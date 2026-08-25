@@ -13,6 +13,11 @@ env/
 data.db
 started.log
 
+# PyInstaller 打包产物
+build/
+dist/
+*.spec
+
 # IDE
 .vscode/
 .idea/
