@@ -12,6 +12,7 @@ import tkinter as tk
 from datetime import date
 
 import dialogs
+import updater
 from db import Database
 from styles import (
     T,
@@ -25,7 +26,6 @@ from widgets.quadrant_card import QuadrantCard
 
 WEEKDAY_NAMES = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
 MIN_WIDTH, MIN_HEIGHT = 400, 500
-APP_VERSION = "v3.0"
 
 
 class MainWindow(tk.Tk):
@@ -404,7 +404,7 @@ class MainWindow(tk.Tk):
         if drag["hover"] is not None:
             self.cards[drag["hover"]].set_drag_hover(False)
         if target is not None and target != drag["source"]:
-            self.db.set_quadrant(drag["task_id"], target)
+            self.db.update_task(drag["task_id"], quadrant=target)
             self.refresh_all()
         else:
             drag["row"].set_dragging(False)
@@ -510,7 +510,7 @@ class MainWindow(tk.Tk):
     def _today_str() -> str:
         today = date.today()
         return (f"{today.strftime('%Y-%m-%d')} "
-                f"{WEEKDAY_NAMES[today.weekday()]} · {APP_VERSION}")
+                f"{WEEKDAY_NAMES[today.weekday()]} · v{updater.APP_VERSION}")
 
     def _load_settings(self) -> None:
         # 主题（先于 _build_ui 生效）

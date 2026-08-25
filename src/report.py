@@ -18,7 +18,7 @@ def build_report_stats(tasks: List[Task]) -> Dict:
     by_quadrant = {item["key"]: 0 for item in QUADRANTS}
     by_tag: Dict[str, int] = {}
     for task in tasks:
-        by_quadrant[task.quadrant] = by_quadrant.get(task.quadrant, 0) + 1
+        by_quadrant[task.quadrant] += 1
         tags = task.tags or ["（无标签）"]
         for tag in tags:
             by_tag[tag] = by_tag.get(tag, 0) + 1
@@ -26,19 +26,6 @@ def build_report_stats(tasks: List[Task]) -> Dict:
         "total": len(tasks),
         "by_quadrant": by_quadrant,
         "by_tag": by_tag,
-    }
-
-
-def _task_payload(task: Task) -> Dict:
-    return {
-        "id": task.id,
-        "title": task.title,
-        "description": task.description,
-        "tag": task.tag,
-        "quadrant": task.quadrant,
-        "quadrant_name": quadrant_name(task.quadrant),
-        "completed_at": task.completed_at,
-        "created_at": task.created_at,
     }
 
 
@@ -81,7 +68,7 @@ def export_report(db: Database, date_str: str, directory: str | Path) -> List[Pa
             },
             "by_tag": stats["by_tag"],
         },
-        "tasks": [_task_payload(task) for task in tasks],
+        "tasks": [task.to_dict() for task in tasks],
     }
     with open(json_path, "w", encoding="utf-8") as file:
         json.dump(payload, file, ensure_ascii=False, indent=2)

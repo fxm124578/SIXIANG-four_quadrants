@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 # 四象限顺序：0 紧急重要 / 1 紧急不重要 / 2 不紧急重要 / 3 不紧急不重要
 QUADRANTS = [
@@ -77,6 +77,21 @@ class Task:
     def tags(self) -> List[str]:
         """标签列表（支持多标签，兼容旧单标签数据）。"""
         return parse_tags(self.tag)
+
+    def to_dict(self) -> Dict:
+        """序列化为 API / 导出通用字典。"""
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "tag": self.tag,
+            "quadrant": self.quadrant,
+            "quadrant_label": self.quadrant_label,
+            "quadrant_color": self.quadrant_color,
+            "quadrant_name": quadrant_name(self.quadrant),
+            "completed_at": self.completed_at,
+            "created_at": self.created_at,
+        }
 
     @property
     def is_completed(self) -> bool:

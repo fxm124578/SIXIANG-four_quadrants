@@ -48,6 +48,7 @@ def safe_messagebox(parent, kind: str, title: str, message: str) -> None:
             "info": messagebox.showinfo,
             "warning": messagebox.showwarning,
             "error": messagebox.showerror,
+            "askyesno": messagebox.askyesno,
         }[kind]
         func(title, message, parent=parent)
     finally:
@@ -109,6 +110,7 @@ class ModalDialog(tk.Toplevel):
     def __init__(self, parent, title: str):
         super().__init__(parent)
         self.result = None
+        self._on_show = None
         self.title(title)
         self.configure(bg=T.bg)
         self.resizable(False, False)
@@ -142,9 +144,6 @@ class ModalDialog(tk.Toplevel):
         self._on_show()
         self.wait_window()
         return self.result
-
-    def _on_show(self) -> None:
-        """子类钩子：模态开始后执行（如聚焦输入框）。"""
 
     def _close(self) -> None:
         self.result = None
@@ -224,6 +223,8 @@ class AddTaskDialog(ModalDialog):
         flat_button(btn_row, "添加", bg=T.accent, fg="#ffffff",
                     hover_bg=T.accent_light, press_bg=T.accent_dark,
                     command=self._submit).pack(side="right", padx=(0, 8))
+        # 模态显示后聚焦标题输入框
+        self._on_show = self.title_entry.focus_set
 
     def _limit(self, entry: tk.Entry, max_len: int) -> None:
         vcmd = (self.register(self._limit_len), "%P", max_len)
@@ -237,9 +238,6 @@ class AddTaskDialog(ModalDialog):
             return len(text) <= int(max_len)
         except (TypeError, ValueError):
             return False
-
-    def _on_show(self) -> None:
-        self.title_entry.focus_set()
 
     def _submit(self) -> None:
         if not self.title_var.get().strip():
@@ -734,9 +732,11 @@ class SettingsDialog(ModalDialog):
         flat_button(btn_row, "打开日报", bg=T.report_bg, fg=T.report_fg,
                     hover_bg=T.report_hover, press_bg=T.report_press,
                     command=self._open_report).pack(side="left")
-        flat_button(btn_row, "检查更新", bg=T.panel2, fg=T.text,
-                    hover_bg=T.btn_hover, press_bg=T.btn_press,
-                    command=self._check_update).pack(side="left", padx=(8, 0))
+        self._update_btn = flat_button(btn_row, "检查更新", bg=T.panel2,
+                                       fg=T.text, hover_bg=T.btn_hover,
+                                       press_bg=T.btn_press,
+                                       command=self._check_update)
+        self._update_btn.pack(side="left", padx=(8, 0))
         flat_button(btn_row, "取消", command=self._close).pack(side="right")
         flat_button(btn_row, "确定", bg=T.accent, fg="#ffffff",
                     hover_bg=T.accent_light, press_bg=T.accent_dark,
@@ -744,15 +744,6 @@ class SettingsDialog(ModalDialog):
 
     # ---- 检查更新（GitHub Releases）----
     def _check_update(self) -> None:
-        self._update_btn = None
-        # 找到“检查更新”按钮并禁用，避免重复点击
-        for child in self.winfo_children():
-            for sub in child.winfo_children():
-                try:
-                    if getattr(sub, "cget", lambda k: None)("text") == "检查更新":
-                        self._update_btn = sub
-                except tk.TclError:
-                    continue
         if self._update_btn is not None:
             try:
                 self._update_btn.configure(state="disabled")

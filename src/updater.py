@@ -8,10 +8,8 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 import subprocess
 import sys
-import tempfile
 import threading
 import urllib.error
 import urllib.request
@@ -170,9 +168,12 @@ def start_download() -> Dict[str, Any]:
     return _snapshot()
 
 
-def _download_worker(url: str, name: str) -> None:
-    local_path: Optional[Path] = None
-    tmp_path: Optional[Path] = None
+def _download_file(url: str, name: str):
+    """下载到程序目录 .__update__，返回 (ok, 本地路径或错误信息)。
+
+    下载过程中更新 _state 进度；供 WebView（后台线程）与 tkinter（同步）复用。
+    """
+    tmp_path = None
     try:
         update_dir = _update_dir()
         update_dir.mkdir(parents=True, exist_ok=True)
@@ -198,20 +199,27 @@ def _download_worker(url: str, name: str) -> None:
                             _state["progress"] = written / total * 100
         local_path = update_dir / name
         tmp_path.replace(local_path)
-        with _state["lock"]:
-            _state["phase"] = "ready"
-            _state["progress"] = 100.0
-            _state["local_path"] = str(local_path)
+        return True, str(local_path)
     except Exception as exc:
-        with _state["lock"]:
-            _state["phase"] = "error"
-            _state["error"] = f"下载失败：{exc}"
-            _state["progress"] = 0.0
         if tmp_path is not None:
             try:
                 tmp_path.unlink(missing_ok=True)
             except OSError:
                 pass
+        return False, str(exc)
+
+
+def _download_worker(url: str, name: str) -> None:
+    ok, result = _download_file(url, name)
+    with _state["lock"]:
+        if ok:
+            _state["phase"] = "ready"
+            _state["progress"] = 100.0
+            _state["local_path"] = result
+        else:
+            _state["phase"] = "error"
+            _state["error"] = f"下载失败：{result}"
+            _state["progress"] = 0.0
 
 
 # ---------------------------------------------------------------- 应用更新
@@ -292,45 +300,14 @@ def _delayed_exit() -> None:
 
 # ---------------------------------------------------------------- 便捷入口
 def download_now(url: str, name: str):
-    """同步下载更新文件到程序目录 .__update__；返回 (ok, 路径或错误信息)。
+    """同步下载更新文件；返回 (ok, 路径或错误信息)。
 
     供 tkinter 回退版等简单场景使用（无进度回调）。
     """
-    try:
-        update_dir = _update_dir()
-        update_dir.mkdir(parents=True, exist_ok=True)
-        target_dir = _exe_dir()
-        if not os.access(str(target_dir), os.W_OK):
-            raise PermissionError("程序目录不可写，无法自动更新（请以管理员身份运行）")
-        tmp_path = update_dir / f"{name}.part"
-        with _github_request(url, timeout=DOWNLOAD_TIMEOUT) as resp:
-            with open(tmp_path, "wb") as fh:
-                while True:
-                    chunk = resp.read(64 * 1024)
-                    if not chunk:
-                        break
-                    fh.write(chunk)
-        local_path = update_dir / name
-        tmp_path.replace(local_path)
+    ok, result = _download_file(url, name)
+    if ok:
         with _state["lock"]:
             _state["phase"] = "ready"
             _state["progress"] = 100.0
-            _state["local_path"] = str(local_path)
-        return True, str(local_path)
-    except Exception as exc:
-        return False, str(exc)
-
-
-def check_now_simple() -> str:
-    """命令行/调试用：打印检查结果。"""
-    info = check_for_update()
-    if info["error"]:
-        return info["error"]
-    if info["has_update"]:
-        return (f"发现新版本 v{info['latest_version']}（当前 v{APP_VERSION}），"
-                f"下载地址：{info['download_url']}")
-    return f"当前已是最新版本 v{APP_VERSION}"
-
-
-if __name__ == "__main__":
-    print(check_now_simple())
+            _state["local_path"] = result
+    return ok, result

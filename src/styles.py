@@ -5,8 +5,6 @@
 """
 from __future__ import annotations
 
-import struct
-import tempfile
 import tkinter as tk
 from pathlib import Path
 from tkinter import ttk
@@ -124,7 +122,6 @@ THEMES = {
     },
 }
 
-_ICON_COLORS = ("#e5533c", "#e8912d", "#3f7fd9", "#4caf7d")
 _current_theme = "midnight"
 
 

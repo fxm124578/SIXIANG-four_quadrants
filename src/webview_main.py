@@ -5,7 +5,6 @@
 """
 from __future__ import annotations
 
-import json
 import os
 import subprocess
 import sys
@@ -36,11 +35,11 @@ class JsApi:
 
     # ------------------------------------------------------------------- 任务
     def get_active_tasks(self) -> List[Dict]:
-        return [self._task_dict(t) for t in self.db.get_active_tasks()]
+        return [t.to_dict() for t in self.db.get_active_tasks()]
 
     def get_task(self, task_id: int) -> Optional[Dict]:
         task = self.db.get_task(task_id)
-        return self._task_dict(task) if task else None
+        return task.to_dict() if task else None
 
     def add_task(self, title: str, description: str = "", tag: str = "",
                  quadrant: int = 0) -> Dict:
@@ -70,22 +69,12 @@ class JsApi:
     def set_quadrant(self, task_id: int, quadrant: int) -> bool:
         task = self.db.get_task(task_id)
         if task and task.quadrant != int(quadrant):
-            self.db.set_quadrant(task_id, int(quadrant))
+            self.db.update_task(task_id, quadrant=int(quadrant))
         return True
-
-    @staticmethod
-    def _task_dict(t) -> Dict:
-        return {
-            "id": t.id, "title": t.title, "description": t.description,
-            "tag": t.tag, "quadrant": t.quadrant,
-            "quadrant_label": t.quadrant_label,
-            "quadrant_color": t.quadrant_color,
-            "completed_at": t.completed_at, "created_at": t.created_at,
-        }
 
     # ------------------------------------------------------------------- 日报
     def get_completed_tasks(self, date_str: str) -> List[Dict]:
-        return [self._task_dict(t) for t in self.db.get_completed_tasks(date_str)]
+        return [t.to_dict() for t in self.db.get_completed_tasks(date_str)]
 
     def get_completed_dates(self) -> List[str]:
         return self.db.get_completed_dates()
@@ -171,19 +160,6 @@ class JsApi:
         return True
 
     # --------------------------------------------------------------- 工具
-    @staticmethod
-    def _tag_list(raw: str) -> List[str]:
-        if not raw or not raw.strip():
-            return []
-        try:
-            data = json.loads(raw)
-            if isinstance(data, list):
-                return [str(t).strip() for t in data if str(t).strip()]
-        except (ValueError, TypeError):
-            pass
-        return [raw.strip()]
-
-
 def _read_settings(db: Database) -> Dict[str, str]:
     keys = ("theme", "window_mode", "window_x", "window_y",
             "window_width", "window_height", "locked", "opacity")

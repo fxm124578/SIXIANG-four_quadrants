@@ -48,7 +48,7 @@ def _default_db_path() -> Path:
 
 
 class Database:
-    def __init__(self, path: Optional[str | Path] = None):
+    def __init__(self, path: str | Path | None = None):
         self.path = Path(path) if path else _default_db_path()
         self.conn = sqlite3.connect(str(self.path), check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
@@ -120,13 +120,6 @@ class Database:
             "SELECT * FROM tasks WHERE id = ?", (int(task_id),)
         ).fetchone()
         return self._row_to_task(row) if row else None
-
-    def set_quadrant(self, task_id: int, quadrant: int) -> None:
-        with self.conn:
-            self.conn.execute(
-                "UPDATE tasks SET quadrant = ?, updated_at = ? WHERE id = ?",
-                (int(quadrant), _now(), int(task_id)),
-            )
 
     def complete_task(self, task_id: int) -> None:
         """勾选任务：写入完成时间，自动归档（不再出现在四象限）。"""
