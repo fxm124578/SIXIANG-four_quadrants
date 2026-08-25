@@ -87,7 +87,7 @@ body.midnight .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ell
 body.midnight .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(139,122,255,.28);color:#cfc4ff;flex:none;letter-spacing:.04em}
 body.midnight .tag.amber{background:rgba(255,171,61,.2);color:#ffd9a3}
 body.midnight footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
-body.midnight .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;
+body.midnight .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;
   border:1px solid rgba(255,255,255,.15);
   background:rgba(255,255,255,.12);color:#fff;transition:.2s;user-select:none}
 body.midnight .btn:hover{background:rgba(255,255,255,.22);transform:translateY(-1px)}
@@ -161,7 +161,7 @@ body.frost .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellips
 body.frost .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#ece4f6;color:#7a6aa8;flex:none}
 body.frost .tag.amber{background:#faeeda;color:#a8763a}
 body.frost footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
-body.frost .btn{font-size:12px;padding:7px 13px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.9);
+body.frost .btn{font-size:12px;padding:7px 13px;border-radius:10px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.9);
   background:rgba(255,255,255,.55);transition:.2s;user-select:none;box-shadow:0 2px 6px -2px rgba(90,104,140,.25)}
 body.frost .btn:hover{background:#fff;transform:translateY(-1px)}
 body.frost .btn.primary{background:linear-gradient(135deg,#8aa6d8,#7b9bd2);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 6px 16px -6px rgba(123,155,210,.7)}
@@ -260,7 +260,7 @@ body.neon .tag{font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(
   border:1px solid rgba(0,229,255,.3);flex:none;letter-spacing:.06em}
 body.neon .tag.amber{background:rgba(255,225,77,.1);color:#ffe98f;border-color:rgba(255,225,77,.3)}
 body.neon footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
-body.neon .btn{font-size:12px;padding:7px 13px;border-radius:6px;cursor:pointer;border:1px solid rgba(0,229,255,.3);
+body.neon .btn{font-size:12px;padding:7px 13px;border-radius:6px;cursor:pointer;white-space:nowrap;border:1px solid rgba(0,229,255,.3);
   background:rgba(0,229,255,.08);color:#c8f0ff;transition:.2s;user-select:none;letter-spacing:.06em;
   text-shadow:0 0 6px rgba(0,229,255,.45)}
 body.neon .btn:hover{background:rgba(0,229,255,.16);box-shadow:0 0 14px rgba(0,229,255,.35);color:#fff}
@@ -338,7 +338,7 @@ body.paper .tag{font-size:10px;padding:2px 8px;border-radius:2px;background:rgba
   color:var(--q3);border:1px solid rgba(77,107,140,.25);flex:none;letter-spacing:.05em}
 body.paper .tag.amber{background:rgba(201,151,58,.1);color:#8f6a20;border-color:rgba(201,151,58,.3)}
 body.paper footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
-body.paper .btn{font-size:12px;padding:7px 13px;border-radius:3px;cursor:pointer;border:1px solid rgba(150,138,110,.35);
+body.paper .btn{font-size:12px;padding:7px 13px;border-radius:3px;cursor:pointer;white-space:nowrap;border:1px solid rgba(150,138,110,.35);
   background:rgba(255,255,255,.45);transition:.2s;user-select:none;letter-spacing:.05em}
 body.paper .btn:hover{background:#fff;box-shadow:0 3px 8px -3px rgba(90,75,45,.35)}
 body.paper .btn.primary{background:var(--seal);border-color:var(--seal);color:#fdf6e8;font-weight:600;box-shadow:0 4px 10px -4px rgba(178,58,46,.6)}
@@ -776,9 +776,9 @@ async function openSettings() {
     <label>软件更新</label>
     <div class="radio-group" style="padding:12px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span id="ver-label" style="font-size:12px;font-weight:600">当前版本 v${esc(ver) || '未知'}</span>
-        <button class="btn" id="btn-check-update" onclick="checkUpdate()" style="padding:4px 12px;font-size:11px">检查更新</button>
+        <span id="ver-label" style="font-size:12px;font-weight:600;white-space:nowrap">当前版本 v${esc(ver) || '未知'}</span>
         <span style="flex:1"></span>
+        <button class="btn" id="btn-check-update" onclick="checkUpdate()" style="padding:4px 12px;font-size:11px;white-space:nowrap;flex-shrink:0">检查更新</button>
       </div>
       <div id="update-status" style="font-size:11px;line-height:1.6;color:#8a93b0;white-space:pre-wrap"></div>
     </div>`,
