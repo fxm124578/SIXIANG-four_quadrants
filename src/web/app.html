@@ -378,14 +378,14 @@ body.paper .icon-btn-sm.danger:hover{background:rgba(255,80,80,.12)}
 .modal{border-radius:16px;padding:24px;width:420px;max-width:90vw;max-height:85vh;overflow:auto;
   box-shadow:0 30px 60px rgba(0,0,0,.6)}
 .modal h2{font-size:16px;font-weight:700;margin-bottom:18px}
-.modal label{display:block;font-size:12px;margin-bottom:5px}
+.modal label, .drawer label{display:block;font-size:12px;margin-bottom:5px}
 .modal input,.modal textarea{width:100%;border-radius:8px;padding:8px 10px;margin-bottom:12px;border:1px solid rgba(255,255,255,.12)}
 .modal textarea{height:70px;resize:vertical}
-.modal .radio-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
-.modal .radio-option{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;
+.modal .radio-group, .drawer .radio-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.modal .radio-option, .drawer .radio-option{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;
   border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:.2s}
-.modal .radio-option:hover{background:rgba(255,255,255,.08)}
-.modal .radio-option.selected{border-color:rgba(91,140,255,.7);background:rgba(91,140,255,.18)}
+.modal .radio-option:hover, .drawer .radio-option:hover{background:rgba(255,255,255,.08)}
+.modal .radio-option.selected, .drawer .radio-option.selected{border-color:rgba(91,140,255,.7);background:rgba(91,140,255,.18)}
 .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 .modal .hint{font-size:11px;margin-bottom:8px}
 .report-modal{display:flex;gap:20px;height:100%;min-height:0}
@@ -429,13 +429,13 @@ body.midnight .modal{background:rgba(28,33,56,.97);color:#eef0fb}
 body.midnight .modal input,.midnight .modal textarea{background:#232738;color:#eef0fb}
 body.frost .modal{background:rgba(244,247,251,.97);color:#2c3242}
 body.frost .modal input,.frost .modal textarea{background:#fff;color:#2c3242;border-color:#d6dcea}
-body.frost .modal .radio-option.selected{border-color:rgba(123,155,210,.7);background:rgba(123,155,210,.15)}
+body.frost .modal .radio-option.selected, body.frost .drawer .radio-option.selected{border-color:rgba(123,155,210,.7);background:rgba(123,155,210,.15)}
 body.neon .modal{background:rgba(10,16,34,.97);color:#e8f2ff}
 body.neon .modal input,.neon .modal textarea{background:#0d1428;color:#e8f2ff;border-color:rgba(0,229,255,.2)}
-body.neon .modal .radio-option.selected{border-color:rgba(0,229,255,.7);background:rgba(0,229,255,.15)}
+body.neon .modal .radio-option.selected, body.neon .drawer .radio-option.selected{border-color:rgba(0,229,255,.7);background:rgba(0,229,255,.15)}
 body.paper .modal{background:rgba(251,246,232,.97);color:#3d3a33}
 body.paper .modal input,.paper .modal textarea{background:#fff;color:#3d3a33;border-color:#d8cfb4}
-body.paper .modal .radio-option.selected{border-color:rgba(178,58,46,.7);background:rgba(178,58,46,.12)}
+body.paper .modal .radio-option.selected, body.paper .drawer .radio-option.selected{border-color:rgba(178,58,46,.7);background:rgba(178,58,46,.12)}
 
 /* 抽屉主题适配 */
 body.midnight .drawer{background:rgba(20,24,48,.97);color:#eef0fb}
@@ -756,40 +756,62 @@ async function openSettings() {
   let ver = '';
   try { ver = (await api.get_app_version()).version || ''; } catch(e) {}
   clearUpdatePoll();
-  showModal('设置', `
-    <label>窗口模式</label>
-    <div class="radio-group" id="set-modes">
-      ${[{k:'desktop',n:'固定桌面',d:'无边框、不置顶'},{k:'topmost',n:'置顶最前',d:'无边框，悬浮所有应用之上'},
-        {k:'normal',n:'普通窗口',d:'系统标题栏'}].map(m =>
-        `<div class="radio-option${m.k===mode?' selected':''}" data-v="${m.k}" onclick="selectRadio(this)">
-          <div><div style="font-weight:600;font-size:12.5px">${m.n}</div><div style="font-size:10.5px">${m.d}</div></div></div>`
-      ).join('')}
-    </div>
-    <label>主题外观</label>
-    <div class="radio-group" id="set-themes">
-      ${[{k:'midnight',n:'午夜玻璃',d:'深色玻璃质感'},{k:'frost',n:'雾白冰川',d:'明亮磨砂玻璃'},
-        {k:'neon',n:'霓虹网格',d:'霓虹描边辉光'},{k:'paper',n:'晨雾纸墨',d:'纸张质感朱砂'}].map(t =>
-        `<div class="radio-option${t.k===theme?' selected':''}" data-v="${t.k}" onclick="selectRadio(this)">
-          <div><div style="font-weight:600;font-size:12.5px">${t.n}</div><div style="font-size:10.5px">${t.d}</div></div></div>`
-      ).join('')}
-    </div>
-    <label>软件更新</label>
-    <div class="radio-group" style="padding:12px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <span id="ver-label" style="font-size:12px;font-weight:600;white-space:nowrap">当前版本 v${esc(ver) || '未知'}</span>
-        <span style="flex:1"></span>
-        <button class="btn" id="btn-check-update" onclick="checkUpdate()" style="padding:4px 12px;font-size:11px;white-space:nowrap;flex-shrink:0">检查更新</button>
+  closeDrawer();
+  const overlay = document.createElement('div');
+  overlay.id = 'drawer-overlay';
+  overlay.className = 'drawer-overlay';
+  overlay.onclick = e => { if (e.target === overlay) closeDrawer(); };
+
+  overlay.innerHTML = `
+    <div class="drawer" onclick="event.stopPropagation()">
+      <div class="drawer-header">
+        <h2>⚙️ 设置</h2>
+        <span style="font-size:12px;color:#8a93b0">窗口模式 / 主题 / 软件更新</span>
       </div>
-      <div id="update-status" style="font-size:11px;line-height:1.6;color:#8a93b0;white-space:pre-wrap"></div>
-    </div>`,
-    [{text:'取消',action:'close'},{text:'确定',action:'submit',primary:true,handler:async()=>{
-      const newMode = document.querySelector('#set-modes .selected')?.dataset.v;
-      const newTheme = document.querySelector('#set-themes .selected')?.dataset.v;
-      await api.save_settings({window_mode: newMode, theme: newTheme});
-      if (newTheme) applyTheme(newTheme);
-      closeModal();
-      // 窗口模式切换由 Python 端关闭窗口并重启，无需 JS reload
-    }}]);
+      <div class="drawer-body" style="flex-direction:column;gap:2px;overflow-y:auto">
+        <label>窗口模式</label>
+        <div class="radio-group" id="set-modes">
+          ${[{k:'desktop',n:'固定桌面',d:'无边框、不置顶'},{k:'topmost',n:'置顶最前',d:'无边框，悬浮所有应用之上'},
+            {k:'normal',n:'普通窗口',d:'系统标题栏'}].map(m =>
+            `<div class="radio-option${m.k===mode?' selected':''}" data-v="${m.k}" onclick="selectRadio(this)">
+              <div><div style="font-weight:600;font-size:12.5px">${m.n}</div><div style="font-size:10.5px">${m.d}</div></div></div>`
+          ).join('')}
+        </div>
+        <label>主题外观</label>
+        <div class="radio-group" id="set-themes">
+          ${[{k:'midnight',n:'午夜玻璃',d:'深色玻璃质感'},{k:'frost',n:'雾白冰川',d:'明亮磨砂玻璃'},
+            {k:'neon',n:'霓虹网格',d:'霓虹描边辉光'},{k:'paper',n:'晨雾纸墨',d:'纸张质感朱砂'}].map(t =>
+            `<div class="radio-option${t.k===theme?' selected':''}" data-v="${t.k}" onclick="selectRadio(this)">
+              <div><div style="font-weight:600;font-size:12.5px">${t.n}</div><div style="font-size:10.5px">${t.d}</div></div></div>`
+          ).join('')}
+        </div>
+        <label>软件更新</label>
+        <div class="radio-group" style="padding:12px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <span id="ver-label" style="font-size:12px;font-weight:600;white-space:nowrap">当前版本 v${esc(ver) || '未知'}</span>
+            <span style="flex:1"></span>
+          </div>
+          <div id="update-status" style="font-size:11px;line-height:1.6;color:#8a93b0;white-space:pre-wrap"></div>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn" id="btn-check-update" onclick="checkUpdate()">检查更新</button>
+        <span style="flex:1"></span>
+        <button class="btn" onclick="closeDrawer()">取消</button>
+        <button class="btn primary" onclick="saveSettingsFromDrawer()">确定</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+}
+
+async function saveSettingsFromDrawer() {
+  const newMode = document.querySelector('#set-modes .selected')?.dataset.v;
+  const newTheme = document.querySelector('#set-themes .selected')?.dataset.v;
+  await api.save_settings({window_mode: newMode, theme: newTheme});
+  if (newTheme) applyTheme(newTheme);
+  closeDrawer();
+  // 窗口模式切换由 Python 端关闭窗口并重启，无需 JS reload
 }
 
 /* ================================================================
