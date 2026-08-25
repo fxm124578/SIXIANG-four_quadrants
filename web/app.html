@@ -539,6 +539,13 @@ const THEME_BACKGROUNDS = {
 window.addEventListener('pywebviewready', async () => {
   api = window.pywebview.api;
   applyDate();
+  try {
+    const ver = await api.get_app_version();
+    const el = document.getElementById('today-date');
+    if (el && ver && ver.version) {
+      el.textContent = el.textContent.replace(/v[\d.]+$/, 'v' + ver.version);
+    }
+  } catch(e) {}
   const st = await api.get_settings();
   isLocked = st.locked === '1';
   updateLockUI();
@@ -549,7 +556,7 @@ window.addEventListener('pywebviewready', async () => {
 function applyDate() {
   const d = new Date();
   document.getElementById('today-date').textContent =
-    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v3.0`;
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.0.0`;
 }
 
 /* ================================================================
