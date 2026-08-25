@@ -21,42 +21,46 @@
 pip install pywebview
 
 # 启动
-python main.py
+python src\main.py
 ```
 
 Windows 也可双击 `run.bat`（自动优先 `pythonw`，无控制台窗口）。
 
-若未安装 pywebview，`main.py` 会自动回退到 tkinter 版（零依赖，视觉近似）。
+若未安装 pywebview，`src/main.py` 会自动回退到 tkinter 版（零依赖，视觉近似）。
 
 ## 目录结构
 
 ```
-├─ main.py              入口（webview 优先，tkinter 回退）
-├─ webview_main.py      WebView 版：JsApi 桥 + 窗口管理
-├─ web/app.html         单页应用：四套主题 + 全部功能
-├─ db.py                SQLite 数据层
-├─ models.py            数据模型 + 四象限常量
-├─ report.py            日报统计与 CSV/JSON 导出
-├─ widgets/             tkinter 回退版（main_widget / quadrant_card / task_item）
-├─ dialogs.py           tkinter 回退版对话框
-├─ styles.py            主题系统 + ICO 图标
-├─ designs/             四套 HTML 设计方案（预览 / 参考）
-├─ app_icon.svg         应用图标源文件
-├─ run.bat              Windows 启动脚本
-├─ LICENSE              MIT
-└─ DESIGN.md            WebView 版改造方案文档
+├─ src/                应用源码
+│  ├─ main.py          入口（webview 优先，tkinter 回退）
+│  ├─ webview_main.py  WebView 版：JsApi 桥 + 窗口管理
+│  ├─ db.py            SQLite 数据层
+│  ├─ models.py        数据模型 + 四象限常量
+│  ├─ report.py        日报统计与 CSV/JSON 导出
+│  ├─ updater.py       GitHub Releases 检查 / 下载 / 自动更新
+│  ├─ dialogs.py       tkinter 回退版对话框
+│  ├─ styles.py        主题系统 + ICO 图标
+│  ├─ app_icon.ico/.svg  应用图标
+│  ├─ web/app.html     单页应用：四套主题 + 全部功能
+│  ├─ widgets/         tkinter 回退版（main_widget / quadrant_card / task_item）
+│  └─ data.db          SQLite 数据文件（源码运行）
+├─ designs/            四套 HTML 设计方案（预览 / 参考）
+├─ run.bat             Windows 启动脚本
+├─ requirements.txt    依赖说明
+├─ LICENSE             MIT
+└─ DESIGN.md           WebView 版改造方案文档
 ```
 
 ## 数据
 
-- SQLite 单文件 `data.db`，默认在程序目录，不可写时回退 `~/.quadrant_tasks/data.db`
+- SQLite 单文件 `data.db`：源码运行在 `src/`，打包版在 exe 同目录；不可写时回退 `~/.quadrant_tasks/data.db`
 - 导出文件默认到桌面 `~/Desktop/四象日报导出/`
 
 ## 打包
 
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --windowed --icon=app_icon.ico main.py
+pyinstaller --onefile --windowed --name 四象 --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/app_icon.ico;." src/main.py
 ```
 
 ## 许可证
