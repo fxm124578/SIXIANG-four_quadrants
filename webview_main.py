@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional
 from db import Database
 from models import quadrant_name
 from report import build_report_stats, export_report, export_report_range
+import updater
 
 THIS_DIR = Path(__file__).resolve().parent
 
@@ -142,6 +143,23 @@ class JsApi:
     def quit(self) -> None:
         if self._window:
             self._window.destroy()
+
+    # --------------------------------------------------------------- 更新
+    def get_app_version(self) -> Dict[str, str]:
+        return {"version": updater.APP_VERSION}
+
+    def start_check_update(self) -> Dict:
+        """后台线程检查 GitHub release；返回当前状态，UI 轮询。"""
+        return updater.start_check()
+
+    def get_update_state(self) -> Dict:
+        return updater.get_state()
+
+    def start_download_update(self) -> Dict:
+        return updater.start_download()
+
+    def apply_update(self) -> Dict:
+        return updater.apply_update()
 
     def resize(self, width: int, height: int) -> bool:
         """调整窗口大小（JS 端拖拽边缘时调用）。"""

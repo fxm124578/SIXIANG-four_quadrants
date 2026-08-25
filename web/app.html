@@ -746,6 +746,9 @@ async function openSettings() {
   const st = await api.get_settings();
   const mode = st.window_mode || 'topmost';
   const theme = st.theme || 'midnight';
+  let ver = '';
+  try { ver = (await api.get_app_version()).version || ''; } catch(e) {}
+  clearUpdatePoll();
   showModal('设置', `
     <label>窗口模式</label>
     <div class="radio-group" id="set-modes">
@@ -762,6 +765,15 @@ async function openSettings() {
         `<div class="radio-option${t.k===theme?' selected':''}" data-v="${t.k}" onclick="selectRadio(this)">
           <div><div style="font-weight:600;font-size:12.5px">${t.n}</div><div style="font-size:10.5px">${t.d}</div></div></div>`
       ).join('')}
+    </div>
+    <label>软件更新</label>
+    <div class="radio-group" style="padding:12px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span id="ver-label" style="font-size:12px;font-weight:600">当前版本 v${esc(ver) || '未知'}</span>
+        <button class="btn" id="btn-check-update" onclick="checkUpdate()" style="padding:4px 12px;font-size:11px">检查更新</button>
+        <span style="flex:1"></span>
+      </div>
+      <div id="update-status" style="font-size:11px;line-height:1.6;color:#8a93b0;white-space:pre-wrap"></div>
     </div>`,
     [{text:'取消',action:'close'},{text:'确定',action:'submit',primary:true,handler:async()=>{
       const newMode = document.querySelector('#set-modes .selected')?.dataset.v;
@@ -771,6 +783,88 @@ async function openSettings() {
       closeModal();
       // 窗口模式切换由 Python 端关闭窗口并重启，无需 JS reload
     }}]);
+}
+
+/* ================================================================
+   检查更新（GitHub Releases）
+   ================================================================ */
+let updateTimer = null;
+function clearUpdatePoll() { if (updateTimer) { clearInterval(updateTimer); updateTimer = null; } }
+
+async function checkUpdate() {
+  if (!api) return;
+  clearUpdatePoll();
+  const btn = document.getElementById('btn-check-update');
+  const status = document.getElementById('update-status');
+  if (btn) btn.disabled = true;
+  if (status) status.textContent = '正在检查更新…';
+  try { await api.start_check_update(); }
+  catch(e) { if (status) status.textContent = '检查失败：' + e.message; if (btn) btn.disabled = false; return; }
+  updateTimer = setInterval(async () => {
+    let st;
+    try { st = await api.get_update_state(); } catch(e) { return; }
+    renderUpdateState(st);
+  }, 500);
+}
+
+function renderUpdateState(st) {
+  const status = document.getElementById('update-status');
+  const btn = document.getElementById('btn-check-update');
+  if (!status) return;
+  if (st.phase === 'checking') {
+    status.textContent = '正在检查更新…';
+  } else if (st.phase === 'error') {
+    if (btn) btn.disabled = false;
+    clearUpdatePoll();
+    status.textContent = st.error || '更新出错，请稍后重试';
+  } else if (st.phase === 'result') {
+    if (btn) btn.disabled = false;
+    clearUpdatePoll();
+    if (st.has_update) {
+      const notes = (st.notes || '').split('\n').filter(Boolean).slice(0, 6).map(s => esc(s)).join('<br>');
+      status.innerHTML = `<div style="color:#e8912d;font-weight:600;margin-bottom:4px">发现新版本 v${esc(st.latest_version)}（当前 v${esc(st.current_version)}）</div>
+        ${notes ? `<div style="margin-bottom:8px">${notes}</div>` : ''}
+        <button class="btn primary" onclick="downloadUpdate()" style="padding:5px 14px;font-size:11px">下载并更新</button>`;
+    } else {
+      status.textContent = `已是最新版本 v${st.current_version}`;
+    }
+  } else if (st.phase === 'downloading') {
+    if (btn) btn.disabled = true;
+    status.textContent = `正在下载更新… ${Math.round(st.progress)}%`;
+  } else if (st.phase === 'ready') {
+    if (btn) btn.disabled = false;
+    clearUpdatePoll();
+    status.innerHTML = `<div style="color:#3dd68c;font-weight:600;margin-bottom:8px">更新已下载完成</div>
+      <button class="btn primary" onclick="applyUpdateNow()" style="padding:5px 14px;font-size:11px">立即重启更新</button>
+      <span style="font-size:10.5px;color:#8a93b0;margin-left:8px">将关闭当前窗口，完成后自动重新打开</span>`;
+  } else if (st.phase === 'applying') {
+    status.textContent = '正在应用更新…';
+  } else {
+    status.textContent = '';
+  }
+}
+
+async function downloadUpdate() {
+  const status = document.getElementById('update-status');
+  if (status) status.textContent = '准备下载…';
+  clearUpdatePoll();
+  try { await api.start_download_update(); }
+  catch(e) { if (status) status.textContent = '下载失败：' + e.message; return; }
+  updateTimer = setInterval(async () => {
+    let st;
+    try { st = await api.get_update_state(); } catch(e) { return; }
+    renderUpdateState(st);
+  }, 500);
+}
+
+async function applyUpdateNow() {
+  const status = document.getElementById('update-status');
+  if (status) status.innerHTML = '<div style="color:#3dd68c">正在应用更新，程序即将重启…</div>';
+  clearUpdatePoll();
+  try {
+    const r = await api.apply_update();
+    if (r && r.ok === false) { if (status) status.textContent = (r.error || '更新失败') + '（请稍后重试）'; }
+  } catch(e) { if (status) status.textContent = '应用更新失败：' + e.message; }
 }
 
 /* ================================================================

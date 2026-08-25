@@ -734,10 +734,96 @@ class SettingsDialog(ModalDialog):
         flat_button(btn_row, "打开日报", bg=T.report_bg, fg=T.report_fg,
                     hover_bg=T.report_hover, press_bg=T.report_press,
                     command=self._open_report).pack(side="left")
+        flat_button(btn_row, "检查更新", bg=T.panel2, fg=T.text,
+                    hover_bg=T.btn_hover, press_bg=T.btn_press,
+                    command=self._check_update).pack(side="left", padx=(8, 0))
         flat_button(btn_row, "取消", command=self._close).pack(side="right")
         flat_button(btn_row, "确定", bg=T.accent, fg="#ffffff",
                     hover_bg=T.accent_light, press_bg=T.accent_dark,
                     command=self._submit).pack(side="right", padx=(0, 8))
+
+    # ---- 检查更新（GitHub Releases）----
+    def _check_update(self) -> None:
+        self._update_btn = None
+        # 找到“检查更新”按钮并禁用，避免重复点击
+        for child in self.winfo_children():
+            for sub in child.winfo_children():
+                try:
+                    if getattr(sub, "cget", lambda k: None)("text") == "检查更新":
+                        self._update_btn = sub
+                except tk.TclError:
+                    continue
+        if self._update_btn is not None:
+            try:
+                self._update_btn.configure(state="disabled")
+            except tk.TclError:
+                pass
+        threading.Thread(target=self._check_worker, daemon=True).start()
+
+    def _check_worker(self) -> None:
+        info = updater.check_for_update()
+        self.after(0, lambda: self._on_check_result(info))
+
+    def _on_check_result(self, info) -> None:
+        self._restore_update_btn()
+        if info.get("error"):
+            safe_messagebox(self, "warning", "检查更新", info["error"])
+            return
+        if not info.get("has_update"):
+            safe_messagebox(self, "info", "检查更新",
+                            f"当前已是最新版本 v{info['current_version']}")
+            return
+        notes = (info.get("notes") or "").strip()
+        msg = (f"发现新版本 v{info['latest_version']}（当前 v"
+               f"{info['current_version']}）\n\n")
+        if notes:
+            msg += f"更新说明：\n{notes[:200]}\n\n"
+        msg += "是否立即下载并更新？"
+        if not safe_messagebox(self, "askyesno", "检查更新", msg):
+            return
+        self._download_and_apply(info)
+
+    def _download_and_apply(self, info) -> None:
+        if self._update_btn is not None:
+            try:
+                self._update_btn.configure(state="disabled", text="下载中…")
+            except tk.TclError:
+                pass
+
+        def _worker():
+            url = info.get("download_url")
+            if not url:
+                self.after(0, lambda: safe_messagebox(
+                    self, "warning", "检查更新", "release 中没有可下载的 exe 文件"))
+                return
+            ok, msg = updater.download_now(url, info.get("file_name") or "update.exe")
+            self.after(0, lambda: self._on_download_done(ok, msg))
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def _on_download_done(self, ok: bool, msg: str) -> None:
+        if not ok:
+            safe_messagebox(self, "error", "更新下载失败", msg)
+            self._restore_update_btn()
+            return
+        if not safe_messagebox(self, "askyesno", "下载完成",
+                               f"更新文件已下载：\n{msg}\n\n是否立即重启并完成更新？"):
+            self._restore_update_btn()
+            return
+        result = updater.apply_update()
+        if not result.get("ok"):
+            safe_messagebox(self, "error", "应用更新", result.get("error") or "未知错误")
+            self._restore_update_btn()
+            return
+        safe_messagebox(self, "info", "正在更新", "程序即将重启以完成更新…")
+        self.master.after(300, self.master.destroy)
+
+    def _restore_update_btn(self) -> None:
+        if self._update_btn is not None:
+            try:
+                self._update_btn.configure(state="normal", text="检查更新")
+            except tk.TclError:
+                pass
 
     def _open_report(self) -> None:
         parent = self.master
