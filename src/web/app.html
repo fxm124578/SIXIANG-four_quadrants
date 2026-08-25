@@ -770,7 +770,7 @@ async function openSettings() {
       </div>
       <div class="drawer-body" style="flex-direction:column;gap:2px;overflow-y:auto">
         <label>窗口模式</label>
-        <div class="radio-group" id="set-modes">
+        <div class="radio-group" id="set-modes" style="grid-template-columns:repeat(3,1fr)">
           ${[{k:'desktop',n:'固定桌面',d:'无边框、不置顶'},{k:'topmost',n:'置顶最前',d:'无边框，悬浮所有应用之上'},
             {k:'normal',n:'普通窗口',d:'系统标题栏'}].map(m =>
             `<div class="radio-option${m.k===mode?' selected':''}" data-v="${m.k}" onclick="selectRadio(this)">
@@ -778,7 +778,7 @@ async function openSettings() {
           ).join('')}
         </div>
         <label>主题外观</label>
-        <div class="radio-group" id="set-themes">
+        <div class="radio-group" id="set-themes" style="grid-template-columns:repeat(4,1fr)">
           ${[{k:'midnight',n:'午夜玻璃',d:'深色玻璃质感'},{k:'frost',n:'雾白冰川',d:'明亮磨砂玻璃'},
             {k:'neon',n:'霓虹网格',d:'霓虹描边辉光'},{k:'paper',n:'晨雾纸墨',d:'纸张质感朱砂'}].map(t =>
             `<div class="radio-option${t.k===theme?' selected':''}" data-v="${t.k}" onclick="selectRadio(this)">
