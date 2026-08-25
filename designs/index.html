@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四象 · 前端设计方案选型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0d16;--ink:#eef0f8;--muted:#9aa2b8;--line:rgba(255,255,255,.1)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{min-height:100vh;font-family:"Noto Sans SC",sans-serif;color:var(--ink);
+    background:radial-gradient(900px 500px at 20% 0%,#1a1f3c 0%,transparent 55%),
+               radial-gradient(800px 500px at 90% 100%,#10243a 0%,transparent 55%),var(--bg);
+    padding:56px 28px 80px}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+  header{max-width:1180px;margin:0 auto 44px;text-align:center}
+  .kicker{font-size:12px;letter-spacing:.5em;color:#8ea4ff;margin-bottom:14px}
+  h1{font-family:"Noto Serif SC",serif;font-weight:900;font-size:38px;letter-spacing:.06em}
+  header p{color:var(--muted);margin-top:12px;font-size:14px}
+  .gallery{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
+  .card{position:relative;display:block;text-decoration:none;color:var(--ink);border-radius:18px;
+    border:1px solid var(--line);overflow:hidden;background:rgba(255,255,255,.03);
+    backdrop-filter:blur(10px);transition:.3s cubic-bezier(.2,.8,.2,1);opacity:0;transform:translateY(22px);animation:up .7s forwards}
+  .card:nth-child(2){animation-delay:.08s}.card:nth-child(3){animation-delay:.16s}.card:nth-child(4){animation-delay:.24s}
+  @keyframes up{to{opacity:1;transform:none}}
+  .card:hover{transform:translateY(-6px);border-color:rgba(142,164,255,.5);box-shadow:0 24px 50px -18px rgba(0,0,0,.7)}
+  .thumb{height:190px;position:relative;overflow:hidden}
+  .thumb iframe{width:900px;height:700px;border:0;transform:scale(.3);transform-origin:top left;pointer-events:none;display:block}
+  .card:nth-child(1) .thumb iframe{transform:scale(.3)}
+  .card:nth-child(2) .thumb iframe{transform:scale(.3)}
+  .card:nth-child(3) .thumb iframe{transform:scale(.3)}
+  .card:nth-child(4) .thumb iframe{transform:scale(.3)}
+  .meta{padding:16px 18px 18px}
+  .meta h2{font-size:16px;letter-spacing:.04em}
+  .meta .en{font-size:11px;color:#8ea4ff;letter-spacing:.18em;margin-bottom:8px;text-transform:uppercase}
+  .meta p{font-size:12.5px;color:var(--muted);line-height:1.7;margin-top:6px}
+  .arrow{position:absolute;right:16px;top:16px;width:28px;height:28px;border-radius:50%;
+    border:1px solid var(--line);display:grid;place-items:center;font-size:13px;transition:.25s}
+  .card:hover .arrow{background:#8ea4ff;color:#0b0d16;border-color:transparent;transform:rotate(-45deg)}
+  footer{margin-top:44px;text-align:center;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="kicker">DESIGN OPTIONS</div>
+  <h1>四象 · 前端设计方案选型</h1>
+  <p>四个方向各异的半透明毛玻璃方案 · 点击进入完整预览（支持三种窗口模式切换与勾选动效）</p>
+</header>
+<main class="gallery">
+  <a class="card" href="design-a-midnight-glass.html">
+    <span class="arrow">↗</span>
+    <div class="thumb"><iframe src="design-a-midnight-glass.html" loading="lazy"></iframe></div>
+    <div class="meta"><div class="en">Option A</div><h2>午夜玻璃 · Midnight Glass</h2>
+    <p>深靛蓝夜空 + 高饱和发光象限描边，顶部一抹渐变光谱线，神秘而克制。</p></div>
+  </a>
+  <a class="card" href="design-b-frost-light.html">
+    <span class="arrow">↗</span>
+    <div class="thumb"><iframe src="design-b-frost-light.html" loading="lazy"></iframe></div>
+    <div class="meta"><div class="en">Option B</div><h2>雾白冰川 · Frost Light</h2>
+    <p>明亮磨砂玻璃、莫兰迪柔色、霞鹜文楷字，像一块搁在晨光里的磨砂玻璃。</p></div>
+  </a>
+  <a class="card" href="design-c-neon-grid.html">
+    <span class="arrow">↗</span>
+    <div class="thumb"><iframe src="design-c-neon-grid.html" loading="lazy"></iframe></div>
+    <div class="meta"><div class="en">Option C</div><h2>霓虹网格 · Neon Grid</h2>
+    <p>赛博终端气质：透视网格、CRT 扫描线、霓虹描边与辉光，锐利而有冲击力。</p></div>
+  </a>
+  <a class="card" href="design-d-paper-ink.html">
+    <span class="arrow">↗</span>
+    <div class="thumb"><iframe src="design-d-paper-ink.html" loading="lazy"></iframe></div>
+    <div class="meta"><div class="en">Option D</div><h2>晨雾纸墨 · Paper &amp; Ink</h2>
+    <p>暖米纸张纹理、中国画颜料色、手绘对勾与印章动效，安静有书卷气。</p></div>
+  </a>
+</main>
+<footer>所有方案均可在预览页底部切换「置顶最前 / 固定桌面 / 普通窗口」三种模式效果</footer>
+</body>
+</html>

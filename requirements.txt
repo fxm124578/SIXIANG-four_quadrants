@@ -1,0 +1,3 @@
+# 本项目仅使用 Python 标准库（tkinter / sqlite3 / csv / json / ctypes）。
+# 无需安装任何第三方依赖，直接运行：
+#   python main.py     或     pythonw main.py

@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案 A · 午夜玻璃 Midnight Glass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg0:#05060f; --bg1:#0b0e22; --ink:#eef0fb; --muted:#8f96b3;
+    --glass:rgba(20,24,48,.55); --stroke:rgba(255,255,255,.09);
+    --q1:#ff6b5e; --q2:#ffab3d; --q3:#5b8cff; --q4:#3dd68c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:26px;overflow:hidden;position:relative;
+    font-family:"Noto Sans SC",sans-serif;color:var(--ink);
+    background:radial-gradient(1200px 800px at 18% 12%,#1a2050 0%,transparent 55%),
+               radial-gradient(1000px 700px at 85% 88%,#0e2340 0%,transparent 60%),
+               linear-gradient(160deg,var(--bg1),var(--bg0) 70%);
+  }
+  /* 漂浮光斑与噪点 */
+  .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;animation:drift 14s ease-in-out infinite alternate}
+  .orb.a{width:340px;height:340px;background:#4b3f9e;top:-80px;left:8%}
+  .orb.b{width:280px;height:280px;background:#123f5e;bottom:-60px;right:10%;animation-delay:-6s}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(40px,-30px) scale(1.12)}}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E")}
+
+  /* ---------- 玻璃小组件 ---------- */
+  .widget{
+    position:relative;width:432px;border-radius:22px;overflow:hidden;
+    background:var(--glass);backdrop-filter:blur(26px) saturate(150%);
+    -webkit-backdrop-filter:blur(26px) saturate(150%);
+    border:1px solid var(--stroke);
+    box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.12);
+    opacity:0;animation:rise .8s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  /* 顶部渐变光谱线 */
+  .widget::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--q1),var(--q2),var(--q3),var(--q4),transparent 85%);
+    opacity:.9;z-index:3}
+  .widget::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;
+    background:linear-gradient(115deg,rgba(255,255,255,.10) 0%,transparent 26%)}
+  @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px}
+  h1{font-family:"ZCOOL XiaoWei",serif;font-weight:400;font-size:23px;letter-spacing:.14em}
+  .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4);box-shadow:0 0 8px var(--q4);animation:pulse 2.4s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px}
+  .quad{border-radius:16px;padding:12px 12px 10px;border:1px solid transparent;position:relative;
+    backdrop-filter:blur(8px);transition:border-color .25s, box-shadow .25s, transform .25s}
+  .quad:hover{transform:translateY(-2px)}
+  .q1{background:rgba(255,107,94,.07);border-color:rgba(255,107,94,.22)}
+  .q1:hover{border-color:rgba(255,107,94,.65);box-shadow:0 8px 30px -8px rgba(255,107,94,.35)}
+  .q2{background:rgba(255,171,61,.07);border-color:rgba(255,171,61,.22)}
+  .q2:hover{border-color:rgba(255,171,61,.65);box-shadow:0 8px 30px -8px rgba(255,171,61,.35)}
+  .q3{background:rgba(91,140,255,.07);border-color:rgba(91,140,255,.22)}
+  .q3:hover{border-color:rgba(91,140,255,.65);box-shadow:0 8px 30px -8px rgba(91,140,255,.35)}
+  .q4{background:rgba(61,214,140,.07);border-color:rgba(61,214,140,.22)}
+  .q4:hover{border-color:rgba(61,214,140,.65);box-shadow:0 8px 30px -8px rgba(61,214,140,.35)}
+  .q-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+  .q-head .tint{width:8px;height:8px;border-radius:50%}
+  .q1 .tint{background:var(--q1);box-shadow:0 0 10px var(--q1)}
+  .q2 .tint{background:var(--q2);box-shadow:0 0 10px var(--q2)}
+  .q3 .tint{background:var(--q3);box-shadow:0 0 10px var(--q3)}
+  .q4 .tint{background:var(--q4);box-shadow:0 0 10px var(--q4)}
+  .q-name{font-size:12.5px;font-weight:700;flex:1}
+  .q-count{font-size:11px;color:var(--muted)}
+  .q-add{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:15px;
+    color:var(--muted);cursor:pointer;transition:.2s}
+  .q-add:hover{color:#fff;background:rgba(255,255,255,.1)}
+
+  .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:11px;
+    background:rgba(255,255,255,.045);border:1px solid transparent;margin-bottom:6px;
+    cursor:pointer;transition:.22s}
+  .task:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.08)}
+  .task.done .t-title{color:var(--muted);text-decoration:line-through;opacity:.75}
+  .cb{width:16px;height:16px;border-radius:5px;border:1px solid #6b7490;flex:none;
+    display:grid;place-items:center;background:rgba(20,24,48,.6);transition:.22s;position:relative}
+  .cb:hover{border-color:#b9c0d8}
+  .cb svg{width:11px;height:11px;opacity:0;transform:scale(.4);transition:.22s cubic-bezier(.34,1.56,.64,1)}
+  .task.done .cb{background:var(--q4);border-color:var(--q4);box-shadow:0 0 12px rgba(61,214,140,.55)}
+  .task.done .cb svg{opacity:1;transform:none}
+  .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(139,122,255,.28);
+    color:#cfc4ff;flex:none;letter-spacing:.04em}
+  .tag.amber{background:rgba(255,171,61,.2);color:#ffd9a3}
+
+  footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px}
+  .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.07);transition:.2s;user-select:none}
+  .btn:hover{background:rgba(255,255,255,.15);transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(135deg,#5b8cff,#4f7df9);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 6px 18px -6px rgba(91,140,255,.6)}
+  .btn.report{background:rgba(61,214,140,.16);border-color:rgba(61,214,140,.4);color:#7fe8b6}
+  .spacer{flex:1}
+  .grip{width:14px;height:14px;background:linear-gradient(135deg,transparent 46%,rgba(255,255,255,.35) 46%,rgba(255,255,255,.35) 54%,transparent 54%),
+    linear-gradient(135deg,transparent 30%,rgba(255,255,255,.25) 30%,rgba(255,255,255,.25) 38%,transparent 38%);cursor:se-resize}
+
+  /* ---------- 模式切换演示 ---------- */
+  .modes{display:flex;gap:8px;padding:6px;border-radius:14px;border:1px solid var(--stroke);
+    background:rgba(20,24,48,.5);backdrop-filter:blur(18px);font-size:12px}
+  .mode{padding:7px 14px;border-radius:9px;cursor:pointer;color:var(--muted);transition:.25s;user-select:none}
+  .mode:hover{color:var(--ink)}
+  .mode.active{color:#fff;background:rgba(255,255,255,.12)}
+  .hint{font-size:11.5px;color:var(--muted);opacity:.85}
+  /* normal 模式的伪标题栏 */
+  .fake-bar{display:none;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,.05);border-bottom:1px solid var(--stroke)}
+  .fake-bar span{font-size:11px;color:var(--muted);flex:1}
+  .fake-bar i{width:11px;height:11px;border-radius:3px;background:rgba(255,255,255,.16)}
+  .widget.mode-normal{border-radius:12px}
+  .widget.mode-normal .fake-bar{display:flex}
+  .widget.mode-topmost{box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(91,140,255,.35),0 0 44px -6px rgba(91,140,255,.45),inset 0 1px 0 rgba(255,255,255,.12)}
+</style>
+</head>
+<body>
+  <div class="orb a"></div><div class="orb b"></div>
+
+  <div class="widget" id="widget">
+    <div class="fake-bar"><i></i><i></i><i></i><span>四象 — 普通窗口模式</span></div>
+    <header>
+      <h1>四象</h1>
+      <div class="date"><span class="dot"></span><span id="today"></span></div>
+    </header>
+    <div class="grid">
+      <section class="quad q1">
+        <div class="q-head"><span class="tint"></span><span class="q-name">紧急且重要</span><span class="q-count">1</span><span class="q-add">＋</span></div>
+        <div class="task" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">今天下班前交周报</span><span class="tag">工作</span><span class="tag amber">高优</span>
+        </div>
+      </section>
+      <section class="quad q2">
+        <div class="q-head"><span class="tint"></span><span class="q-name">紧急不重要</span><span class="q-count">1</span><span class="q-add">＋</span></div>
+        <div class="task" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">回复行政邮件</span><span class="tag">沟通</span>
+        </div>
+      </section>
+      <section class="quad q3">
+        <div class="q-head"><span class="tint"></span><span class="q-name">不紧急重要</span><span class="q-count">2</span><span class="q-add">＋</span></div>
+        <div class="task" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">读《深度工作》第 3 章</span><span class="tag">成长</span><span class="tag">阅读</span>
+        </div>
+      </section>
+      <section class="quad q4">
+        <div class="q-head"><span class="tint"></span><span class="q-name">不紧急不重要</span><span class="q-count">1</span><span class="q-add">＋</span></div>
+        <div class="task done" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">整理桌面壁纸</span><span class="tag">生活</span>
+        </div>
+      </section>
+    </div>
+    <footer>
+      <span class="btn primary">＋ 新建任务</span>
+      <span class="btn report">日报</span>
+      <span class="spacer"></span>
+      <span class="btn">设置</span>
+      <span class="btn">锁定</span>
+      <span class="btn">退出</span>
+      <span class="grip" title="拖拽调整大小"></span>
+    </footer>
+  </div>
+
+  <div class="modes" id="modes">
+    <span class="mode active" data-mode="topmost">置顶最前</span>
+    <span class="mode" data-mode="desktop">固定桌面</span>
+    <span class="mode" data-mode="normal">普通窗口</span>
+  </div>
+  <p class="hint">点击模式切换预览效果 · 点击任务勾选框体验完成动效</p>
+
+<script>
+  const w = ["周一","周二","周三","周四","周五","周六","周日"];
+  const d = new Date();
+  document.getElementById("today").textContent =
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${w[(d.getDay()+6)%7]}`;
+  document.getElementById("modes").addEventListener("click", e => {
+    const el = e.target.closest(".mode");
+    if (!el) return;
+    document.querySelectorAll(".mode").forEach(m => m.classList.remove("active"));
+    el.classList.add("active");
+    const widget = document.getElementById("widget");
+    widget.classList.remove("mode-normal", "mode-topmost", "mode-desktop");
+    widget.classList.add("mode-" + el.dataset.mode);
+  });
+</script>
+</body>
+</html>

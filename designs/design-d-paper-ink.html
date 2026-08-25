@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案 D · 晨雾纸墨 Paper &amp; Ink</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai:wght@400;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5efdf; --card:#fbf6e8; --ink:#3d3a33; --muted:#9a927e;
+    --q1:#c2543f; --q2:#c9973a; --q3:#4d6b8c; --q4:#5f8c6b;
+    --seal:#b23a2e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:26px;overflow:hidden;position:relative;
+    font-family:"Noto Serif SC",serif;color:var(--ink);
+    background:
+      radial-gradient(900px 600px at 80% 12%,#f3e8cf 0%,transparent 60%),
+      radial-gradient(700px 500px at 12% 90%,#e9e2cc 0%,transparent 55%),
+      var(--paper);
+  }
+  /* 纸纤维纹理 */
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .62 0 0 0 0 .55 0 0 0 0 .42 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23p)'/%3E%3C/svg%3E")}
+  .leaf{position:absolute;width:150px;height:150px;border-radius:0 100% 0 100%;opacity:.16;filter:blur(2px)}
+  .leaf.a{background:#c9973a;top:6%;left:10%;transform:rotate(20deg)}
+  .leaf.b{background:#5f8c6b;bottom:8%;right:12%;transform:rotate(160deg)}
+
+  .widget{
+    position:relative;width:432px;border-radius:6px;
+    background:rgba(251,246,232,.82);backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border:1px solid rgba(150,138,110,.35);
+    box-shadow:0 2px 0 rgba(255,255,255,.8) inset,0 26px 50px -22px rgba(90,75,45,.45),
+               0 3px 10px -2px rgba(90,75,45,.2);
+    opacity:0;animation:settle .9s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes settle{from{opacity:0;transform:translateY(30px) rotate(.6deg)}to{opacity:1;transform:none}}
+  /* 顶部装订红线 */
+  .thread{position:absolute;top:0;left:26px;right:26px;height:2px;z-index:3;
+    background:linear-gradient(90deg,transparent,#b23a2e 12%,#b23a2e 88%,transparent)}
+  .thread::before,.thread::after{content:"";position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;background:#b23a2e}
+  .thread::before{left:-3px}.thread::after{right:-3px}
+
+  .fake-bar{display:none;align-items:center;gap:6px;padding:8px 14px;background:rgba(150,138,110,.1);border-bottom:1px solid rgba(150,138,110,.3)}
+  .fake-bar span{font-size:11px;color:var(--muted);flex:1}
+  .fake-bar i{width:11px;height:11px;border-radius:50%;background:rgba(150,138,110,.5)}
+  .widget.mode-normal .fake-bar{display:flex}
+  .widget.mode-topmost{box-shadow:0 2px 0 rgba(255,255,255,.85) inset,0 34px 60px -20px rgba(90,75,45,.55),0 0 0 1px rgba(178,58,46,.4)}
+  .widget.mode-desktop{filter:sepia(.12) brightness(.97)}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 12px}
+  h1{font-family:"LXGW WenKai",serif;font-weight:700;font-size:23px;letter-spacing:.22em}
+  .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .date .dot{width:8px;height:8px;border-radius:50%;background:var(--q4);border:1px solid rgba(95,140,107,.5)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px}
+  .quad{border-radius:4px;padding:12px 12px 10px;border:1px solid rgba(150,138,110,.28);transition:.25s;position:relative}
+  .quad:hover{transform:translateY(-2px) rotate(-.3deg);box-shadow:0 10px 22px -10px rgba(90,75,45,.4)}
+  .q1{background:rgba(194,84,63,.06)}
+  .q2{background:rgba(201,151,58,.07)}
+  .q3{background:rgba(77,107,140,.06)}
+  .q4{background:rgba(95,140,107,.07)}
+  .q-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+  .q-head .tint{width:9px;height:9px;border-radius:50%;border:2px solid}
+  .q1 .tint{border-color:var(--q1)}.q2 .tint{border-color:var(--q2)}
+  .q3 .tint{border-color:var(--q3)}.q4 .tint{border-color:var(--q4)}
+  .q-name{font-size:13px;font-weight:700;flex:1;letter-spacing:.08em}
+  .q-count{font-size:11px;color:var(--muted)}
+  .q-add{width:22px;height:22px;display:grid;place-items:center;font-size:16px;color:var(--muted);
+    cursor:pointer;transition:.2s;font-family:"LXGW WenKai",serif}
+  .q-add:hover{color:var(--seal);transform:scale(1.15)}
+
+  .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:3px;
+    background:rgba(255,255,255,.5);border:1px solid rgba(150,138,110,.2);margin-bottom:6px;
+    cursor:pointer;transition:.2s}
+  .task:hover{background:rgba(255,255,255,.85);box-shadow:0 3px 8px -3px rgba(90,75,45,.3)}
+  .task.done .t-title{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(178,58,46,.55)}
+  .cb{width:17px;height:17px;border-radius:50%;border:1.7px solid var(--muted);flex:none;
+    display:grid;place-items:center;background:transparent;transition:.2s}
+  .cb:hover{border-color:var(--seal)}
+  /* 手绘对勾 */
+  .cb svg{width:11px;height:11px;opacity:0;stroke-dasharray:16;stroke-dashoffset:16;transition:.35s ease}
+  .task.done .cb{background:rgba(178,58,46,.12);border-color:var(--seal);
+    animation:stamp .45s cubic-bezier(.2,1.4,.4,1)}
+  .task.done .cb svg{opacity:1;stroke-dashoffset:0}
+  @keyframes stamp{40%{transform:scale(1.35)}100%{transform:scale(1)}}
+  .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tag{font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(77,107,140,.1);
+    color:var(--q3);border:1px solid rgba(77,107,140,.25);flex:none;letter-spacing:.05em}
+  .tag.amber{background:rgba(201,151,58,.1);color:#8f6a20;border-color:rgba(201,151,58,.3)}
+
+  footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px}
+  .btn{font-size:12px;padding:7px 13px;border-radius:3px;cursor:pointer;border:1px solid rgba(150,138,110,.35);
+    background:rgba(255,255,255,.45);transition:.2s;user-select:none;letter-spacing:.05em}
+  .btn:hover{background:#fff;box-shadow:0 3px 8px -3px rgba(90,75,45,.35)}
+  .btn.primary{background:var(--seal);border-color:var(--seal);color:#fdf6e8;font-weight:600;box-shadow:0 4px 10px -4px rgba(178,58,46,.6)}
+  .btn.report{background:rgba(95,140,107,.14);border-color:rgba(95,140,107,.4);color:#44664e}
+  .spacer{flex:1}
+  .grip{width:14px;height:14px;background:linear-gradient(135deg,transparent 46%,rgba(120,110,90,.55) 46%,rgba(120,110,90,.55) 54%,transparent 54%),
+    linear-gradient(135deg,transparent 30%,rgba(120,110,90,.35) 30%,rgba(120,110,90,.35) 38%,transparent 38%);cursor:se-resize}
+
+  .modes{display:flex;gap:8px;padding:6px;border-radius:8px;border:1px solid rgba(150,138,110,.35);
+    background:rgba(251,246,232,.85);backdrop-filter:blur(10px);font-size:12px;box-shadow:0 8px 20px -10px rgba(90,75,45,.35)}
+  .mode{padding:7px 14px;border-radius:3px;cursor:pointer;color:var(--muted);transition:.2s;user-select:none;letter-spacing:.05em}
+  .mode:hover{color:var(--ink)}
+  .mode.active{color:#fdf6e8;background:var(--seal)}
+  .hint{font-size:11.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="leaf a"></div><div class="leaf b"></div>
+
+  <div class="widget" id="widget">
+    <div class="thread"></div>
+    <div class="fake-bar"><i></i><i></i><i></i><span>四象 — 普通窗口模式</span></div>
+    <header>
+      <h1>四象</h1>
+      <div class="date"><span class="dot"></span><span id="today"></span></div>
+    </header>
+    <div class="grid">
+      <section class="quad q1">
+        <div class="q-head"><span class="tint"></span><span class="q-name">紧急且重要</span><span class="q-count">1</span><span class="q-add">＋</span></div>
+        <div class="task" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#b23a2e" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">今天下班前交周报</span><span class="tag">工作</span><span class="tag amber">高优</span>
+        </div>
+      </section>
+      <section class="quad q2">
+        <div class="q-head"><span class="tint"></span><span class="q-name">紧急不重要</span><span class="q-count">1</span><span class="q-add">＋</span></div>
+        <div class="task" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#b23a2e" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">回复行政邮件</span><span class="tag">沟通</span>
+        </div>
+      </section>
+      <section class="quad q3">
+        <div class="q-head"><span class="tint"></span><span class="q-name">不紧急重要</span><span class="q-count">2</span><span class="q-add">＋</span></div>
+        <div class="task" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#b23a2e" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">读《深度工作》第 3 章</span><span class="tag">成长</span><span class="tag">阅读</span>
+        </div>
+      </section>
+      <section class="quad q4">
+        <div class="q-head"><span class="tint"></span><span class="q-name">不紧急不重要</span><span class="q-count">1</span><span class="q-add">＋</span></div>
+        <div class="task done" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#b23a2e" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">整理桌面壁纸</span><span class="tag">生活</span>
+        </div>
+      </section>
+    </div>
+    <footer>
+      <span class="btn primary">＋ 新建任务</span>
+      <span class="btn report">日报</span>
+      <span class="spacer"></span>
+      <span class="btn">设置</span>
+      <span class="btn">锁定</span>
+      <span class="btn">退出</span>
+      <span class="grip" title="拖拽调整大小"></span>
+    </footer>
+  </div>
+
+  <div class="modes" id="modes">
+    <span class="mode active" data-mode="topmost">置顶最前</span>
+    <span class="mode" data-mode="desktop">固定桌面</span>
+    <span class="mode" data-mode="normal">普通窗口</span>
+  </div>
+  <p class="hint">点击模式切换预览效果 · 点击任务勾选框体验完成动效</p>
+
+<script>
+  const w = ["周一","周二","周三","周四","周五","周六","周日"];
+  const d = new Date();
+  document.getElementById("today").textContent =
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${w[(d.getDay()+6)%7]}`;
+  document.getElementById("modes").addEventListener("click", e => {
+    const el = e.target.closest(".mode");
+    if (!el) return;
+    document.querySelectorAll(".mode").forEach(m => m.classList.remove("active"));
+    el.classList.add("active");
+    const widget = document.getElementById("widget");
+    widget.classList.remove("mode-normal", "mode-topmost", "mode-desktop");
+    widget.classList.add("mode-" + el.dataset.mode);
+  });
+</script>
+</body>
+</html>

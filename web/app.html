@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com">
+<title>四象</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;700&family=LXGW+WenKai:wght@400;700&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   A · 午夜玻璃（原样，body → body.midnight）
+   ================================================================ */
+body.midnight{
+  --bg0:#05060f;--bg1:#0b0e22;--ink:#eef0fb;--muted:#8f96b3;
+  --glass:rgba(20,24,48,.55);--stroke:rgba(255,255,255,.09);
+  --q1:#ff6b5e;--q2:#ffab3d;--q3:#5b8cff;--q4:#3dd68c;
+  width:100%;height:100%;margin:0;padding:0;overflow:hidden;
+  position:relative;
+  font-family:"Noto Sans SC",sans-serif;color:var(--ink);
+  background:radial-gradient(1200px 800px at 18% 12%,#1a2050 0%,transparent 55%),
+    radial-gradient(1000px 700px at 85% 88%,#0e2340 0%,transparent 60%),
+    linear-gradient(160deg,var(--bg1),var(--bg0) 70%);
+}
+body.midnight .orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;animation:drift 14s ease-in-out infinite alternate}
+body.midnight .orb.a{width:340px;height:340px;background:#4b3f9e;top:-80px;left:8%}
+body.midnight .orb.b{width:280px;height:280px;background:#123f5e;bottom:-60px;right:10%;animation-delay:-6s}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(40px,-30px) scale(1.12)}}
+body.midnight::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E")}
+body.midnight .widget{
+  position:relative;width:100%;height:100%;border-radius:0;overflow:hidden;
+  background:var(--glass);backdrop-filter:blur(26px) saturate(150%);
+  -webkit-backdrop-filter:blur(26px) saturate(150%);
+  border:1px solid var(--stroke);
+  box-shadow:0 30px 80px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.12);
+  display:flex;flex-direction:column;
+}
+body.midnight .widget::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--q1),var(--q2),var(--q3),var(--q4),transparent 85%);
+  opacity:.95;z-index:3}
+body.midnight .widget::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:linear-gradient(115deg,rgba(255,255,255,.10) 0%,transparent 26%)}
+@keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+body.midnight header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px;flex-shrink:0}
+body.midnight h1{font-family:"ZCOOL XiaoWei",serif;font-weight:400;font-size:23px;letter-spacing:.14em}
+body.midnight .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+body.midnight .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4);box-shadow:0 0 8px var(--q4);animation:pulse 2.4s infinite}
+@keyframes pulse{50%{opacity:.35}}
+body.midnight .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
+body.midnight .quad{border-radius:16px;padding:12px 12px 10px;border:1px solid transparent;position:relative;
+  backdrop-filter:blur(8px);transition:border-color .25s,box-shadow .25s,transform .25s;
+  display:flex;flex-direction:column;min-height:0}
+body.midnight .quad:hover{transform:translateY(-2px)}
+body.midnight .q1{background:rgba(255,107,94,.07);border-color:rgba(255,107,94,.22)}
+body.midnight .q1:hover{border-color:rgba(255,107,94,.65);box-shadow:0 8px 30px -8px rgba(255,107,94,.35)}
+body.midnight .q2{background:rgba(255,171,61,.07);border-color:rgba(255,171,61,.22)}
+body.midnight .q2:hover{border-color:rgba(255,171,61,.65);box-shadow:0 8px 30px -8px rgba(255,171,61,.35)}
+body.midnight .q3{background:rgba(91,140,255,.07);border-color:rgba(91,140,255,.22)}
+body.midnight .q3:hover{border-color:rgba(91,140,255,.65);box-shadow:0 8px 30px -8px rgba(91,140,255,.35)}
+body.midnight .q4{background:rgba(61,214,140,.07);border-color:rgba(61,214,140,.22)}
+body.midnight .q4:hover{border-color:rgba(61,214,140,.65);box-shadow:0 8px 30px -8px rgba(61,214,140,.35)}
+body.midnight .q-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+body.midnight .q-head .tint{width:8px;height:8px;border-radius:50%}
+body.midnight .q1 .tint{background:var(--q1);box-shadow:0 0 10px var(--q1)}
+body.midnight .q2 .tint{background:var(--q2);box-shadow:0 0 10px var(--q2)}
+body.midnight .q3 .tint{background:var(--q3);box-shadow:0 0 10px var(--q3)}
+body.midnight .q4 .tint{background:var(--q4);box-shadow:0 0 10px var(--q4)}
+body.midnight .q-name{font-size:12.5px;font-weight:700;flex:1}
+body.midnight .q-count{font-size:11px;color:var(--muted)}
+body.midnight .q-add{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:15px;
+  color:var(--muted);cursor:pointer;transition:.2s}
+body.midnight .q-add:hover{color:#fff;background:rgba(255,255,255,.1)}
+body.midnight .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:11px;
+  background:rgba(255,255,255,.045);border:1px solid transparent;margin-bottom:6px;cursor:pointer;transition:.22s}
+body.midnight .task:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.08)}
+body.midnight .task.dragging{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.12)}
+body.midnight .task.done .t-title{color:var(--muted);text-decoration:line-through;opacity:.75}
+body.midnight .cb{width:16px;height:16px;border-radius:5px;border:1px solid #6b7490;flex:none;
+  display:grid;place-items:center;background:rgba(20,24,48,.6);transition:.22s;cursor:pointer}
+body.midnight .cb:hover{border-color:#b9c0d8}
+body.midnight .cb svg{width:11px;height:11px;opacity:0;transform:scale(.4);transition:.22s cubic-bezier(.34,1.56,.64,1)}
+body.midnight .task.done .cb{background:var(--q4);border-color:var(--q4);box-shadow:0 0 12px rgba(61,214,140,.55)}
+body.midnight .task.done .cb svg{opacity:1;transform:none}
+body.midnight .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.midnight .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(139,122,255,.28);color:#cfc4ff;flex:none;letter-spacing:.04em}
+body.midnight .tag.amber{background:rgba(255,171,61,.2);color:#ffd9a3}
+body.midnight footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
+body.midnight .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.12);color:#fff;transition:.2s;user-select:none}
+body.midnight .btn:hover{background:rgba(255,255,255,.22);transform:translateY(-1px)}
+body.midnight .btn.primary{background:linear-gradient(135deg,#5b8cff,#4f7df9);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 6px 18px -6px rgba(91,140,255,.6)}
+body.midnight .btn.report{background:rgba(61,214,140,.16);border-color:rgba(61,214,140,.4);color:#7fe8b6}
+body.midnight .spacer{flex:1}
+body.midnight .grip{width:14px;height:14px;background:linear-gradient(135deg,transparent 46%,rgba(255,255,255,.35) 46%,rgba(255,255,255,.35) 54%,transparent 54%),
+  linear-gradient(135deg,transparent 30%,rgba(255,255,255,.25) 30%,rgba(255,255,255,.25) 38%,transparent 38%);cursor:se-resize}
+
+/* ================================================================
+   B · 雾白冰川（原样）
+   ================================================================ */
+body.frost{
+  --ink:#2c3242;--muted:#8d94a8;
+  --glass:rgba(255,255,255,.62);--stroke:rgba(255,255,255,.75);
+  --q1:#e2867d;--q2:#e8b26f;--q3:#8aa6d8;--q4:#8fc7a6;
+  width:100%;height:100%;margin:0;padding:0;overflow:hidden;
+  position:relative;
+  font-family:"Noto Sans SC",sans-serif;color:var(--ink);
+  background:linear-gradient(150deg,#eef2f8 0%,#dfe7f2 45%,#e8e4ee 100%);
+}
+body.frost .blob{position:absolute;border-radius:44% 56% 60% 40%/48% 42% 58% 52%;filter:blur(80px);opacity:.55;animation:morph 16s ease-in-out infinite alternate}
+body.frost .blob.a{width:420px;height:380px;background:#f6cfd0;top:-90px;left:6%}
+body.frost .blob.b{width:380px;height:340px;background:#cfe0f2;bottom:-80px;right:8%;animation-delay:-7s}
+body.frost .blob.c{width:260px;height:260px;background:#d9e8cf;top:40%;left:18%;opacity:.45;animation-delay:-3s}
+@keyframes morph{from{border-radius:44% 56% 60% 40%/48% 42% 58% 52%;transform:rotate(0)}to{border-radius:58% 42% 44% 56%/40% 58% 42% 60%;transform:rotate(14deg)}}
+body.frost::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+body.frost .widget{
+  position:relative;width:100%;height:100%;border-radius:0;
+  background:var(--glass);backdrop-filter:blur(30px) saturate(160%);
+  -webkit-backdrop-filter:blur(30px) saturate(160%);
+  border:1px solid var(--stroke);
+  box-shadow:0 24px 60px -18px rgba(90,104,140,.35),inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(255,255,255,.4);
+  display:flex;flex-direction:column;
+}
+body.frost .widget::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;
+  background:linear-gradient(115deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 30%)}
+body.frost header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px;flex-shrink:0}
+body.frost h1{font-family:"LXGW WenKai",serif;font-weight:700;font-size:22px;letter-spacing:.1em}
+body.frost .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+body.frost .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4);box-shadow:0 0 6px rgba(143,199,166,.8)}
+body.frost .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
+body.frost .quad{border-radius:17px;padding:12px 12px 10px;border:1px solid rgba(255,255,255,.8);transition:.25s;
+  display:flex;flex-direction:column;min-height:0}
+body.frost .quad:hover{transform:translateY(-2px);box-shadow:0 10px 26px -12px rgba(90,104,140,.4)}
+body.frost .q1{background:rgba(226,134,125,.13)}.body.frost .q2{background:rgba(232,178,111,.15)}
+body.frost .q3{background:rgba(138,166,216,.14)}.body.frost .q4{background:rgba(143,199,166,.15)}
+body.frost .q-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+body.frost .q-head .tint{width:8px;height:8px;border-radius:50%}
+body.frost .q1 .tint{background:var(--q1)}.body.frost .q2 .tint{background:var(--q2)}
+body.frost .q3 .tint{background:var(--q3)}.body.frost .q4 .tint{background:var(--q4)}
+body.frost .q-name{font-size:12.5px;font-weight:700;flex:1}
+body.frost .q-count{font-size:11px;color:var(--muted)}
+body.frost .q-add{width:22px;height:22px;border-radius:8px;display:grid;place-items:center;font-size:15px;
+  color:var(--muted);cursor:pointer;transition:.2s}
+body.frost .q-add:hover{color:var(--ink);background:rgba(255,255,255,.75)}
+body.frost .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:12px;
+  background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85);margin-bottom:6px;
+  cursor:pointer;transition:.22s;box-shadow:0 2px 8px -3px rgba(90,104,140,.18)}
+body.frost .task:hover{background:rgba(255,255,255,.85);transform:translateX(2px)}
+body.frost .task.dragging{background:#fff;border-color:rgba(138,166,216,.5)}
+body.frost .task.done .t-title{color:var(--muted);text-decoration:line-through;opacity:.8}
+body.frost .cb{width:16px;height:16px;border-radius:50%;border:1.6px solid #b6bccd;flex:none;
+  display:grid;place-items:center;background:#fff;transition:.22s;cursor:pointer}
+body.frost .cb:hover{border-color:var(--q4)}
+body.frost .cb svg{width:10px;height:10px;opacity:0;transform:scale(.4);transition:.22s cubic-bezier(.34,1.56,.64,1)}
+body.frost .task.done .cb{background:var(--q4);border-color:var(--q4)}
+body.frost .task.done .cb svg{opacity:1;transform:none}
+body.frost .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.frost .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#ece4f6;color:#7a6aa8;flex:none}
+body.frost .tag.amber{background:#faeeda;color:#a8763a}
+body.frost footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
+body.frost .btn{font-size:12px;padding:7px 13px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.9);
+  background:rgba(255,255,255,.55);transition:.2s;user-select:none;box-shadow:0 2px 6px -2px rgba(90,104,140,.25)}
+body.frost .btn:hover{background:#fff;transform:translateY(-1px)}
+body.frost .btn.primary{background:linear-gradient(135deg,#8aa6d8,#7b9bd2);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 6px 16px -6px rgba(123,155,210,.7)}
+body.frost .btn.report{background:rgba(143,199,166,.35);border-color:rgba(143,199,166,.8);color:#4e7d63}
+body.frost .spacer{flex:1}
+body.frost .grip{width:14px;height:14px;background:linear-gradient(135deg,transparent 46%,rgba(120,130,160,.5) 46%,rgba(120,130,160,.5) 54%,transparent 54%),
+  linear-gradient(135deg,transparent 30%,rgba(120,130,160,.35) 30%,rgba(120,130,160,.35) 38%,transparent 38%);cursor:se-resize}
+
+/* ================================================================
+   C · 霓虹网格（原样）
+   ================================================================ */
+body.neon{
+  --bg:#04060d;--ink:#e8f2ff;--muted:#5f708e;
+  --glass:rgba(10,16,34,.62);
+  --c1:#00e5ff;--c2:#ff4dd8;--c3:#ffe14d;--c4:#3dffa2;
+  width:100%;height:100%;margin:0;padding:0;overflow:hidden;
+  position:relative;
+  font-family:"Noto Sans SC",sans-serif;color:var(--ink);background:var(--bg);
+}
+body.neon .grid-bg{position:fixed;inset:-40% -20%;pointer-events:none;
+  background:
+    linear-gradient(rgba(0,229,255,.09) 1px,transparent 1px) 0 0/42px 42px,
+    linear-gradient(90deg,rgba(0,229,255,.09) 1px,transparent 1px) 0 0/42px 42px;
+  transform:perspective(700px) rotateX(52deg);transform-origin:center 30%;
+  animation:gridmove 5s linear infinite;opacity:.8}
+@keyframes gridmove{from{background-position:0 0,0 0}to{background-position:0 42px,0 0}}
+body.neon::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9;opacity:.55;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px)}
+body.neon::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:8;
+  background:radial-gradient(ellipse at center,transparent 85%,rgba(0,0,0,.25) 100%)}
+body.neon .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.32;animation:drift 12s ease-in-out infinite alternate}
+body.neon .orb.a{width:380px;height:380px;background:#0a4a66;top:-100px;left:10%}
+body.neon .orb.b{width:320px;height:320px;background:#4a1250;bottom:-80px;right:8%;animation-delay:-5s}
+body.neon .widget{
+  position:relative;width:100%;height:100%;border-radius:0;z-index:2;
+  background:var(--glass);backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  border:1px solid rgba(0,229,255,.22);
+  box-shadow:0 0 0 1px rgba(0,229,255,.08),0 0 50px -8px rgba(0,229,255,.35),
+    0 26px 70px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,229,255,.14);
+  display:flex;flex-direction:column;
+}
+@keyframes boot{from{opacity:0;transform:translateY(22px) skewX(1.5deg)}to{opacity:1;transform:none}}
+body.neon .widget::after{content:"";position:absolute;right:0;bottom:0;width:14px;height:14px;
+  background:linear-gradient(315deg,var(--c1) 50%,transparent 50%);filter:drop-shadow(0 0 6px var(--c1))}
+body.neon header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px;flex-shrink:0}
+body.neon h1{font-family:"ZCOOL QingKe HuangYou",serif;font-weight:400;font-size:24px;letter-spacing:.2em;
+  color:#fff;text-shadow:0 0 12px rgba(0,229,255,.75),0 0 30px rgba(0,229,255,.4)}
+body.neon .date{font-size:12px;color:#7a9ab8;display:flex;align-items:center;gap:7px;letter-spacing:.08em;
+  text-shadow:0 0 5px rgba(0,229,255,.3)}
+body.neon .date .dot{width:7px;height:7px;background:var(--c4);box-shadow:0 0 9px var(--c4);animation:blink 1.4s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+body.neon .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
+body.neon .quad{border-radius:12px;padding:12px 12px 10px;border:1px solid transparent;position:relative;transition:.22s;
+  display:flex;flex-direction:column;min-height:0}
+body.neon .quad::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;transition:.22s;pointer-events:none}
+body.neon .quad:hover::before{opacity:1}
+body.neon .q1{background:rgba(0,229,255,.05);border-color:rgba(0,229,255,.25)}
+body.neon .q1::before{box-shadow:inset 0 0 18px rgba(0,229,255,.35)}
+body.neon .q2{background:rgba(255,77,216,.05);border-color:rgba(255,77,216,.25)}
+body.neon .q2::before{box-shadow:inset 0 0 18px rgba(255,77,216,.35)}
+body.neon .q3{background:rgba(255,225,77,.05);border-color:rgba(255,225,77,.25)}
+body.neon .q3::before{box-shadow:inset 0 0 18px rgba(255,225,77,.3)}
+body.neon .q4{background:rgba(61,255,162,.05);border-color:rgba(61,255,162,.25)}
+body.neon .q4::before{box-shadow:inset 0 0 18px rgba(61,255,162,.3)}
+body.neon .q-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+body.neon .q-head .tint{width:9px;height:9px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+body.neon .q1 .tint{background:var(--c1);box-shadow:0 0 8px var(--c1)}
+body.neon .q2 .tint{background:var(--c2);box-shadow:0 0 8px var(--c2)}
+body.neon .q3 .tint{background:var(--c3);box-shadow:0 0 8px var(--c3)}
+body.neon .q4 .tint{background:var(--c4);box-shadow:0 0 8px var(--c4)}
+body.neon .q-name{font-size:12.5px;font-weight:700;flex:1;letter-spacing:.06em;
+  text-shadow:0 0 8px rgba(0,229,255,.6),0 0 20px rgba(0,229,255,.3)}
+body.neon .q-count{font-size:11px;color:#7a9ab8;text-shadow:0 0 5px rgba(0,229,255,.3)}
+body.neon .q-add{width:22px;height:22px;display:grid;place-items:center;font-size:15px;color:var(--muted);
+  cursor:pointer;transition:.2s;border:1px dashed rgba(255,255,255,.2)}
+body.neon .q-add:hover{color:#fff;border-color:rgba(255,255,255,.6);box-shadow:0 0 10px rgba(0,229,255,.4)}
+body.neon .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:8px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);margin-bottom:6px;
+  cursor:pointer;transition:.18s;position:relative;overflow:hidden}
+body.neon .task::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;
+  background:linear-gradient(90deg,transparent,rgba(0,229,255,.12),transparent);transition:.45s}
+body.neon .task:hover::after{left:110%}
+body.neon .task:hover{border-color:rgba(0,229,255,.35)}
+body.neon .task.dragging{background:rgba(0,229,255,.1);border-color:rgba(0,229,255,.4)}
+body.neon .task.done .t-title{color:var(--muted);text-decoration:line-through}
+body.neon .cb{width:15px;height:15px;border:1.5px solid #3f5270;flex:none;display:grid;place-items:center;
+  background:rgba(8,12,26,.8);transition:.18s;cursor:pointer}
+body.neon .cb:hover{border-color:var(--c4)}
+body.neon .cb svg{width:10px;height:10px;opacity:0;transition:.18s}
+body.neon .task.done .cb{background:var(--c4);border-color:var(--c4);box-shadow:0 0 12px rgba(61,255,162,.7)}
+body.neon .task.done .cb svg{opacity:1}
+body.neon .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  text-shadow:0 0 6px rgba(0,229,255,.45)}
+body.neon .tag{font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(0,229,255,.12);color:#8ff0ff;
+  border:1px solid rgba(0,229,255,.3);flex:none;letter-spacing:.06em}
+body.neon .tag.amber{background:rgba(255,225,77,.1);color:#ffe98f;border-color:rgba(255,225,77,.3)}
+body.neon footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
+body.neon .btn{font-size:12px;padding:7px 13px;border-radius:6px;cursor:pointer;border:1px solid rgba(0,229,255,.3);
+  background:rgba(0,229,255,.08);color:#c8f0ff;transition:.2s;user-select:none;letter-spacing:.06em;
+  text-shadow:0 0 6px rgba(0,229,255,.45)}
+body.neon .btn:hover{background:rgba(0,229,255,.16);box-shadow:0 0 14px rgba(0,229,255,.35);color:#fff}
+body.neon .btn.primary{background:var(--c1);border-color:transparent;color:#02121a;font-weight:700;box-shadow:0 0 18px rgba(0,229,255,.55)}
+body.neon .btn.report{background:rgba(61,255,162,.1);border-color:rgba(61,255,162,.4);color:#7dffc2}
+body.neon .spacer{flex:1}
+body.neon .grip{width:14px;height:14px;background:linear-gradient(135deg,transparent 46%,rgba(0,229,255,.7) 46%,rgba(0,229,255,.7) 54%,transparent 54%),
+  linear-gradient(135deg,transparent 30%,rgba(0,229,255,.45) 30%,rgba(0,229,255,.45) 38%,transparent 38%);cursor:se-resize}
+
+/* ================================================================
+   D · 晨雾纸墨（原样）
+   ================================================================ */
+body.paper{
+  --paper:#f5efdf;--card:#fbf6e8;--ink:#3d3a33;--muted:#9a927e;
+  --q1:#c2543f;--q2:#c9973a;--q3:#4d6b8c;--q4:#5f8c6b;--seal:#b23a2e;
+  width:100%;height:100%;margin:0;padding:0;overflow:hidden;
+  position:relative;
+  font-family:"Noto Serif SC",serif;color:var(--ink);
+  background:
+    radial-gradient(900px 600px at 80% 12%,#f3e8cf 0%,transparent 60%),
+    radial-gradient(700px 500px at 12% 90%,#e9e2cc 0%,transparent 55%),
+    var(--paper);
+}
+body.paper::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .62 0 0 0 0 .55 0 0 0 0 .42 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23p)'/%3E%3C/svg%3E")}
+body.paper .leaf{position:absolute;width:150px;height:150px;border-radius:0 100% 0 100%;opacity:.16;filter:blur(2px)}
+body.paper .leaf.a{background:#c9973a;top:6%;left:10%;transform:rotate(20deg)}
+body.paper .leaf.b{background:#5f8c6b;bottom:8%;right:12%;transform:rotate(160deg)}
+body.paper .widget{
+  position:relative;width:100%;height:100%;border-radius:0;
+  background:rgba(251,246,232,.82);backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(150,138,110,.35);
+  box-shadow:0 2px 0 rgba(255,255,255,.8) inset,0 26px 50px -22px rgba(90,75,45,.45),0 3px 10px -2px rgba(90,75,45,.2);
+  display:flex;flex-direction:column;
+}
+@keyframes settle{from{opacity:0;transform:translateY(30px) rotate(.6deg)}to{opacity:1;transform:none}}
+body.paper .thread{position:absolute;top:0;left:26px;right:26px;height:2px;z-index:3;
+  background:linear-gradient(90deg,transparent,#b23a2e 12%,#b23a2e 88%,transparent)}
+body.paper .thread::before,.paper .thread::after{content:"";position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;background:#b23a2e}
+body.paper .thread::before{left:-3px}.body.paper .thread::after{right:-3px}
+body.paper header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 12px;flex-shrink:0}
+body.paper h1{font-family:"LXGW WenKai",serif;font-weight:700;font-size:23px;letter-spacing:.22em}
+body.paper .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+body.paper .date .dot{width:8px;height:8px;border-radius:50%;background:var(--q4);border:1px solid rgba(95,140,107,.5)}
+body.paper .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
+body.paper .quad{border-radius:4px;padding:12px 12px 10px;border:1px solid rgba(150,138,110,.28);transition:.25s;position:relative;
+  display:flex;flex-direction:column;min-height:0}
+body.paper .quad:hover{transform:translateY(-2px) rotate(-.3deg);box-shadow:0 10px 22px -10px rgba(90,75,45,.4)}
+body.paper .q1{background:rgba(194,84,63,.06)}.body.paper .q2{background:rgba(201,151,58,.07)}
+body.paper .q3{background:rgba(77,107,140,.06)}.body.paper .q4{background:rgba(95,140,107,.07)}
+body.paper .q-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+body.paper .q-head .tint{width:9px;height:9px;border-radius:50%;border:2px solid}
+body.paper .q1 .tint{border-color:var(--q1)}.body.paper .q2 .tint{border-color:var(--q2)}
+body.paper .q3 .tint{border-color:var(--q3)}.body.paper .q4 .tint{border-color:var(--q4)}
+body.paper .q-name{font-size:13px;font-weight:700;flex:1;letter-spacing:.08em}
+body.paper .q-count{font-size:11px;color:var(--muted)}
+body.paper .q-add{width:22px;height:22px;display:grid;place-items:center;font-size:16px;color:var(--muted);
+  cursor:pointer;transition:.2s;font-family:"LXGW WenKai",serif}
+body.paper .q-add:hover{color:var(--seal);transform:scale(1.15)}
+body.paper .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:3px;
+  background:rgba(255,255,255,.5);border:1px solid rgba(150,138,110,.2);margin-bottom:6px;cursor:pointer;transition:.2s}
+body.paper .task:hover{background:rgba(255,255,255,.85);box-shadow:0 3px 8px -3px rgba(90,75,45,.3)}
+body.paper .task.dragging{background:#fff;border-color:rgba(178,58,46,.4)}
+body.paper .task.done .t-title{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(178,58,46,.55)}
+body.paper .cb{width:17px;height:17px;border-radius:50%;border:1.7px solid var(--muted);flex:none;
+  display:grid;place-items:center;background:transparent;transition:.2s;cursor:pointer}
+body.paper .cb:hover{border-color:var(--seal)}
+body.paper .cb svg{width:11px;height:11px;opacity:0;stroke-dasharray:16;stroke-dashoffset:16;transition:.35s ease}
+body.paper .task.done .cb{background:rgba(178,58,46,.12);border-color:var(--seal);animation:stamp .45s cubic-bezier(.2,1.4,.4,1)}
+body.paper .task.done .cb svg{opacity:1;stroke-dashoffset:0}
+@keyframes stamp{40%{transform:scale(1.35)}100%{transform:scale(1)}}
+body.paper .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.paper .tag{font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(77,107,140,.1);
+  color:var(--q3);border:1px solid rgba(77,107,140,.25);flex:none;letter-spacing:.05em}
+body.paper .tag.amber{background:rgba(201,151,58,.1);color:#8f6a20;border-color:rgba(201,151,58,.3)}
+body.paper footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
+body.paper .btn{font-size:12px;padding:7px 13px;border-radius:3px;cursor:pointer;border:1px solid rgba(150,138,110,.35);
+  background:rgba(255,255,255,.45);transition:.2s;user-select:none;letter-spacing:.05em}
+body.paper .btn:hover{background:#fff;box-shadow:0 3px 8px -3px rgba(90,75,45,.35)}
+body.paper .btn.primary{background:var(--seal);border-color:var(--seal);color:#fdf6e8;font-weight:600;box-shadow:0 4px 10px -4px rgba(178,58,46,.6)}
+body.paper .btn.report{background:rgba(95,140,107,.14);border-color:rgba(95,140,107,.4);color:#44664e}
+body.paper .spacer{flex:1}
+body.paper .grip{width:14px;height:14px;background:linear-gradient(135deg,transparent 46%,rgba(120,110,90,.55) 46%,rgba(120,110,90,.55) 54%,transparent 54%),
+  linear-gradient(135deg,transparent 30%,rgba(120,110,90,.35) 30%,rgba(120,110,90,.35) 38%,transparent 38%);cursor:se-resize}
+
+/* ================================================================
+   通用结构（功能元素，不含视觉样式）
+   ================================================================ */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;cursor:default}
+/* 隐藏所有滚动条 */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{display:none}
+/* easy_drag=True 时默认全窗口可拖动，排除交互区域 */
+button,a,.q-add,.cb,select,input,textarea,.radio-option,.calendar-grid .day,.nav-btn{-webkit-app-region:no-drag}
+.modal-overlay{-webkit-app-region:no-drag}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:42px;height:38px;padding:0}
+.icon-btn svg{pointer-events:none}
+.q-tasks{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0}
+.task-actions{display:flex;gap:2px;margin-left:4px;opacity:0;transition:opacity .15s;flex-shrink:0}
+.task:hover .task-actions{opacity:1}
+.icon-btn-sm{display:inline-flex;align-items:center;justify-content:center;width:28px;height:24px;
+  border-radius:6px;cursor:pointer;transition:.15s;color:inherit;vertical-align:middle}
+.icon-btn-sm:hover{background:rgba(255,255,255,.15)}
+.icon-btn-sm.danger:hover{background:rgba(255,80,80,.25);color:#ff6b6b}
+.icon-btn-sm svg{pointer-events:none}
+body.frost .icon-btn-sm:hover{background:rgba(0,0,0,.08)}
+body.frost .icon-btn-sm.danger:hover{background:rgba(255,80,80,.15)}
+body.paper .icon-btn-sm:hover{background:rgba(0,0,0,.06)}
+body.paper .icon-btn-sm.danger:hover{background:rgba(255,80,80,.12)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;
+  justify-content:center;z-index:100;opacity:0;animation:fadeIn .25s forwards}
+@keyframes fadeIn{to{opacity:1}}
+.modal{border-radius:16px;padding:24px;width:420px;max-width:90vw;max-height:85vh;overflow:auto;
+  box-shadow:0 30px 60px rgba(0,0,0,.6)}
+.modal h2{font-size:16px;font-weight:700;margin-bottom:18px}
+.modal label{display:block;font-size:12px;margin-bottom:5px}
+.modal input,.modal textarea{width:100%;border-radius:8px;padding:8px 10px;margin-bottom:12px;border:1px solid rgba(255,255,255,.12)}
+.modal textarea{height:70px;resize:vertical}
+.modal .radio-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.modal .radio-option{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:.2s}
+.modal .radio-option:hover{background:rgba(255,255,255,.08)}
+.modal .radio-option.selected{border-color:rgba(91,140,255,.7);background:rgba(91,140,255,.18)}
+.modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.modal .hint{font-size:11px;margin-bottom:8px}
+.report-modal{display:flex;gap:20px;height:100%;min-height:0}
+.report-left{flex:0 0 280px;display:flex;flex-direction:column;overflow-y:auto}
+.report-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+/* 抽屉式大弹窗（从底部滑入） */
+.drawer-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-end;
+  background:rgba(0,0,0,.45);opacity:0;animation:fadeIn .2s forwards}
+.drawer{width:100%;height:78%;min-height:400px;
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translateY(100%);animation:slideUp .3s cubic-bezier(.2,.8,.2,1) forwards;
+  box-shadow:0 -8px 40px rgba(0,0,0,.4);border-radius:18px 18px 0 0}
+@keyframes slideUp{to{transform:translateY(0)}}
+.drawer-header{display:flex;align-items:center;padding:18px 24px 14px;flex-shrink:0;gap:12px}
+.drawer-header h2{margin:0;flex:1;font-size:16px;font-weight:700}
+.drawer-body{flex:1;display:flex;gap:20px;padding:0 24px 18px;overflow:hidden;min-height:0}
+.drawer-footer{display:flex;align-items:center;gap:8px;padding:12px 24px 16px;flex-shrink:0}
+.calendar-nav{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.calendar-nav .nav-btn{font-size:15px;font-weight:700;padding:4px 10px;border-radius:8px;cursor:pointer;background:none;border:1px solid rgba(255,255,255,.12)}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.calendar-grid .weekday{font-size:11px;text-align:center;padding:4px 0}
+.calendar-grid .day{font-size:12px;text-align:center;padding:7px 4px;border-radius:8px;cursor:pointer;transition:.2s}
+.calendar-grid .day:hover{background:rgba(255,255,255,.12)}
+.calendar-grid .day.other{opacity:.35}
+.calendar-grid .day.today{outline:1.5px solid #8a93b0}
+.calendar-grid .day.selected{background:#4f7df9;color:#fff}
+.calendar-grid .day.completed{background:#4caf7d;color:#fff}
+.report-stats{margin-bottom:8px}
+.report-stats .total{font-size:14px;font-weight:700;color:#4caf7d;margin-bottom:4px}
+.report-stats .stat-line{font-size:12px;margin-bottom:2px}
+.report-table{flex:1;overflow-y:auto;min-height:0}
+.report-table table{width:100%;border-collapse:collapse;font-size:12px}
+.report-table th{padding:7px 8px;text-align:left;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1)}
+.report-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+.report-table tr:hover{background:rgba(255,255,255,.04)}
+.report-table tr:nth-child(even){background:rgba(255,255,255,.02)}
+
+/* 主题切换时弹窗背景色适配 */
+body.midnight .modal{background:rgba(28,33,56,.97);color:#eef0fb}
+body.midnight .modal input,.midnight .modal textarea{background:#232738;color:#eef0fb}
+body.frost .modal{background:rgba(244,247,251,.97);color:#2c3242}
+body.frost .modal input,.frost .modal textarea{background:#fff;color:#2c3242;border-color:#d6dcea}
+body.frost .modal .radio-option.selected{border-color:rgba(123,155,210,.7);background:rgba(123,155,210,.15)}
+body.neon .modal{background:rgba(10,16,34,.97);color:#e8f2ff}
+body.neon .modal input,.neon .modal textarea{background:#0d1428;color:#e8f2ff;border-color:rgba(0,229,255,.2)}
+body.neon .modal .radio-option.selected{border-color:rgba(0,229,255,.7);background:rgba(0,229,255,.15)}
+body.paper .modal{background:rgba(251,246,232,.97);color:#3d3a33}
+body.paper .modal input,.paper .modal textarea{background:#fff;color:#3d3a33;border-color:#d8cfb4}
+body.paper .modal .radio-option.selected{border-color:rgba(178,58,46,.7);background:rgba(178,58,46,.12)}
+
+/* 抽屉主题适配 */
+body.midnight .drawer{background:rgba(20,24,48,.97);color:#eef0fb}
+body.midnight .drawer-header{border-bottom:1px solid rgba(255,255,255,.08)}
+body.midnight .report-table th{background:rgba(255,255,255,.06)}
+body.frost .drawer{background:rgba(244,247,251,.97);color:#2c3242}
+body.frost .drawer-header{border-bottom:1px solid rgba(0,0,0,.08)}
+body.frost .report-table th{background:#e9eef6}
+body.frost .calendar-grid .day:hover{background:rgba(0,0,0,.06)}
+body.neon .drawer{background:rgba(10,16,34,.97);color:#e8f2ff}
+body.neon .drawer-header{border-bottom:1px solid rgba(0,229,255,.12)}
+body.neon .report-table th{background:rgba(0,229,255,.06)}
+body.neon .calendar-grid .day.completed{background:#3dffa2;color:#02121a}
+body.neon .report-stats .total{color:#3dffa2}
+body.paper .drawer{background:rgba(251,246,232,.97);color:#3d3a33}
+body.paper .drawer-header{border-bottom:1px solid rgba(150,138,110,.2)}
+body.paper .report-table th{background:#ede4cd}
+body.paper .calendar-grid .day.selected{background:#b23a2e;color:#fdf6e8}
+body.paper .report-stats .total{color:#5f8c6b}
+</style>
+</head>
+<body class="midnight">
+<div class="orb a"></div>
+<div class="orb b"></div>
+<div class="blob a" style="display:none"></div>
+<div class="blob b" style="display:none"></div>
+<div class="blob c" style="display:none"></div>
+<div class="grid-bg" style="display:none"></div>
+<div class="leaf a" style="display:none"></div>
+<div class="leaf b" style="display:none"></div>
+
+<div class="widget" id="widget">
+  <div class="thread" style="display:none"></div>
+  <header>
+    <h1 style="display:flex;align-items:center;gap:8px">
+      <svg width="20" height="20" viewBox="0 0 20 20" style="flex-shrink:0">
+        <rect x="1" y="1" width="8" height="8" rx="2" fill="#e5533c"/>
+        <rect x="11" y="1" width="8" height="8" rx="2" fill="#e8912d"/>
+        <rect x="1" y="11" width="8" height="8" rx="2" fill="#3f7fd9"/>
+        <rect x="11" y="11" width="8" height="8" rx="2" fill="#4caf7d"/>
+      </svg>
+      <span>四象</span>
+    </h1>
+    <div class="date"><span class="dot"></span><span id="today-date"></span></div>
+  </header>
+  <div class="grid" id="grid">
+    <div class="quad q1" data-quadrant="0">
+      <div class="q-head"><span class="tint"></span><span class="q-name">紧急且重要</span><span class="q-count" id="count-0">0</span><span class="q-add" data-action="add" data-q="0">＋</span></div>
+      <div class="q-tasks" id="tasks-0"></div>
+    </div>
+    <div class="quad q2" data-quadrant="1">
+      <div class="q-head"><span class="tint"></span><span class="q-name">紧急不重要</span><span class="q-count" id="count-1">0</span><span class="q-add" data-action="add" data-q="1">＋</span></div>
+      <div class="q-tasks" id="tasks-1"></div>
+    </div>
+    <div class="quad q3" data-quadrant="2">
+      <div class="q-head"><span class="tint"></span><span class="q-name">不紧急重要</span><span class="q-count" id="count-2">0</span><span class="q-add" data-action="add" data-q="2">＋</span></div>
+      <div class="q-tasks" id="tasks-2"></div>
+    </div>
+    <div class="quad q4" data-quadrant="3">
+      <div class="q-head"><span class="tint"></span><span class="q-name">不紧急不重要</span><span class="q-count" id="count-3">0</span><span class="q-add" data-action="add" data-q="3">＋</span></div>
+      <div class="q-tasks" id="tasks-3"></div>
+    </div>
+  </div>
+  <footer>
+    <button class="btn primary" data-action="add-task">＋ 新建任务</button>
+    <button class="btn report" data-action="report">日报</button>
+    <span class="spacer"></span>
+    <button class="btn icon-btn" data-action="settings" title="设置">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+    <button class="btn icon-btn" id="lock-btn" data-action="lock" title="锁定">
+      <svg id="lock-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </button>
+    <button class="btn icon-btn" data-action="quit" title="退出">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/>
+      </svg>
+    </button>
+  </footer>
+</div>
+
+<script>
+/* ================================================================
+   pywebview API 桥
+   ================================================================ */
+let api = null;
+const QUADRANT_NAMES = ['紧急且重要','紧急不重要','不紧急重要','不紧急不重要'];
+const QUADRANT_COLORS = ['#e5533c','#e8912d','#3f7fd9','#4caf7d'];
+const WEEKDAYS = ['周一','周二','周三','周四','周五','周六','周日'];
+const THEME_BACKGROUNDS = {
+  midnight: { orbs: true, blobs: false, grid: false, leaves: false, thread: false },
+  frost:    { orbs: false, blobs: true,  grid: false, leaves: false, thread: false },
+  neon:     { orbs: true,  blobs: false, grid: true,  leaves: false, thread: false },
+  paper:    { orbs: false, blobs: false, grid: false, leaves: true,  thread: true  }
+};
+
+window.addEventListener('pywebviewready', async () => {
+  api = window.pywebview.api;
+  applyDate();
+  const st = await api.get_settings();
+  isLocked = st.locked === '1';
+  updateLockUI();
+  applyTheme(st.theme || 'midnight');
+  await refreshAll();
+});
+
+function applyDate() {
+  const d = new Date();
+  document.getElementById('today-date').textContent =
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v3.0`;
+}
+
+/* ================================================================
+   主题切换
+   ================================================================ */
+function applyTheme(theme) {
+  document.body.className = theme;
+  const bg = THEME_BACKGROUNDS[theme] || THEME_BACKGROUNDS.midnight;
+  document.querySelectorAll('.orb').forEach(el => el.style.display = bg.orbs ? '' : 'none');
+  document.querySelectorAll('.blob').forEach(el => el.style.display = bg.blobs ? '' : 'none');
+  document.querySelectorAll('.grid-bg').forEach(el => el.style.display = bg.grid ? '' : 'none');
+  document.querySelectorAll('.leaf').forEach(el => el.style.display = bg.leaves ? '' : 'none');
+  const thread = document.querySelector('.thread');
+  if (thread) thread.style.display = bg.thread ? '' : 'none';
+}
+
+/* ================================================================
+   渲染
+   ================================================================ */
+async function refreshAll() {
+  if (!api) return;
+  const tasks = await api.get_active_tasks();
+  const byQ = {0:[],1:[],2:[],3:[]};
+  tasks.forEach(t => { if (byQ[t.quadrant]) byQ[t.quadrant].push(t); });
+  for (let q = 0; q < 4; q++) renderQuadrant(q, byQ[q]);
+}
+
+function renderQuadrant(q, tasks) {
+  const container = document.getElementById(`tasks-${q}`);
+  document.getElementById(`count-${q}`).textContent = tasks.length;
+  container.innerHTML = tasks.map(t => {
+    const tags = parseTags(t.tag);
+    const tagHTML = tags.slice(0,2).map(tg => `<span class="tag">${esc(tg)}</span>`).join('')
+      + (tags.length > 2 ? `<span class="tag">+${tags.length-2}</span>` : '');
+    return `<div class="task" draggable="true" data-id="${t.id}" data-quadrant="${q}"
+      ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" onclick="openDetail(${t.id})">
+      <span class="cb" onclick="event.stopPropagation();completeTask(${t.id},this)"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+      <span class="t-title">${esc(t.title)}</span>
+      ${tagHTML ? `<div class="tags">${tagHTML}</div>` : ''}
+    </div>`;
+  }).join('');
+  container.parentElement.ondragover = e => e.preventDefault();
+  container.parentElement.ondrop = e => onDrop(e, q);
+}
+
+function parseTags(raw) {
+  if (!raw || !raw.trim()) return [];
+  try { const a = JSON.parse(raw); return Array.isArray(a) ? a.filter(x => String(x).trim()).map(String) : [raw]; }
+  catch { return [raw]; }
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ================================================================
+   拖拽
+   ================================================================ */
+let dragId = null;
+function onDragStart(e) {
+  dragId = e.currentTarget.dataset.id;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragId);
+}
+function onDragEnd(e) { e.currentTarget.classList.remove('dragging'); dragId = null; }
+async function onDrop(e, q) {
+  e.preventDefault();
+  const id = dragId || e.dataTransfer.getData('text/plain');
+  if (!id) return;
+  await api.set_quadrant(parseInt(id), q);
+  await refreshAll();
+}
+document.querySelectorAll('.quad').forEach(el => {
+  el.addEventListener('dragover', e => e.preventDefault());
+  el.addEventListener('drop', e => onDrop(e, parseInt(el.dataset.quadrant)));
+});
+
+/* ================================================================
+   任务操作
+   ================================================================ */
+async function completeTask(id, el) {
+  el.classList.add('checked');
+  await api.complete_task(id);
+  setTimeout(refreshAll, 250);
+}
+
+async function deleteTask(id, title) {
+  if (!confirm(`确定删除「${title}」？`)) return;
+  await api.delete_task(id);
+  await refreshAll();
+}
+
+async function deleteReportTask(id, title) {
+  if (!confirm(`确定删除「${title}」？`)) return;
+  await api.delete_task(id);
+  // 刷新日报内容和日历标记
+  completedDatesCache = await api.get_completed_dates();
+  loadReportDay(fmtDate(reportDate));
+}
+
+async function openEdit(id) {
+  const t = await api.get_task(id);
+  if (!t) return;
+  const tags = parseTags(t.tag);
+  showModal('编辑任务', `
+    <label>标题</label><input id="edit-title" maxlength="80" value="${esc(t.title)}">
+    <label>描述</label><textarea id="edit-desc">${esc(t.description)}</textarea>
+    <label>标签（多个用逗号或空格分隔）</label><input id="edit-tags" value="${esc(tags.join(' '))}">
+    <label>所属象限</label>
+    <div class="radio-group" id="edit-quads">
+      ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===t.quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
+        <span style="width:8px;height:8px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
+    </div>`,
+    [{text:'取消',action:'close'},{text:'保存',action:'submit',primary:true,handler:async()=>{
+      try {
+        const title = document.getElementById('edit-title').value.trim();
+        if (!title) { alert('任务标题不能为空'); return; }
+        const desc = document.getElementById('edit-desc').value.trim();
+        const rawTags = document.getElementById('edit-tags').value;
+        const tags = rawTags.split(/[,，;；、\s]+/).filter(x=>x.trim());
+        const quad = parseInt(document.querySelector('#edit-quads .selected')?.dataset.v ?? '0');
+        await api.update_task(id, title, desc, JSON.stringify([...new Set(tags)]), quad);
+        closeModal(); refreshAll();
+      } catch(err) { alert('保存失败: ' + err.message); }
+    }}]);
+  setTimeout(() => document.getElementById('edit-title').focus(), 100);
+}
+
+/* ================================================================
+   新建任务
+   ================================================================ */
+function openAdd(quadrant = 0) {
+  showModal('新建任务', `
+    <label>标题 *</label><input id="dlg-title" maxlength="80" placeholder="短文本标题">
+    <label>描述</label><textarea id="dlg-desc" placeholder="补充任务描述"></textarea>
+    <label>标签（多个用逗号或空格分隔）</label><input id="dlg-tags" placeholder="工作 个人">
+    <div class="hint">支持多个标签，用逗号或空格分隔，例如：工作 个人</div>
+    <label>所属象限</label>
+    <div class="radio-group" id="dlg-quads">
+      ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
+        <span style="width:8px;height:8px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
+    </div>`,
+    [{text:'取消',action:'close'},{text:'添加',action:'submit',primary:true,handler:async()=>{
+      try {
+        const title = document.getElementById('dlg-title').value.trim();
+        if (!title) { alert('任务标题不能为空'); return; }
+        const desc = document.getElementById('dlg-desc').value.trim();
+        const rawTags = document.getElementById('dlg-tags').value;
+        const tags = rawTags.split(/[,，;；、\s]+/).filter(x=>x.trim());
+        const quad = parseInt(document.querySelector('#dlg-quads .selected')?.dataset.v ?? '0');
+        if (!api) { alert('系统未就绪，请稍后重试'); return; }
+        await api.add_task(title, desc, JSON.stringify([...new Set(tags)]), quad);
+        closeModal(); refreshAll();
+      } catch(err) { alert('保存失败: ' + err.message); console.error(err); }
+    }}]);
+  setTimeout(() => document.getElementById('dlg-title').focus(), 100);
+}
+
+function selectRadio(el) {
+  el.parentElement.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+/* ================================================================
+   任务详情
+   ================================================================ */
+async function openDetail(id) {
+  const t = await api.get_task(id);
+  if (!t) return;
+  const tags = parseTags(t.tag);
+  const qColor = QUADRANT_COLORS[t.quadrant] || '#8a93b0';
+  const qName = QUADRANT_NAMES[t.quadrant] || `象限${t.quadrant}`;
+  showModal('任务详情', `
+    <h2 style="font-size:16px;margin:0 0 14px">${esc(t.title)}</h2>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="width:8px;height:8px;border-radius:50%;background:${qColor};display:inline-block"></span>
+      <span style="font-size:11px">${qName}</span>
+      ${tags.map(tg => `<span class="tag">${esc(tg)}</span>`).join('')}
+    </div>
+    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 16px;margin-bottom:14px">
+      <div style="font-size:11px;margin-bottom:6px">任务描述</div>
+      <div style="font-size:12.5px;line-height:1.6">${esc(t.description) || '（无描述）'}</div>
+    </div>
+    <div style="font-size:12px;margin-bottom:4px">创建时间：${esc(t.created_at)}</div>
+    ${t.completed_at ? `<div style="font-size:12px">完成归档：${esc(t.completed_at)}</div>` :
+      '<div style="font-size:12px">状态：进行中</div>'}`,
+    [{icon:'edit',action:'noop',handler:()=>{closeModal();openEdit(t.id)}},
+     {icon:'delete',action:'noop',handler:()=>{closeModal();deleteTask(t.id,t.title)}},
+     {icon:'close',action:'close'}]);
+}
+
+/* ================================================================
+   设置
+   ================================================================ */
+async function openSettings() {
+  const st = await api.get_settings();
+  const mode = st.window_mode || 'topmost';
+  const theme = st.theme || 'midnight';
+  showModal('设置', `
+    <label>窗口模式</label>
+    <div class="radio-group" id="set-modes">
+      ${[{k:'desktop',n:'固定桌面',d:'无边框、不置顶'},{k:'topmost',n:'置顶最前',d:'无边框，悬浮所有应用之上'},
+        {k:'normal',n:'普通窗口',d:'系统标题栏'}].map(m =>
+        `<div class="radio-option${m.k===mode?' selected':''}" data-v="${m.k}" onclick="selectRadio(this)">
+          <div><div style="font-weight:600;font-size:12.5px">${m.n}</div><div style="font-size:10.5px">${m.d}</div></div></div>`
+      ).join('')}
+    </div>
+    <label>主题外观</label>
+    <div class="radio-group" id="set-themes">
+      ${[{k:'midnight',n:'午夜玻璃',d:'深色玻璃质感'},{k:'frost',n:'雾白冰川',d:'明亮磨砂玻璃'},
+        {k:'neon',n:'霓虹网格',d:'霓虹描边辉光'},{k:'paper',n:'晨雾纸墨',d:'纸张质感朱砂'}].map(t =>
+        `<div class="radio-option${t.k===theme?' selected':''}" data-v="${t.k}" onclick="selectRadio(this)">
+          <div><div style="font-weight:600;font-size:12.5px">${t.n}</div><div style="font-size:10.5px">${t.d}</div></div></div>`
+      ).join('')}
+    </div>`,
+    [{text:'取消',action:'close'},{text:'确定',action:'submit',primary:true,handler:async()=>{
+      const newMode = document.querySelector('#set-modes .selected')?.dataset.v;
+      const newTheme = document.querySelector('#set-themes .selected')?.dataset.v;
+      await api.save_settings({window_mode: newMode, theme: newTheme});
+      if (newTheme) applyTheme(newTheme);
+      closeModal();
+      // 窗口模式切换由 Python 端关闭窗口并重启，无需 JS reload
+    }}]);
+}
+
+/* ================================================================
+   日报
+   ================================================================ */
+let reportDate = new Date();
+let completedDatesCache = [];
+
+async function openReport() {
+  completedDatesCache = await api.get_completed_dates();
+  reportDate = new Date();
+  renderReportDrawer();
+}
+
+function closeDrawer() {
+  const d = document.getElementById('drawer-overlay');
+  if (d) d.remove();
+}
+
+function renderReportDrawer() {
+  closeDrawer();
+  const y = reportDate.getFullYear(), m = reportDate.getMonth();
+  const sel = fmtDate(reportDate);
+  const today = fmtDate(new Date());
+
+  const overlay = document.createElement('div');
+  overlay.id = 'drawer-overlay';
+  overlay.className = 'drawer-overlay';
+  overlay.onclick = e => { if (e.target === overlay) closeDrawer(); };
+
+  overlay.innerHTML = `
+    <div class="drawer" onclick="event.stopPropagation()">
+      <div class="drawer-header">
+        <h2>📋 日报</h2>
+        <span style="font-size:12px;color:#8a93b0">绿色日期有完成记录</span>
+        <span style="flex:1"></span>
+        <button class="btn" onclick="drawerExportDay()" style="padding:5px 12px;font-size:11px">导出当日</button>
+        <button class="btn" onclick="drawerExportRange()" style="padding:5px 12px;font-size:11px">导出范围</button>
+      </div>
+      <div class="drawer-body">
+        <div class="report-left">
+          <div class="calendar-nav">
+            <button class="nav-btn" onclick="calPrev()">‹</button>
+            <span style="flex:1;text-align:center;font-weight:700">${y} 年 ${m+1} 月</span>
+            <button class="nav-btn" onclick="calNext()">›</button>
+          </div>
+          <div class="calendar-grid" id="cal-grid">
+            ${'一二三四五六日'.split('').map(d => `<div class="weekday">${d}</div>`).join('')}
+            ${buildCalendarCells(y, m, sel, today)}
+          </div>
+        </div>
+        <div class="report-right">
+          <div id="report-content" style="flex:1;overflow-y:auto;min-height:0"></div>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  loadReportDay(sel);
+}
+
+function buildCalendarCells(y, m, sel, today) {
+  const first = new Date(y, m, 1);
+  const offset = (first.getDay() + 6) % 7;
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  let html = '';
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(y, m, 1 - offset + i);
+    const ds = fmtDate(d);
+    const inMonth = d.getMonth() === m;
+    if (!inMonth && (i - offset >= daysInMonth || i < offset)) { html += `<div class="day" style="visibility:hidden">0</div>`; continue; }
+    const cls = ['day'];
+    if (!inMonth) cls.push('other');
+    if (ds === today) cls.push('today');
+    if (ds === sel) cls.push('selected');
+    if (completedDatesCache.includes(ds)) cls.push('completed');
+    html += `<div class="${cls.join(' ')}" onclick="selectReportDay('${ds}')">${d.getDate()}</div>`;
+  }
+  return html;
+}
+
+function selectReportDay(ds) { reportDate = parseDate(ds); renderReportDrawer(); }
+
+async function loadReportDay(ds) {
+  const tasks = await api.get_completed_tasks(ds);
+  const stats = {total:tasks.length, byQ:[0,0,0,0], byTag:{}};
+  tasks.forEach(t => { stats.byQ[t.quadrant]++; (parseTags(t.tag)||['（无标签）']).forEach(tg => stats.byTag[tg]=(stats.byTag[tg]||0)+1); });
+  const el = document.getElementById('report-content');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="report-stats">
+      <div class="total">${ds} 日报 · 完成 ${stats.total} 个任务</div>
+      <div class="stat-line">按象限：${stats.byQ.map((c,i) => c?`${QUADRANT_NAMES[i]}：${c}`:'').filter(Boolean).join('、')||'无'}</div>
+      <div class="stat-line">按标签：${Object.entries(stats.byTag).sort((a,b)=>b[1]-a[1]).map(([t,c])=>`${t}：${c}`).join('、')||'无'}</div>
+    </div>
+    <div class="report-table"><table>
+      <thead><tr><th>完成时间</th><th>标题</th><th>标签</th><th>象限</th><th>描述</th><th style="width:80px;text-align:center">操作</th></tr></thead>
+      <tbody>${tasks.map(t=>`<tr>
+        <td>${esc(t.completed_at)}</td>
+        <td>${esc(t.title)}</td>
+        <td>${esc(parseTags(t.tag).join('、'))}</td>
+        <td>${esc(QUADRANT_NAMES[t.quadrant])}</td>
+        <td>${esc(t.description)}</td>
+        <td style="text-align:center;white-space:nowrap">
+          <span class="icon-btn-sm" onclick="openEdit(${t.id})" title="编辑">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </span>
+          <span class="icon-btn-sm danger" onclick="deleteReportTask(${t.id},'${esc(t.title).replace(/'/g,"\\'")}')" title="删除">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          </span>
+        </td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+}
+
+function calPrev() { reportDate = new Date(reportDate.getFullYear(), reportDate.getMonth()-1, 1); renderReportDrawer(); }
+function calNext() { reportDate = new Date(reportDate.getFullYear(), reportDate.getMonth()+1, 1); renderReportDrawer(); }
+
+async function drawerExportDay() {
+  const ds = fmtDate(reportDate);
+  const files = await api.export_day(ds);
+  alert(files.length ? `已生成 ${files.length} 个文件：\n${files.slice(0,6).join('\n')}` : `${ds} 没有已完成任务`);
+}
+
+async function drawerExportRange() {
+  const start = prompt('开始日期（YYYY-MM-DD）', fmtDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
+  if (!start) return;
+  const end = prompt('结束日期（YYYY-MM-DD）', fmtDate(new Date()));
+  if (!end) return;
+  const files = await api.export_range(start, end);
+  alert(files.length ? `已生成 ${files.length} 个文件` : '该范围内没有可导出的记录');
+}
+
+/* ================================================================
+   设置操作
+   ================================================================ */
+let isLocked = false;
+
+function updateLockUI() {
+  const btn = document.getElementById('lock-btn');
+  if (!btn) return;
+  btn.title = isLocked ? '已锁定' : '锁定';
+  // 切换锁图标：锁定=闭锁，解锁=开锁
+  const icon = document.getElementById('lock-icon');
+  if (icon) {
+    icon.innerHTML = isLocked
+      ? '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>'
+      : '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+  }
+  // 锁定时禁止整个窗口拖动
+  const widget = document.getElementById('widget');
+  if (widget) {
+    widget.style.webkitAppRegion = isLocked ? 'no-drag' : '';
+  }
+}
+
+async function toggleLock() {
+  isLocked = !isLocked;
+  updateLockUI();
+  await api.save_settings({locked: isLocked ? '1' : '0'});
+}
+
+async function quitApp() { await api.quit(); }
+
+/* ================================================================
+   弹窗系统
+   ================================================================ */
+const ICON_SVGS = {
+  edit: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  delete: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
+  close: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+};
+
+function showModal(title, bodyHTML, buttons=[], opts={}) {
+  let overlay = document.getElementById('modal-overlay');
+  if (overlay) overlay.remove();
+  overlay = document.createElement('div');
+  overlay.id = 'modal-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.onclick = e => { if (e.target === overlay) closeModal(); };
+  const btnsHTML = buttons.map(b => {
+    if (b.icon) {
+      const cls = `icon-btn-sm${b.icon==='delete'?' danger':''}`;
+      return `<span class="${cls}" data-icon="${b.icon}">${ICON_SVGS[b.icon]||''}</span>`;
+    }
+    return `<button class="btn${b.primary?' primary':''}">${b.text||''}</button>`;
+  }).join('');
+  overlay.innerHTML = `<div class="modal${opts.wide?' report-modal-wrap':''}" style="${opts.wide?'width:400px;max-width:94vw;height:600px;max-height:88vh':''}">
+    <div style="display:flex;align-items:center;margin-bottom:16px"><h2 style="margin:0;flex:1">${title}</h2></div>
+    <div class="modal-body">${bodyHTML}</div>
+    <div class="actions">${btnsHTML}</div>
+  </div>`;
+  document.body.appendChild(overlay);
+  const btnEls = overlay.querySelectorAll('.actions .btn, .actions .icon-btn-sm');
+  btnEls.forEach((el, i) => {
+    const b = buttons[i];
+    el.onclick = async () => { if (b.handler) await b.handler(); if (b.action === 'close') closeModal(); };
+  });
+}
+function closeModal() { const o = document.getElementById('modal-overlay'); if (o) o.remove(); }
+
+/* 工具 */
+function fmtDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function parseDate(s) { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); }
+
+/* ================================================================
+   窗口边缘拖拽调整大小
+   ================================================================ */
+const RESIZE_EDGE = 6;
+const MIN_W = 600, MIN_H = 450;
+let resizing = null;
+
+function getResizeDir(e) {
+  const w = window.innerWidth, h = window.innerHeight;
+  const x = e.clientX, y = e.clientY;
+  let dir = '';
+  if (y < RESIZE_EDGE) dir += 'n';
+  else if (y > h - RESIZE_EDGE) dir += 's';
+  if (x < RESIZE_EDGE) dir += 'w';
+  else if (x > w - RESIZE_EDGE) dir += 'e';
+  return dir;
+}
+
+const CURSOR_MAP = {
+  'n':'ns-resize','s':'ns-resize','e':'ew-resize','w':'ew-resize',
+  'ne':'nesw-resize','sw':'nesw-resize','nw':'nwse-resize','se':'nwse-resize'
+};
+
+document.addEventListener('mousemove', e => {
+  if (resizing) {
+    const dx = e.screenX - resizing.sx;
+    const dy = e.screenY - resizing.sy;
+    let w = resizing.ow, h = resizing.oh;
+    if (resizing.dir.includes('e')) w = resizing.ow + dx;
+    if (resizing.dir.includes('s')) h = resizing.oh + dy;
+    if (resizing.dir.includes('w')) w = resizing.ow - dx;
+    if (resizing.dir.includes('n')) h = resizing.oh - dy;
+    w = Math.max(MIN_W, w);
+    h = Math.max(MIN_H, h);
+    if (api) api.resize(w, h);
+    e.preventDefault();
+    return;
+  }
+  const dir = getResizeDir(e);
+  document.body.style.cursor = dir ? (CURSOR_MAP[dir] || '') : '';
+});
+
+document.addEventListener('mousedown', e => {
+  const dir = getResizeDir(e);
+  if (!dir || e.button !== 0) return;
+  resizing = {
+    dir, sx: e.screenX, sy: e.screenY,
+    ow: window.innerWidth, oh: window.innerHeight
+  };
+  e.preventDefault();
+});
+
+document.addEventListener('mouseup', () => {
+  if (resizing) resizing = null;
+});
+
+/* ================================================================
+   事件委托（替代 inline onclick，避免 CSP 问题）
+   ================================================================ */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.dataset.action;
+  if (action === 'add') openAdd(parseInt(el.dataset.q) || 0);
+  else if (action === 'add-task') openAdd();
+  else if (action === 'report') openReport();
+  else if (action === 'settings') openSettings();
+  else if (action === 'lock') toggleLock();
+  else if (action === 'quit') quitApp();
+});
+
+/* 键盘 Esc */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>

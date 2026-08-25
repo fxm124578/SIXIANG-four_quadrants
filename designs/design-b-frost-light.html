@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案 B · 雾白冰川 Frost Light</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2c3242; --muted:#8d94a8;
+    --glass:rgba(255,255,255,.62); --stroke:rgba(255,255,255,.75);
+    --q1:#e2867d; --q2:#e8b26f; --q3:#8aa6d8; --q4:#8fc7a6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:26px;overflow:hidden;position:relative;
+    font-family:"Noto Sans SC",sans-serif;color:var(--ink);
+    background:linear-gradient(150deg,#eef2f8 0%,#dfe7f2 45%,#e8e4ee 100%);
+  }
+  /* 背景柔和色块 */
+  .blob{position:absolute;border-radius:44% 56% 60% 40%/48% 42% 58% 52%;filter:blur(80px);opacity:.55;animation:morph 16s ease-in-out infinite alternate}
+  .blob.a{width:420px;height:380px;background:#f6cfd0;top:-90px;left:6%}
+  .blob.b{width:380px;height:340px;background:#cfe0f2;bottom:-80px;right:8%;animation-delay:-7s}
+  .blob.c{width:260px;height:260px;background:#d9e8cf;top:40%;left:18%;opacity:.45;animation-delay:-3s}
+  @keyframes morph{from{border-radius:44% 56% 60% 40%/48% 42% 58% 52%;transform:rotate(0)}to{border-radius:58% 42% 44% 56%/40% 58% 42% 60%;transform:rotate(14deg)}}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  .widget{
+    position:relative;width:432px;border-radius:24px;
+    background:var(--glass);backdrop-filter:blur(30px) saturate(160%);
+    -webkit-backdrop-filter:blur(30px) saturate(160%);
+    border:1px solid var(--stroke);
+    box-shadow:0 24px 60px -18px rgba(90,104,140,.35),inset 0 1px 0 rgba(255,255,255,.9),
+               inset 0 -1px 0 rgba(255,255,255,.4);
+    opacity:0;animation:rise .8s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  /* 玻璃左上高光 */
+  .widget::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;
+    background:linear-gradient(115deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 30%)}
+  @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+
+  .fake-bar{display:none;align-items:center;gap:6px;padding:8px 14px;background:rgba(255,255,255,.4);border-bottom:1px solid rgba(255,255,255,.7)}
+  .fake-bar span{font-size:11px;color:var(--muted);flex:1}
+  .fake-bar i{width:11px;height:11px;border-radius:50%;background:rgba(120,130,160,.35)}
+  .widget.mode-normal{border-radius:14px}
+  .widget.mode-normal .fake-bar{display:flex}
+  .widget.mode-topmost{box-shadow:0 30px 70px -16px rgba(90,104,140,.5),0 0 0 1px rgba(138,166,216,.6),inset 0 1px 0 rgba(255,255,255,.95)}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px}
+  h1{font-family:"LXGW WenKai",serif;font-weight:700;font-size:22px;letter-spacing:.1em}
+  .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4);box-shadow:0 0 6px rgba(143,199,166,.8)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px}
+  .quad{border-radius:17px;padding:12px 12px 10px;border:1px solid rgba(255,255,255,.8);transition:.25s}
+  .quad:hover{transform:translateY(-2px);box-shadow:0 10px 26px -12px rgba(90,104,140,.4)}
+  .q1{background:rgba(226,134,125,.13)}
+  .q2{background:rgba(232,178,111,.15)}
+  .q3{background:rgba(138,166,216,.14)}
+  .q4{background:rgba(143,199,166,.15)}
+  .q-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+  .q-head .tint{width:8px;height:8px;border-radius:50%}
+  .q1 .tint{background:var(--q1)}.q2 .tint{background:var(--q2)}
+  .q3 .tint{background:var(--q3)}.q4 .tint{background:var(--q4)}
+  .q-name{font-size:12.5px;font-weight:700;flex:1}
+  .q-count{font-size:11px;color:var(--muted)}
+  .q-add{width:22px;height:22px;border-radius:8px;display:grid;place-items:center;font-size:15px;
+    color:var(--muted);cursor:pointer;transition:.2s}
+  .q-add:hover{color:var(--ink);background:rgba(255,255,255,.75)}
+
+  .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:12px;
+    background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85);margin-bottom:6px;
+    cursor:pointer;transition:.22s;box-shadow:0 2px 8px -3px rgba(90,104,140,.18)}
+  .task:hover{background:rgba(255,255,255,.85);transform:translateX(2px)}
+  .task.done .t-title{color:var(--muted);text-decoration:line-through;opacity:.8}
+  .cb{width:16px;height:16px;border-radius:50%;border:1.6px solid #b6bccd;flex:none;
+    display:grid;place-items:center;background:#fff;transition:.22s}
+  .cb:hover{border-color:var(--q4)}
+  .cb svg{width:10px;height:10px;opacity:0;transform:scale(.4);transition:.22s cubic-bezier(.34,1.56,.64,1)}
+  .task.done .cb{background:var(--q4);border-color:var(--q4)}
+  .task.done .cb svg{opacity:1;transform:none}
+  .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#ece4f6;color:#7a6aa8;flex:none}
+  .tag.amber{background:#faeeda;color:#a8763a}
+
+  footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px}
+  .btn{font-size:12px;padding:7px 13px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.9);
+    background:rgba(255,255,255,.55);transition:.2s;user-select:none;box-shadow:0 2px 6px -2px rgba(90,104,140,.25)}
+  .btn:hover{background:#fff;transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(135deg,#8aa6d8,#7b9bd2);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 6px 16px -6px rgba(123,155,210,.7)}
+  .btn.report{background:rgba(143,199,166,.35);border-color:rgba(143,199,166,.8);color:#4e7d63}
+  .spacer{flex:1}
+  .grip{width:14px;height:14px;background:linear-gradient(135deg,transparent 46%,rgba(120,130,160,.5) 46%,rgba(120,130,160,.5) 54%,transparent 54%),
+    linear-gradient(135deg,transparent 30%,rgba(120,130,160,.35) 30%,rgba(120,130,160,.35) 38%,transparent 38%);cursor:se-resize}
+
+  .modes{display:flex;gap:8px;padding:6px;border-radius:15px;border:1px solid rgba(255,255,255,.9);
+    background:rgba(255,255,255,.55);backdrop-filter:blur(18px);font-size:12px;box-shadow:0 8px 24px -10px rgba(90,104,140,.35)}
+  .mode{padding:7px 14px;border-radius:10px;cursor:pointer;color:var(--muted);transition:.25s;user-select:none}
+  .mode:hover{color:var(--ink)}
+  .mode.active{color:var(--ink);background:#fff;box-shadow:0 3px 10px -3px rgba(90,104,140,.4)}
+  .hint{font-size:11.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+
+  <div class="widget" id="widget">
+    <div class="fake-bar"><i></i><i></i><i></i><span>四象 — 普通窗口模式</span></div>
+    <header>
+      <h1>四象</h1>
+      <div class="date"><span class="dot"></span><span id="today"></span></div>
+    </header>
+    <div class="grid">
+      <section class="quad q1">
+        <div class="q-head"><span class="tint"></span><span class="q-name">紧急且重要</span><span class="q-count">1</span><span class="q-add">＋</span></div>
+        <div class="task" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">今天下班前交周报</span><span class="tag">工作</span><span class="tag amber">高优</span>
+        </div>
+      </section>
+      <section class="quad q2">
+        <div class="q-head"><span class="tint"></span><span class="q-name">紧急不重要</span><span class="q-count">1</span><span class="q-add">＋</span></div>
+        <div class="task" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">回复行政邮件</span><span class="tag">沟通</span>
+        </div>
+      </section>
+      <section class="quad q3">
+        <div class="q-head"><span class="tint"></span><span class="q-name">不紧急重要</span><span class="q-count">2</span><span class="q-add">＋</span></div>
+        <div class="task" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">读《深度工作》第 3 章</span><span class="tag">成长</span><span class="tag">阅读</span>
+        </div>
+      </section>
+      <section class="quad q4">
+        <div class="q-head"><span class="tint"></span><span class="q-name">不紧急不重要</span><span class="q-count">1</span><span class="q-add">＋</span></div>
+        <div class="task done" onclick="this.classList.toggle('done')">
+          <span class="cb"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+          <span class="t-title">整理桌面壁纸</span><span class="tag">生活</span>
+        </div>
+      </section>
+    </div>
+    <footer>
+      <span class="btn primary">＋ 新建任务</span>
+      <span class="btn report">日报</span>
+      <span class="spacer"></span>
+      <span class="btn">设置</span>
+      <span class="btn">锁定</span>
+      <span class="btn">退出</span>
+      <span class="grip" title="拖拽调整大小"></span>
+    </footer>
+  </div>
+
+  <div class="modes" id="modes">
+    <span class="mode active" data-mode="topmost">置顶最前</span>
+    <span class="mode" data-mode="desktop">固定桌面</span>
+    <span class="mode" data-mode="normal">普通窗口</span>
+  </div>
+  <p class="hint">点击模式切换预览效果 · 点击任务勾选框体验完成动效</p>
+
+<script>
+  const w = ["周一","周二","周三","周四","周五","周六","周日"];
+  const d = new Date();
+  document.getElementById("today").textContent =
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${w[(d.getDay()+6)%7]}`;
+  document.getElementById("modes").addEventListener("click", e => {
+    const el = e.target.closest(".mode");
+    if (!el) return;
+    document.querySelectorAll(".mode").forEach(m => m.classList.remove("active"));
+    el.classList.add("active");
+    const widget = document.getElementById("widget");
+    widget.classList.remove("mode-normal", "mode-topmost", "mode-desktop");
+    widget.classList.add("mode-" + el.dataset.mode);
+  });
+</script>
+</body>
+</html>
