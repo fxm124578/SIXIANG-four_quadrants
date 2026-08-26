@@ -419,7 +419,7 @@ body.paper .switch input:checked + .slider{background:#b23a2e}
 .report-left{flex:0 0 280px;display:flex;flex-direction:column;overflow-y:auto}
 .report-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 /* 日报顶部日期导航 + 下拉日历 */
-.report-nav{position:relative;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.report-nav{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:8px;white-space:nowrap}
 .report-nav-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:inherit;cursor:pointer;transition:.2s;flex-shrink:0;-webkit-app-region:no-drag}
 .report-nav-btn:hover{background:rgba(255,255,255,.14);transform:translateY(-1px)}
 .report-nav-center{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:7px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.12);transition:.2s;user-select:none;-webkit-app-region:no-drag}
@@ -1017,7 +1017,7 @@ function renderReportDrawer() {
 
   overlay.innerHTML = `
     <div class="drawer" onclick="event.stopPropagation()">
-      <div class="drawer-header" style="gap:10px">
+      <div class="drawer-header" style="gap:10px;position:relative">
         <h2>📋 日报</h2>
         <div class="report-nav">
           <button class="report-nav-btn" onclick="reportPrev()" title="前一天">
@@ -1089,13 +1089,9 @@ function buildCalendarCells(y, m, sel, today) {
 
 function selectReportDay(ds) {
   reportDate = parseDate(ds);
-  reportCalendarOpen = false;
+  hideCalendar();
   updateReportNavDate();
   loadReportDay(ds);
-  const cal = document.getElementById('report-calendar');
-  const chevron = document.getElementById('cal-chevron');
-  if (cal) cal.style.display = 'none';
-  if (chevron) chevron.style.transform = '';
 }
 
 async function loadReportDay(ds) {
@@ -1142,6 +1138,13 @@ function calNext() {
   calMonth = total % 12;
   renderCalendar();
 }
+function hideCalendar() {
+  reportCalendarOpen = false;
+  const cal = document.getElementById('report-calendar');
+  const chevron = document.getElementById('cal-chevron');
+  if (cal) cal.style.display = 'none';
+  if (chevron) chevron.style.transform = '';
+}
 function toggleCalendar() {
   reportCalendarOpen = !reportCalendarOpen;
   const cal = document.getElementById('report-calendar');
@@ -1156,11 +1159,13 @@ function toggleCalendar() {
 }
 function reportPrev() {
   reportDate = new Date(reportDate.getFullYear(), reportDate.getMonth(), reportDate.getDate() - 1);
+  hideCalendar();
   updateReportNavDate();
   loadReportDay(fmtDate(reportDate));
 }
 function reportNext() {
   reportDate = new Date(reportDate.getFullYear(), reportDate.getMonth(), reportDate.getDate() + 1);
+  hideCalendar();
   updateReportNavDate();
   loadReportDay(fmtDate(reportDate));
 }
