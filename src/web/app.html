@@ -419,14 +419,21 @@ body.paper .switch input:checked + .slider{background:#b23a2e}
 .report-left{flex:0 0 280px;display:flex;flex-direction:column;overflow-y:auto}
 .report-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 /* 日报顶部日期导航 + 下拉日历 */
-.report-nav{display:flex;align-items:center;gap:8px}
+.report-nav{position:relative;display:flex;align-items:center;gap:8px}
+.report-nav-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:inherit;cursor:pointer;transition:.2s;flex-shrink:0;-webkit-app-region:no-drag}
+.report-nav-btn:hover{background:rgba(255,255,255,.14);transform:translateY(-1px)}
 .report-nav-center{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:7px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.12);transition:.2s;user-select:none;-webkit-app-region:no-drag}
 .report-nav-center:hover{background:rgba(255,255,255,.08)}
 .report-nav-center svg{transition:transform .2s}
 .report-date{font-size:13px;font-weight:700;letter-spacing:.03em}
-.report-calendar{border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;background:rgba(255,255,255,.04)}
-.report-calendar .calendar-grid{max-width:420px;margin:0 auto}
+/* 下拉日历：居中小悬浮窗 */
+.report-calendar{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);width:340px;z-index:30;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;background:rgba(20,24,48,.98);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+body.frost .report-calendar{background:rgba(244,247,251,.98);border-color:rgba(0,0,0,.1)}
+body.neon .report-calendar{background:rgba(10,16,34,.98)}
+body.paper .report-calendar{background:rgba(251,246,232,.98);border-color:rgba(150,138,110,.3)}
 body.frost .report-nav-center:hover,body.paper .report-nav-center:hover{background:rgba(0,0,0,.06)}
+body.frost .report-nav-btn,body.paper .report-nav-btn{border-color:rgba(0,0,0,.12);background:rgba(0,0,0,.05)}
+body.frost .report-nav-btn:hover,body.paper .report-nav-btn:hover{background:rgba(0,0,0,.1)}
 
 /* 抽屉式大弹窗（从底部滑入） */
 .drawer-overlay{position:fixed;inset:0;z-index:200;display:flex;align-items:flex-end;
@@ -1017,22 +1024,26 @@ function renderReportDrawer() {
       </div>
       <div class="drawer-body" style="flex-direction:column;gap:10px;padding-top:6px">
         <div class="report-nav">
-          <button class="nav-btn" onclick="reportPrev()" title="前一天">‹</button>
+          <button class="report-nav-btn" onclick="reportPrev()" title="前一天">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
           <div class="report-nav-center" onclick="toggleCalendar()" title="点击展开 / 收起日历">
             <span class="report-date">${sel} ${weekday}</span>
-            <svg id="cal-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:${reportCalendarOpen?'rotate(180deg)':''}"><path d="M6 9l6 6 6-6"/></svg>
+            <svg id="cal-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:${reportCalendarOpen?'rotate(180deg)':''}"><path d="M6 9l6 6 6-6"/></svg>
           </div>
-          <button class="nav-btn" onclick="reportNext()" title="后一天">›</button>
-        </div>
-        <div class="report-calendar" id="report-calendar" style="display:${reportCalendarOpen?'block':'none'}">
-          <div class="calendar-nav">
-            <button class="nav-btn" onclick="calPrev()">‹</button>
-            <span style="flex:1;text-align:center;font-weight:700">${y} 年 ${m+1} 月</span>
-            <button class="nav-btn" onclick="calNext()">›</button>
-          </div>
-          <div class="calendar-grid" id="cal-grid">
-            ${'一二三四五六日'.split('').map(d => `<div class="weekday">${d}</div>`).join('')}
-            ${buildCalendarCells(y, m, sel, today)}
+          <button class="report-nav-btn" onclick="reportNext()" title="后一天">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+          <div class="report-calendar" id="report-calendar" style="display:${reportCalendarOpen?'block':'none'}">
+            <div class="calendar-nav">
+              <button class="nav-btn" onclick="calPrev()">‹</button>
+              <span style="flex:1;text-align:center;font-weight:700">${y} 年 ${m+1} 月</span>
+              <button class="nav-btn" onclick="calNext()">›</button>
+            </div>
+            <div class="calendar-grid" id="cal-grid">
+              ${'一二三四五六日'.split('').map(d => `<div class="weekday">${d}</div>`).join('')}
+              ${buildCalendarCells(y, m, sel, today)}
+            </div>
           </div>
         </div>
         <div id="report-content" style="flex:1;overflow-y:auto;min-height:0"></div>
