@@ -729,7 +729,7 @@ function openAdd(quadrant = 0) {
         <span class="icon-btn-sm" onclick="closeDrawer()" title="关闭">${ICON_SVGS.close}</span>
       </div>
       <div class="drawer-body" style="gap:22px">
-        <div style="flex:1.15;display:flex;flex-direction:column;min-width:0">
+        <div style="flex:3;display:flex;flex-direction:column;min-width:0">
           <label>标题 *</label>
           <input id="dlg-title" maxlength="80" style="margin-bottom:12px">
           <label>描述</label>
@@ -740,7 +740,7 @@ function openAdd(quadrant = 0) {
         </div>
         <div style="flex:1;display:flex;flex-direction:column;min-width:0">
           <label>所属象限</label>
-          <div class="radio-group" id="dlg-quads" style="grid-template-columns:1fr 1fr;align-content:start;margin-bottom:0">
+          <div class="radio-group" id="dlg-quads" style="grid-template-columns:1fr;align-content:start;margin-bottom:0">
             ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
               <span style="width:9px;height:9px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
           </div>
