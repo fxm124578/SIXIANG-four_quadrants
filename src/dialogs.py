@@ -5,11 +5,13 @@
 from __future__ import annotations
 
 import re
+import threading
 import tkinter as tk
 from datetime import date, timedelta
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
+import autostart
 from db import Database
 from models import QUADRANTS, Task, quadrant_name, tags_to_raw
 from report import (
@@ -727,6 +729,23 @@ class SettingsDialog(ModalDialog):
             tk.Label(row, text=THEMES[key]["desc"], bg=T.bg, fg=T.muted,
                      font=font(10)).pack(side="left")
 
+        # ---- 开机自启动 ----
+        tk.Label(body, text="开机自启动", bg=T.bg, fg=T.title_text,
+                 font=font(13, bold=True)).pack(anchor="w", pady=(16, 8))
+        self.autostart_var = tk.BooleanVar(value=autostart.is_enabled())
+        row = tk.Frame(body, bg=T.bg)
+        row.pack(fill="x", pady=3)
+        cb = tk.Checkbutton(
+            row, text="登录 Windows 后自动启动四象",
+            variable=self.autostart_var, bg=T.bg, fg=T.text,
+            selectcolor=T.panel, activebackground=T.bg,
+            activeforeground=T.text, font=font(12), anchor="w",
+            highlightthickness=0, bd=0,
+        )
+        cb.pack(side="left")
+        tk.Label(row, text="写入注册表 HKCU Run，仅 Windows 生效", bg=T.bg,
+                 fg=T.muted, font=font(10)).pack(side="left", padx=(10, 0))
+
         btn_row = tk.Frame(self, bg=T.bg)
         btn_row.pack(fill="x", pady=(16, 0))
         flat_button(btn_row, "打开日报", bg=T.report_bg, fg=T.report_fg,
@@ -823,6 +842,7 @@ class SettingsDialog(ModalDialog):
         self._close()
 
     def _submit(self) -> None:
+        autostart.set_enabled(bool(self.autostart_var.get()))
         self.result = {
             "mode": str(self.mode_var.get()),
             "theme": str(self.theme_var.get()),

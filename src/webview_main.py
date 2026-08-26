@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional
 from db import Database
 from models import quadrant_name
 from report import build_report_stats, export_report, export_report_range
+import autostart
 import updater
 
 THIS_DIR = Path(__file__).resolve().parent
@@ -132,6 +133,15 @@ class JsApi:
     def quit(self) -> None:
         if self._window:
             self._window.destroy()
+
+    # --------------------------------------------------------------- 开机自启动
+    def get_autostart(self) -> bool:
+        """当前是否已注册开机自启动。"""
+        return autostart.is_enabled()
+
+    def set_autostart(self, enabled: bool) -> bool:
+        """开启 / 关闭开机自启动（写入 HKCU Run 注册表）。"""
+        return autostart.set_enabled(bool(enabled))
 
     # --------------------------------------------------------------- 更新
     def get_app_version(self) -> Dict[str, str]:

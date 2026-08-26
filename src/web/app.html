@@ -18,7 +18,7 @@ body.midnight{
   --q1:#ff6b5e;--q2:#ffab3d;--q3:#5b8cff;--q4:#3dd68c;
   width:100%;height:100%;margin:0;padding:0;overflow:hidden;
   position:relative;
-  font-family:"Noto Sans SC",sans-serif;color:var(--ink);
+  font-family:"Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);
   background:radial-gradient(1200px 800px at 18% 12%,#1a2050 0%,transparent 55%),
     radial-gradient(1000px 700px at 85% 88%,#0e2340 0%,transparent 60%),
     linear-gradient(160deg,var(--bg1),var(--bg0) 70%);
@@ -106,7 +106,7 @@ body.frost{
   --q1:#e2867d;--q2:#e8b26f;--q3:#8aa6d8;--q4:#8fc7a6;
   width:100%;height:100%;margin:0;padding:0;overflow:hidden;
   position:relative;
-  font-family:"Noto Sans SC",sans-serif;color:var(--ink);
+  font-family:"Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);
   background:linear-gradient(150deg,#eef2f8 0%,#dfe7f2 45%,#e8e4ee 100%);
 }
 body.frost .blob{position:absolute;border-radius:44% 56% 60% 40%/48% 42% 58% 52%;filter:blur(80px);opacity:.55;animation:morph 16s ease-in-out infinite alternate}
@@ -179,7 +179,7 @@ body.neon{
   --c1:#00e5ff;--c2:#ff4dd8;--c3:#ffe14d;--c4:#3dffa2;
   width:100%;height:100%;margin:0;padding:0;overflow:hidden;
   position:relative;
-  font-family:"Noto Sans SC",sans-serif;color:var(--ink);background:var(--bg);
+  font-family:"Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);background:var(--bg);
 }
 body.neon .grid-bg{position:fixed;inset:-40% -20%;pointer-events:none;
   background:
@@ -278,7 +278,7 @@ body.paper{
   --q1:#c2543f;--q2:#c9973a;--q3:#4d6b8c;--q4:#5f8c6b;--seal:#b23a2e;
   width:100%;height:100%;margin:0;padding:0;overflow:hidden;
   position:relative;
-  font-family:"Noto Serif SC",serif;color:var(--ink);
+  font-family:"Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);
   background:
     radial-gradient(900px 600px at 80% 12%,#f3e8cf 0%,transparent 60%),
     radial-gradient(700px 500px at 12% 90%,#e9e2cc 0%,transparent 55%),
@@ -319,7 +319,7 @@ body.paper .q3 .tint{border-color:var(--q3)}.body.paper .q4 .tint{border-color:v
 body.paper .q-name{font-size:13px;font-weight:700;flex:1;letter-spacing:.08em}
 body.paper .q-count{font-size:11px;color:var(--muted)}
 body.paper .q-add{width:22px;height:22px;display:grid;place-items:center;font-size:16px;color:var(--muted);
-  cursor:pointer;transition:.2s;font-family:"LXGW WenKai",serif}
+  cursor:pointer;transition:.2s}
 body.paper .q-add:hover{color:var(--seal);transform:scale(1.15)}
 body.paper .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:3px;
   background:rgba(255,255,255,.5);border:1px solid rgba(150,138,110,.2);margin-bottom:6px;cursor:pointer;transition:.2s}
@@ -388,6 +388,20 @@ body.paper .icon-btn-sm.danger:hover{background:rgba(255,80,80,.12)}
 .modal .radio-option.selected, .drawer .radio-option.selected{border-color:rgba(91,140,255,.7);background:rgba(91,140,255,.18)}
 .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 .modal .hint{font-size:11px;margin-bottom:8px}
+
+/* 字体统一：弹窗/抽屉内所有元素与正文一致。
+   input/textarea/select/button 默认不继承 body 字体，会显示成系统默认字体造成混杂 */
+.modal,.drawer,
+.modal input,.modal textarea,.modal select,.modal button,
+.drawer input,.drawer textarea,.drawer select,.drawer button,
+.modal label,.drawer label,.modal .radio-option,.drawer .radio-option,
+.modal h2,.drawer-header h2{
+  font-family:"Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif}
+/* 弹窗字号基线：字段标题与选项按钮协调一致 */
+.modal,.drawer{font-size:13px}
+.modal label,.drawer label{font-size:13px}
+.modal .radio-option,.drawer .radio-option{font-size:13px}
+.modal input,.modal textarea{font-size:13px}
 .report-modal{display:flex;gap:20px;height:100%;min-height:0}
 .report-left{flex:0 0 280px;display:flex;flex-direction:column;overflow-y:auto}
 .report-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
@@ -556,7 +570,7 @@ window.addEventListener('pywebviewready', async () => {
 function applyDate() {
   const d = new Date();
   document.getElementById('today-date').textContent =
-    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.0.2`;
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.0.3`;
 }
 
 /* ================================================================
@@ -662,7 +676,7 @@ async function openEdit(id) {
   showModal('编辑任务', `
     <label>标题</label><input id="edit-title" maxlength="80" value="${esc(t.title)}">
     <label>描述</label><textarea id="edit-desc">${esc(t.description)}</textarea>
-    <label>标签（多个用逗号或空格分隔）</label><input id="edit-tags" value="${esc(tags.join(' '))}">
+    <label>标签</label><input id="edit-tags" value="${esc(tags.join(' '))}">
     <label>所属象限</label>
     <div class="radio-group" id="edit-quads">
       ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===t.quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
@@ -688,9 +702,9 @@ async function openEdit(id) {
    ================================================================ */
 function openAdd(quadrant = 0) {
   showModal('新建任务', `
-    <label>标题 *</label><input id="dlg-title" maxlength="80" placeholder="短文本标题">
-    <label>描述</label><textarea id="dlg-desc" placeholder="补充任务描述"></textarea>
-    <label>标签（多个用逗号或空格分隔）</label><input id="dlg-tags" placeholder="工作 个人">
+    <label>标题 *</label><input id="dlg-title" maxlength="80">
+    <label>描述</label><textarea id="dlg-desc"></textarea>
+    <label>标签</label><input id="dlg-tags">
     <div class="hint">支持多个标签，用逗号或空格分隔，例如：工作 个人</div>
     <label>所属象限</label>
     <div class="radio-group" id="dlg-quads">
@@ -755,6 +769,8 @@ async function openSettings() {
   const theme = st.theme || 'midnight';
   let ver = '';
   try { ver = (await api.get_app_version()).version || ''; } catch(e) {}
+  let autoStart = false;
+  try { autoStart = await api.get_autostart(); } catch(e) {}
   clearUpdatePoll();
   closeDrawer();
   const overlay = document.createElement('div');
@@ -766,7 +782,7 @@ async function openSettings() {
     <div class="drawer" onclick="event.stopPropagation()">
       <div class="drawer-header">
         <h2>⚙️ 设置</h2>
-        <span style="font-size:12px;color:#8a93b0">窗口模式 / 主题 / 软件更新</span>
+        <span style="font-size:12px;color:#8a93b0">窗口模式 / 主题 / 开机自启动 / 软件更新</span>
       </div>
       <div class="drawer-body" style="flex-direction:column;gap:2px;overflow-y:auto">
         <label>窗口模式</label>
@@ -783,6 +799,13 @@ async function openSettings() {
             {k:'neon',n:'霓虹网格',d:'霓虹描边辉光'},{k:'paper',n:'晨雾纸墨',d:'纸张质感朱砂'}].map(t =>
             `<div class="radio-option${t.k===theme?' selected':''}" data-v="${t.k}" onclick="selectRadio(this)">
               <div><div style="font-weight:600;font-size:12.5px">${t.n}</div><div style="font-size:10.5px">${t.d}</div></div></div>`
+          ).join('')}
+        </div>
+        <label>开机自启动</label>
+        <div class="radio-group" id="set-autostart" style="grid-template-columns:repeat(2,1fr)">
+          ${[{k:'1',n:'开启',d:'登录 Windows 后自动启动'},{k:'0',n:'关闭',d:'仅手动启动'}].map(a =>
+            `<div class="radio-option${(a.k==='1')===autoStart?' selected':''}" data-v="${a.k}" onclick="selectRadio(this)">
+              <div><div style="font-weight:600;font-size:12.5px">${a.n}</div><div style="font-size:10.5px">${a.d}</div></div></div>`
           ).join('')}
         </div>
         <label>软件更新</label>
@@ -808,8 +831,12 @@ async function openSettings() {
 async function saveSettingsFromDrawer() {
   const newMode = document.querySelector('#set-modes .selected')?.dataset.v;
   const newTheme = document.querySelector('#set-themes .selected')?.dataset.v;
+  const newAutoStart = document.querySelector('#set-autostart .selected')?.dataset.v;
   await api.save_settings({window_mode: newMode, theme: newTheme});
   if (newTheme) applyTheme(newTheme);
+  if (newAutoStart === '1' || newAutoStart === '0') {
+    try { await api.set_autostart(newAutoStart === '1'); } catch(e) {}
+  }
   closeDrawer();
   // 窗口模式切换由 Python 端关闭窗口并重启，无需 JS reload
 }
