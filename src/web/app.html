@@ -402,6 +402,19 @@ body.paper .icon-btn-sm.danger:hover{background:rgba(255,80,80,.12)}
 .modal label,.drawer label{font-size:13px}
 .modal .radio-option,.drawer .radio-option{font-size:13px}
 .modal input,.modal textarea{font-size:13px}
+
+/* 开关滑块（设置页右上角开机自启动） */
+.switch{position:relative;display:inline-flex;width:42px;height:24px;flex-shrink:0;cursor:pointer;-webkit-app-region:no-drag;vertical-align:middle}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .slider{position:absolute;inset:0;border-radius:99px;background:rgba(255,255,255,.18);transition:background .25s}
+.switch .slider::before{content:"";position:absolute;width:18px;height:18px;border-radius:50%;left:3px;top:3px;background:#fff;transition:transform .25s;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.switch input:checked + .slider{background:#5b8cff}
+.switch input:checked + .slider::before{transform:translateX(18px)}
+body.frost .switch .slider{background:rgba(0,0,0,.18)}
+body.frost .switch input:checked + .slider{background:#7b9bd2}
+body.neon .switch input:checked + .slider{background:#00e5ff}
+body.paper .switch .slider{background:rgba(0,0,0,.15)}
+body.paper .switch input:checked + .slider{background:#b23a2e}
 .report-modal{display:flex;gap:20px;height:100%;min-height:0}
 .report-left{flex:0 0 280px;display:flex;flex-direction:column;overflow-y:auto}
 .report-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
@@ -782,7 +795,14 @@ async function openSettings() {
     <div class="drawer" onclick="event.stopPropagation()">
       <div class="drawer-header">
         <h2>⚙️ 设置</h2>
-        <span style="font-size:12px;color:#8a93b0">窗口模式 / 主题 / 开机自启动 / 软件更新</span>
+        <span style="flex:1"></span>
+        <span style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px">开机自启动</span>
+          <label class="switch" title="开机自启动">
+            <input type="checkbox" id="set-autostart" ${autoStart?'checked':''}>
+            <span class="slider"></span>
+          </label>
+        </span>
       </div>
       <div class="drawer-body" style="flex-direction:column;gap:2px;overflow-y:auto">
         <label>窗口模式</label>
@@ -799,13 +819,6 @@ async function openSettings() {
             {k:'neon',n:'霓虹网格',d:'霓虹描边辉光'},{k:'paper',n:'晨雾纸墨',d:'纸张质感朱砂'}].map(t =>
             `<div class="radio-option${t.k===theme?' selected':''}" data-v="${t.k}" onclick="selectRadio(this)">
               <div><div style="font-weight:600;font-size:12.5px">${t.n}</div><div style="font-size:10.5px">${t.d}</div></div></div>`
-          ).join('')}
-        </div>
-        <label>开机自启动</label>
-        <div class="radio-group" id="set-autostart" style="grid-template-columns:repeat(2,1fr)">
-          ${[{k:'1',n:'开启',d:'登录 Windows 后自动启动'},{k:'0',n:'关闭',d:'仅手动启动'}].map(a =>
-            `<div class="radio-option${(a.k==='1')===autoStart?' selected':''}" data-v="${a.k}" onclick="selectRadio(this)">
-              <div><div style="font-weight:600;font-size:12.5px">${a.n}</div><div style="font-size:10.5px">${a.d}</div></div></div>`
           ).join('')}
         </div>
         <label>软件更新</label>
@@ -831,11 +844,11 @@ async function openSettings() {
 async function saveSettingsFromDrawer() {
   const newMode = document.querySelector('#set-modes .selected')?.dataset.v;
   const newTheme = document.querySelector('#set-themes .selected')?.dataset.v;
-  const newAutoStart = document.querySelector('#set-autostart .selected')?.dataset.v;
+  const newAutoStart = document.getElementById('set-autostart')?.checked;
   await api.save_settings({window_mode: newMode, theme: newTheme});
   if (newTheme) applyTheme(newTheme);
-  if (newAutoStart === '1' || newAutoStart === '0') {
-    try { await api.set_autostart(newAutoStart === '1'); } catch(e) {}
+  if (typeof newAutoStart === 'boolean') {
+    try { await api.set_autostart(newAutoStart); } catch(e) {}
   }
   closeDrawer();
   // 窗口模式切换由 Python 端关闭窗口并重启，无需 JS reload
