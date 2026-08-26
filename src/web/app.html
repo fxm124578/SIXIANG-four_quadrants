@@ -86,7 +86,7 @@ body.midnight .task.done .cb svg{opacity:1;transform:none}
 body.midnight .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 body.midnight .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(139,122,255,.28);color:#cfc4ff;flex:none;letter-spacing:.04em}
 body.midnight .tag.amber{background:rgba(255,171,61,.2);color:#ffd9a3}
-body.midnight footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
+body.midnight footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
 body.midnight .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;
   border:1px solid rgba(255,255,255,.15);
   background:rgba(255,255,255,.12);color:#fff;transition:.2s;user-select:none}
@@ -160,7 +160,7 @@ body.frost .task.done .cb svg{opacity:1;transform:none}
 body.frost .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 body.frost .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#ece4f6;color:#7a6aa8;flex:none}
 body.frost .tag.amber{background:#faeeda;color:#a8763a}
-body.frost footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
+body.frost footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
 body.frost .btn{font-size:12px;padding:7px 13px;border-radius:10px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.9);
   background:rgba(255,255,255,.55);transition:.2s;user-select:none;box-shadow:0 2px 6px -2px rgba(90,104,140,.25)}
 body.frost .btn:hover{background:#fff;transform:translateY(-1px)}
@@ -259,7 +259,7 @@ body.neon .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsi
 body.neon .tag{font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(0,229,255,.12);color:#8ff0ff;
   border:1px solid rgba(0,229,255,.3);flex:none;letter-spacing:.06em}
 body.neon .tag.amber{background:rgba(255,225,77,.1);color:#ffe98f;border-color:rgba(255,225,77,.3)}
-body.neon footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
+body.neon footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
 body.neon .btn{font-size:12px;padding:7px 13px;border-radius:6px;cursor:pointer;white-space:nowrap;border:1px solid rgba(0,229,255,.3);
   background:rgba(0,229,255,.08);color:#c8f0ff;transition:.2s;user-select:none;letter-spacing:.06em;
   text-shadow:0 0 6px rgba(0,229,255,.45)}
@@ -337,7 +337,7 @@ body.paper .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellips
 body.paper .tag{font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(77,107,140,.1);
   color:var(--q3);border:1px solid rgba(77,107,140,.25);flex:none;letter-spacing:.05em}
 body.paper .tag.amber{background:rgba(201,151,58,.1);color:#8f6a20;border-color:rgba(201,151,58,.3)}
-body.paper footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0}
+body.paper footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
 body.paper .btn{font-size:12px;padding:7px 13px;border-radius:3px;cursor:pointer;white-space:nowrap;border:1px solid rgba(150,138,110,.35);
   background:rgba(255,255,255,.45);transition:.2s;user-select:none;letter-spacing:.05em}
 body.paper .btn:hover{background:#fff;box-shadow:0 3px 8px -3px rgba(90,75,45,.35)}
@@ -498,6 +498,123 @@ body.paper .drawer-header{border-bottom:1px solid rgba(150,138,110,.2)}
 body.paper .report-table th{background:#ede4cd}
 body.paper .calendar-grid .day.selected{background:#b23a2e;color:#fdf6e8}
 body.paper .report-stats .total{color:#5f8c6b}
+
+/* ================================================================
+   E . 标签筛选（上拉面板，低调按钮）
+   ================================================================ */
+.tag-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  box-shadow: none;
+}
+.tag-filter-btn svg { flex-shrink: 0; }
+.tag-filter-btn.active { border-color: currentColor; }
+.tag-filter-btn-count {
+  font-size: 9px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: var(--q3);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+.tag-panel {
+  position: fixed;
+  right: 14px;
+  bottom: 52px;
+  width: 280px;
+  max-height: 240px;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.4);
+  padding: 12px;
+  display: none;
+  z-index: 30;
+  flex-direction: column;
+  gap: 8px;
+}
+.tag-panel.open { display: flex; animation: rise 0.22s ease; }
+.tag-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tag-panel-act {
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+.tag-panel-act:hover { color: var(--ink); background: rgba(255,255,255,0.1); }
+.tag-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 170px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.tag-panel-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.15s;
+  user-select: none;
+  flex-shrink: 0;
+}
+.tag-panel-item:hover { background: rgba(255,255,255,0.08); }
+.tag-panel-item .ck {
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  opacity: 0.45;
+  transition: opacity 0.15s;
+}
+.tag-panel-item .ck svg { width: 16px; height: 16px; }
+.tag-panel-item.selected { font-weight: 600; }
+.tag-panel-item.selected .ck { opacity: 1; }
+.tag-panel-empty { font-size: 11px; color: var(--muted); padding: 6px 2px; }
+
+body.midnight .tag-panel { background: rgba(24,29,58,0.95); }
+body.midnight .tag-panel-item { color: var(--ink); }
+body.midnight .tag-panel-item:hover { background: rgba(255,255,255,0.1); }
+body.midnight .tag-panel-item.selected { background: rgba(91,140,255,0.22); color: var(--q3); }
+
+body.frost .tag-panel { background: rgba(255,255,255,0.92); }
+body.frost .tag-panel-item { color: var(--ink); }
+body.frost .tag-panel-item:hover { background: rgba(0,0,0,0.07); }
+body.frost .tag-panel-item.selected { background: rgba(138,166,216,0.22); color: var(--q3); }
+
+body.neon .tag-panel { background: rgba(12,18,38,0.97); }
+body.neon .tag-panel-item { color: var(--ink); text-shadow: 0 0 5px rgba(0,229,255,0.3); }
+body.neon .tag-panel-item:hover { background: rgba(0,229,255,0.12); box-shadow: none; }
+body.neon .tag-panel-item.selected { background: rgba(0,229,255,0.2); color: var(--c1); }
+
+body.paper .tag-panel { background: rgba(251,246,232,0.96); }
+body.paper .tag-panel-item { color: var(--ink); }
+body.paper .tag-panel-item:hover { background: rgba(0,0,0,0.07); }
+body.paper .tag-panel-item.selected { background: rgba(178,58,46,0.15); color: var(--seal); }
+
 </style>
 </head>
 <body class="midnight">
@@ -524,6 +641,7 @@ body.paper .report-stats .total{color:#5f8c6b}
     </h1>
     <div class="date"><span class="dot"></span><span id="today-date"></span></div>
   </header>
+  
   <div class="grid" id="grid">
     <div class="quad q1" data-quadrant="0">
       <div class="q-head"><span class="tint"></span><span class="q-name">紧急且重要</span><span class="q-count" id="count-0">0</span><span class="q-add" data-action="add" data-q="0">＋</span></div>
@@ -544,7 +662,15 @@ body.paper .report-stats .total{color:#5f8c6b}
   </div>
   <footer>
     <button class="btn primary" data-action="add-task">＋ 新建任务</button>
-    <button class="btn report" data-action="report">日报</button>
+    <button class="btn report tag-filter-btn" id="tag-filter-btn" title="标签筛选">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+      筛选
+      <span class="tag-filter-btn-count" id="tag-filter-btn-count" style="display:none">0</span>
+    </button>
+    <button class="btn report" data-action="report">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      日报
+    </button>
     <span class="spacer"></span>
     <button class="btn icon-btn" data-action="settings" title="设置">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -562,6 +688,15 @@ body.paper .report-stats .total{color:#5f8c6b}
       </svg>
     </button>
   </footer>
+</div>
+
+<!-- 标签筛选上拉面板（位于 widget 之外，避免被 overflow:hidden 裁剪） -->
+<div class="tag-panel" id="tag-panel">
+  <div class="tag-panel-actions">
+    <span class="tag-panel-act" onclick="selectAllTags()">全选</span>
+    <span class="tag-panel-act" onclick="clearTags()">清空</span>
+  </div>
+  <div class="tag-panel-list" id="tag-panel-list"></div>
 </div>
 
 <script>
@@ -594,12 +729,13 @@ window.addEventListener('pywebviewready', async () => {
   updateLockUI();
   applyTheme(st.theme || 'midnight');
   await refreshAll();
+  await loadAllTags();
 });
 
 function applyDate() {
   const d = new Date();
   document.getElementById('today-date').textContent =
-    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.0.5`;
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.1.0`;
 }
 
 /* ================================================================
@@ -622,8 +758,16 @@ function applyTheme(theme) {
 async function refreshAll() {
   if (!api) return;
   const tasks = await api.get_active_tasks();
+  // 标签筛选（多选：任务需包含任一选中标签）
+  let filteredTasks = tasks;
+  if (selectedTags.length > 0) {
+    filteredTasks = tasks.filter(t => {
+      const tags = parseTags(t.tag);
+      return tags.some(tg => selectedTags.includes(tg));
+    });
+  }
   const byQ = {0:[],1:[],2:[],3:[]};
-  tasks.forEach(t => { if (byQ[t.quadrant]) byQ[t.quadrant].push(t); });
+  filteredTasks.forEach(t => { if (byQ[t.quadrant]) byQ[t.quadrant].push(t); });
   for (let q = 0; q < 4; q++) renderQuadrant(q, byQ[q]);
 }
 
@@ -651,6 +795,116 @@ function parseTags(raw) {
   catch { return [raw]; }
 }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ================================================================
+   标签筛选（上拉面板 · 多选）
+   ================================================================ */
+let selectedTags = []; // 当前选中的标签集合，空数组 = 显示所有
+let allTags = []; // 所有标签列表
+
+async function loadAllTags() {
+  if (!api) return;
+  try {
+    allTags = await api.get_all_tags();
+    renderTagPanel();
+    updateTagFilterBtn();
+  } catch(e) {
+    console.error('加载标签失败:', e);
+  }
+}
+
+function renderTagPanel() {
+  const container = document.getElementById('tag-panel-list');
+  if (!container) return;
+  if (allTags.length === 0) {
+    container.innerHTML = '<div class="tag-panel-empty">暂无标签</div>';
+    return;
+  }
+  container.innerHTML = allTags.map(tag => {
+    const sel = selectedTags.includes(tag);
+    return `<span class="tag-panel-item ${sel ? 'selected' : ''}" onclick="toggleTag('${esc(tag)}')">
+      <span class="ck">${sel
+        ? '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor" stroke="currentColor" stroke-width="1.5"/><path d="M5 8.5l2 2 4-4.5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        : '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'}
+      </span>${esc(tag)}
+    </span>`;
+  }).join('');
+}
+
+function toggleTag(tag) {
+  const i = selectedTags.indexOf(tag);
+  if (i >= 0) selectedTags.splice(i, 1);
+  else selectedTags.push(tag);
+  renderTagPanel();
+  updateTagFilterBtn();
+  refreshAll();
+}
+
+function selectAllTags() {
+  selectedTags = [...allTags];
+  renderTagPanel();
+  updateTagFilterBtn();
+  refreshAll();
+}
+
+function clearTags() {
+  selectedTags = [];
+  renderTagPanel();
+  updateTagFilterBtn();
+  refreshAll();
+}
+
+function updateTagFilterBtn() {
+  const btn = document.getElementById('tag-filter-btn');
+  const count = document.getElementById('tag-filter-btn-count');
+  if (!btn) return;
+  if (selectedTags.length > 0 && selectedTags.length < allTags.length) {
+    btn.classList.add('active');
+    if (count) { count.style.display = 'inline-flex'; count.textContent = selectedTags.length; }
+  } else {
+    btn.classList.remove('active');
+    if (count) count.style.display = 'none';
+  }
+}
+
+function toggleTagPanel() {
+  const panel = document.getElementById('tag-panel');
+  const btn = document.getElementById('tag-filter-btn');
+  if (!panel || !btn) return;
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    return;
+  }
+  // 动态定位：面板左缘对齐按钮左缘，向上弹出，保证不出屏
+  const rect = btn.getBoundingClientRect();
+  const panelW = 280;
+  let left = rect.left;
+  if (left + panelW > window.innerWidth - 12) left = window.innerWidth - panelW - 12;
+  if (left < 12) left = 12;
+  panel.style.left = left + 'px';
+  panel.style.right = 'auto';
+  panel.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+  panel.classList.add('open');
+  // 加载标签数据（如果还没加载）
+  if (allTags.length > 0) renderTagPanel();
+  else loadAllTags();
+}
+
+// 点击外部关闭面板
+// 用 mousedown 判断（在 click 之前触发）：toggleTag 的 renderTagPanel 会替换面板内 DOM，
+// 导致 click 冒泡时 e.target 已脱离面板，误判为外部点击而关闭弹窗。
+// mousedown 时 DOM 尚未变化，panel.contains 判断准确；另用坐标判断双保险。
+document.addEventListener('mousedown', e => {
+  const panel = document.getElementById('tag-panel');
+  const btn = document.getElementById('tag-filter-btn');
+  if (panel && panel.classList.contains('open')) {
+    const rect = panel.getBoundingClientRect();
+    const inPanel = e.clientX >= rect.left && e.clientX <= rect.right &&
+                    e.clientY >= rect.top && e.clientY <= rect.bottom;
+    if (inPanel || (btn && btn.contains(e.target))) return;
+    panel.classList.remove('open');
+  }
+});
 
 /* ================================================================
    拖拽
@@ -1317,6 +1571,11 @@ document.addEventListener('mouseup', () => {
    事件委托（替代 inline onclick，避免 CSP 问题）
    ================================================================ */
 document.addEventListener('click', e => {
+  const tagBtn = document.getElementById('tag-filter-btn');
+  if (tagBtn && (e.target === tagBtn || tagBtn.contains(e.target))) {
+    toggleTagPanel();
+    return;
+  }
   const el = e.target.closest('[data-action]');
   if (!el) return;
   const action = el.dataset.action;

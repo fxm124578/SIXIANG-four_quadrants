@@ -73,6 +73,12 @@ class JsApi:
             self.db.update_task(task_id, quadrant=int(quadrant))
         return True
 
+    # ------------------------------------------------------------------- 标签
+    def get_all_tags(self) -> List[str]:
+        """获取所有任务中的标签列表。"""
+        return self.db.get_all_tags()
+
+
     # ------------------------------------------------------------------- 日报
     def get_completed_tasks(self, date_str: str) -> List[Dict]:
         return [t.to_dict() for t in self.db.get_completed_tasks(date_str)]

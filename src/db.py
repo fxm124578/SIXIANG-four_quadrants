@@ -219,6 +219,30 @@ class Database:
                 (key, str(value)),
             )
 
+    # --------------------------------------------------------------- tags
+    def get_all_tags(self) -> List[str]:
+        """获取所有任务中的标签（去重、排序）。"""
+        import json
+        rows = self.conn.execute(
+            "SELECT DISTINCT tag FROM tasks WHERE tag IS NOT NULL AND tag != ''"
+        ).fetchall()
+
+        all_tags = set()
+        for row in rows:
+            tag_str = str(row["tag"])
+            try:
+                tags = json.loads(tag_str)
+                if isinstance(tags, list):
+                    for tag in tags:
+                        if tag and tag.strip():
+                            all_tags.add(tag.strip())
+            except (ValueError, TypeError):
+                if tag_str.strip():
+                    all_tags.add(tag_str.strip())
+
+        return sorted(all_tags)
+
+
     def close(self) -> None:
         try:
             self.conn.close()
