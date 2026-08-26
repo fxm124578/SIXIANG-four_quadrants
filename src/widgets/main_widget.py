@@ -524,8 +524,8 @@ class MainWindow(tk.Tk):
             except ValueError:
                 return default
 
-        width = max(MIN_WIDTH, min(setting_int("window_width", 420), 1400))
-        height = max(MIN_HEIGHT, min(setting_int("window_height", 540), 1400))
+        # 每次启动固定 4:3（800×600），不读取也不持久化窗口尺寸
+        width, height = 800, 600
         x = setting_int("window_x", -1)
         y = setting_int("window_y", -1)
         locked = (self.db.get_setting("locked") or "0") == "1"
@@ -548,8 +548,6 @@ class MainWindow(tk.Tk):
         try:
             self.db.set_setting("window_x", str(self.winfo_x()))
             self.db.set_setting("window_y", str(self.winfo_y()))
-            self.db.set_setting("window_width", str(self.winfo_width()))
-            self.db.set_setting("window_height", str(self.winfo_height()))
             self.db.set_setting("opacity", f"{self._opacity:.2f}")
             self.db.set_setting("locked", "1" if self._locked else "0")
             self.db.set_setting("window_mode", self._window_mode)

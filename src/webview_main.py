@@ -172,7 +172,7 @@ class JsApi:
     # --------------------------------------------------------------- 工具
 def _read_settings(db: Database) -> Dict[str, str]:
     keys = ("theme", "window_mode", "window_x", "window_y",
-            "window_width", "window_height", "locked", "opacity")
+            "locked", "opacity")
     return {k: (db.get_setting(k) or "") for k in keys}
 
 
@@ -238,14 +238,8 @@ def _make_window(api: JsApi, db: Database, html_path: str) -> webview.Window:
     frameless = mode != "normal"
     on_top = mode == "topmost"
 
-    try:
-        width = max(600, min(int(settings.get("window_width") or 800), 1600))
-    except ValueError:
-        width = 800
-    try:
-        height = max(450, min(int(settings.get("window_height") or 600), 1200))
-    except ValueError:
-        height = 600
+    # 每次启动固定 4:3（800×600），不读取也不持久化窗口尺寸
+    width, height = 800, 600
     try:
         x = int(settings.get("window_x") or 100)
         y = int(settings.get("window_y") or 100)
@@ -278,17 +272,12 @@ def run() -> int:
             api.restart_requested = False
             window = _make_window(api, db, html_path)
 
-            # 监听窗口 move/size 事件持久化
+            # 监听窗口位置持久化（尺寸固定 4:3，不保存）
             def on_moved(w, x, y, _w=window):
                 db.set_setting("window_x", str(x))
                 db.set_setting("window_y", str(y))
 
-            def on_resized(w, width, height, _w=window):
-                db.set_setting("window_width", str(width))
-                db.set_setting("window_height", str(height))
-
             window.events.moved += on_moved
-            window.events.resized += on_resized
 
             # 设置四象限应用图标
             from styles import ensure_app_icon
