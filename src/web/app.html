@@ -723,12 +723,12 @@ function openAdd(quadrant = 0) {
 
   overlay.innerHTML = `
     <div class="drawer" style="height:480px;min-height:400px;max-height:80vh" onclick="event.stopPropagation()">
-      <div class="drawer-header">
+      <div class="drawer-header" style="padding-top:24px">
         <h2>＋ 新建任务</h2>
         <span style="flex:1"></span>
         <span class="icon-btn-sm" onclick="closeDrawer()" title="关闭">${ICON_SVGS.close}</span>
       </div>
-      <div class="drawer-body" style="gap:22px">
+      <div class="drawer-body" style="gap:22px;padding-top:16px">
         <div style="flex:3;display:flex;flex-direction:column;min-width:0">
           <label>标题 *</label>
           <input id="dlg-title" maxlength="80" style="margin-bottom:12px">
@@ -746,10 +746,11 @@ function openAdd(quadrant = 0) {
           </div>
         </div>
       </div>
-      <div class="drawer-footer">
-        <button class="btn" onclick="closeDrawer()">取消</button>
-        <span style="flex:1"></span>
-        <button class="btn primary" id="dlg-submit">添加</button>
+      <div class="drawer-footer" style="justify-content:flex-end;gap:10px">
+        <button class="btn" onclick="closeDrawer()" style="display:inline-flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>取消</button>
+        <button class="btn primary" id="dlg-submit" style="display:inline-flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加</button>
       </div>
     </div>`;
 
