@@ -419,7 +419,7 @@ body.paper .switch input:checked + .slider{background:#b23a2e}
 .report-left{flex:0 0 280px;display:flex;flex-direction:column;overflow-y:auto}
 .report-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 /* 日报顶部日期导航 + 下拉日历 */
-.report-nav{position:relative;display:flex;align-items:center;gap:8px}
+.report-nav{position:relative;display:flex;align-items:center;gap:8px;flex:1;min-width:0}
 .report-nav-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:inherit;cursor:pointer;transition:.2s;flex-shrink:0;-webkit-app-region:no-drag}
 .report-nav-btn:hover{background:rgba(255,255,255,.14);transform:translateY(-1px)}
 .report-nav-center{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:7px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.12);transition:.2s;user-select:none;-webkit-app-region:no-drag}
@@ -989,6 +989,7 @@ async function applyUpdateNow() {
 let reportDate = new Date();
 let completedDatesCache = [];
 let reportCalendarOpen = false;
+let calYear, calMonth;
 
 async function openReport() {
   completedDatesCache = await api.get_completed_dates();
@@ -1004,10 +1005,10 @@ function closeDrawer() {
 
 function renderReportDrawer() {
   closeDrawer();
-  const y = reportDate.getFullYear(), m = reportDate.getMonth();
   const sel = fmtDate(reportDate);
-  const today = fmtDate(new Date());
   const weekday = WEEKDAYS[(reportDate.getDay() + 6) % 7];
+  calYear = reportDate.getFullYear();
+  calMonth = reportDate.getMonth();
 
   const overlay = document.createElement('div');
   overlay.id = 'drawer-overlay';
@@ -1016,42 +1017,54 @@ function renderReportDrawer() {
 
   overlay.innerHTML = `
     <div class="drawer" onclick="event.stopPropagation()">
-      <div class="drawer-header">
+      <div class="drawer-header" style="gap:10px">
         <h2>📋 日报</h2>
-        <span style="flex:1"></span>
-        <button class="btn" onclick="drawerExportDay()" style="padding:5px 12px;font-size:11px">导出当日</button>
-        <button class="btn" onclick="drawerExportRange()" style="padding:5px 12px;font-size:11px">导出范围</button>
-      </div>
-      <div class="drawer-body" style="flex-direction:column;gap:10px;padding-top:6px">
         <div class="report-nav">
           <button class="report-nav-btn" onclick="reportPrev()" title="前一天">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <div class="report-nav-center" onclick="toggleCalendar()" title="点击展开 / 收起日历">
             <span class="report-date">${sel} ${weekday}</span>
-            <svg id="cal-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:${reportCalendarOpen?'rotate(180deg)':''}"><path d="M6 9l6 6 6-6"/></svg>
+            <svg id="cal-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
           </div>
           <button class="report-nav-btn" onclick="reportNext()" title="后一天">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
           </button>
-          <div class="report-calendar" id="report-calendar" style="display:${reportCalendarOpen?'block':'none'}">
+          <div class="report-calendar" id="report-calendar" style="display:none">
             <div class="calendar-nav">
               <button class="nav-btn" onclick="calPrev()">‹</button>
-              <span style="flex:1;text-align:center;font-weight:700">${y} 年 ${m+1} 月</span>
+              <span class="cal-month" style="flex:1;text-align:center;font-weight:700"></span>
               <button class="nav-btn" onclick="calNext()">›</button>
             </div>
-            <div class="calendar-grid" id="cal-grid">
-              ${'一二三四五六日'.split('').map(d => `<div class="weekday">${d}</div>`).join('')}
-              ${buildCalendarCells(y, m, sel, today)}
-            </div>
+            <div class="calendar-grid" id="cal-grid"></div>
           </div>
         </div>
+        <span style="flex:1"></span>
+        <button class="btn" onclick="drawerExportDay()" style="padding:5px 12px;font-size:11px">导出当日</button>
+        <button class="btn" onclick="drawerExportRange()" style="padding:5px 12px;font-size:11px">导出范围</button>
+      </div>
+      <div class="drawer-body" style="flex-direction:column;padding-top:6px">
         <div id="report-content" style="flex:1;overflow-y:auto;min-height:0"></div>
       </div>
     </div>`;
 
   document.body.appendChild(overlay);
+  renderCalendar();
   loadReportDay(sel);
+}
+
+function updateReportNavDate() {
+  const el = document.querySelector('.report-date');
+  if (el) el.textContent = fmtDate(reportDate) + ' ' + WEEKDAYS[(reportDate.getDay() + 6) % 7];
+}
+
+function renderCalendar() {
+  const sel = fmtDate(reportDate);
+  const today = fmtDate(new Date());
+  const monthLabel = document.querySelector('.report-calendar .cal-month');
+  const grid = document.getElementById('cal-grid');
+  if (monthLabel) monthLabel.textContent = `${calYear} 年 ${calMonth + 1} 月`;
+  if (grid) grid.innerHTML = '一二三四五六日'.split('').map(d => `<div class="weekday">${d}</div>`).join('') + buildCalendarCells(calYear, calMonth, sel, today);
 }
 
 function buildCalendarCells(y, m, sel, today) {
@@ -1074,7 +1087,16 @@ function buildCalendarCells(y, m, sel, today) {
   return html;
 }
 
-function selectReportDay(ds) { reportDate = parseDate(ds); reportCalendarOpen = false; renderReportDrawer(); }
+function selectReportDay(ds) {
+  reportDate = parseDate(ds);
+  reportCalendarOpen = false;
+  updateReportNavDate();
+  loadReportDay(ds);
+  const cal = document.getElementById('report-calendar');
+  const chevron = document.getElementById('cal-chevron');
+  if (cal) cal.style.display = 'none';
+  if (chevron) chevron.style.transform = '';
+}
 
 async function loadReportDay(ds) {
   const tasks = await api.get_completed_tasks(ds);
@@ -1108,22 +1130,39 @@ async function loadReportDay(ds) {
     </table></div>`;
 }
 
-function calPrev() { reportDate = new Date(reportDate.getFullYear(), reportDate.getMonth()-1, 1); renderReportDrawer(); }
-function calNext() { reportDate = new Date(reportDate.getFullYear(), reportDate.getMonth()+1, 1); renderReportDrawer(); }
+function calPrev() {
+  const total = calYear * 12 + calMonth - 1;
+  calYear = Math.floor(total / 12);
+  calMonth = total % 12;
+  renderCalendar();
+}
+function calNext() {
+  const total = calYear * 12 + calMonth + 1;
+  calYear = Math.floor(total / 12);
+  calMonth = total % 12;
+  renderCalendar();
+}
 function toggleCalendar() {
   reportCalendarOpen = !reportCalendarOpen;
   const cal = document.getElementById('report-calendar');
   const chevron = document.getElementById('cal-chevron');
+  if (reportCalendarOpen) {
+    calYear = reportDate.getFullYear();
+    calMonth = reportDate.getMonth();
+    renderCalendar();
+  }
   if (cal) cal.style.display = reportCalendarOpen ? 'block' : 'none';
   if (chevron) chevron.style.transform = reportCalendarOpen ? 'rotate(180deg)' : '';
 }
 function reportPrev() {
   reportDate = new Date(reportDate.getFullYear(), reportDate.getMonth(), reportDate.getDate() - 1);
-  renderReportDrawer();
+  updateReportNavDate();
+  loadReportDay(fmtDate(reportDate));
 }
 function reportNext() {
   reportDate = new Date(reportDate.getFullYear(), reportDate.getMonth(), reportDate.getDate() + 1);
-  renderReportDrawer();
+  updateReportNavDate();
+  loadReportDay(fmtDate(reportDate));
 }
 
 async function drawerExportDay() {
