@@ -714,29 +714,59 @@ async function openEdit(id) {
    新建任务
    ================================================================ */
 function openAdd(quadrant = 0) {
-  showModal('新建任务', `
-    <label>标题 *</label><input id="dlg-title" maxlength="80">
-    <label>描述</label><textarea id="dlg-desc"></textarea>
-    <label>标签</label><input id="dlg-tags">
-    <div class="hint">支持多个标签，用逗号或空格分隔，例如：工作 个人</div>
-    <label>所属象限</label>
-    <div class="radio-group" id="dlg-quads">
-      ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
-        <span style="width:8px;height:8px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
-    </div>`,
-    [{text:'取消',action:'close'},{text:'添加',action:'submit',primary:true,handler:async()=>{
-      try {
-        const title = document.getElementById('dlg-title').value.trim();
-        if (!title) { alert('任务标题不能为空'); return; }
-        const desc = document.getElementById('dlg-desc').value.trim();
-        const rawTags = document.getElementById('dlg-tags').value;
-        const tags = rawTags.split(/[,，;；、\s]+/).filter(x=>x.trim());
-        const quad = parseInt(document.querySelector('#dlg-quads .selected')?.dataset.v ?? '0');
-        if (!api) { alert('系统未就绪，请稍后重试'); return; }
-        await api.add_task(title, desc, JSON.stringify([...new Set(tags)]), quad);
-        closeModal(); refreshAll();
-      } catch(err) { alert('保存失败: ' + err.message); console.error(err); }
-    }}]);
+  closeModal();
+  closeDrawer();
+  const overlay = document.createElement('div');
+  overlay.id = 'drawer-overlay';
+  overlay.className = 'drawer-overlay';
+  overlay.onclick = e => { if (e.target === overlay) closeDrawer(); };
+
+  overlay.innerHTML = `
+    <div class="drawer" style="height:480px;min-height:400px;max-height:80vh" onclick="event.stopPropagation()">
+      <div class="drawer-header">
+        <h2>＋ 新建任务</h2>
+        <span style="flex:1"></span>
+        <span class="icon-btn-sm" onclick="closeDrawer()" title="关闭">${ICON_SVGS.close}</span>
+      </div>
+      <div class="drawer-body" style="gap:22px">
+        <div style="flex:1.15;display:flex;flex-direction:column;min-width:0">
+          <label>标题 *</label>
+          <input id="dlg-title" maxlength="80" style="margin-bottom:12px">
+          <label>描述</label>
+          <textarea id="dlg-desc" style="flex:1;min-height:88px;margin-bottom:12px"></textarea>
+          <label>标签</label>
+          <input id="dlg-tags" style="margin-bottom:6px">
+          <div class="hint" style="margin-bottom:0">支持多个标签，用逗号或空格分隔，例如：工作 个人</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+          <label>所属象限</label>
+          <div class="radio-group" id="dlg-quads" style="grid-template-columns:1fr 1fr;align-content:start;margin-bottom:0">
+            ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
+              <span style="width:9px;height:9px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn" onclick="closeDrawer()">取消</button>
+        <span style="flex:1"></span>
+        <button class="btn primary" id="dlg-submit">添加</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  document.getElementById('dlg-submit').onclick = async () => {
+    try {
+      const title = document.getElementById('dlg-title').value.trim();
+      if (!title) { alert('任务标题不能为空'); document.getElementById('dlg-title').focus(); return; }
+      const desc = document.getElementById('dlg-desc').value.trim();
+      const rawTags = document.getElementById('dlg-tags').value;
+      const tags = rawTags.split(/[,，;；、\s]+/).filter(x=>x.trim());
+      const quad = parseInt(document.querySelector('#dlg-quads .selected')?.dataset.v ?? '0');
+      if (!api) { alert('系统未就绪，请稍后重试'); return; }
+      await api.add_task(title, desc, JSON.stringify([...new Set(tags)]), quad);
+      closeDrawer(); refreshAll();
+    } catch(err) { alert('保存失败: ' + err.message); console.error(err); }
+  };
   setTimeout(() => document.getElementById('dlg-title').focus(), 100);
 }
 
