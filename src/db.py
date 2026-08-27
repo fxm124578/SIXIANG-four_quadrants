@@ -142,7 +142,8 @@ class Database:
 
     def update_task(self, task_id: int, title: str = None,
                     description: str = None, tag: str = None,
-                    quadrant: int = None) -> None:
+                    quadrant: int = None,
+                    completed_at: str = None) -> None:
         """更新任务字段（仅传入需要更新的字段）。"""
         updates = []
         params = []
@@ -158,6 +159,10 @@ class Database:
         if quadrant is not None:
             updates.append("quadrant = ?")
             params.append(int(quadrant))
+        if completed_at is not None:
+            # 空字符串表示清除完成状态（任务回到进行中）
+            updates.append("completed_at = ?")
+            params.append(completed_at or None)
         if not updates:
             return
         updates.append("updated_at = ?")

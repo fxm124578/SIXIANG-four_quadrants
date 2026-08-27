@@ -57,13 +57,15 @@ class JsApi:
 
     def update_task(self, task_id: int, title: str = "",
                     description: str = "", tag: str = "",
-                    quadrant: int = -1) -> bool:
+                    quadrant: int = -1,
+                    completed_at: str = "") -> bool:
         self.db.update_task(
             task_id,
             title=title or None,
             description=description if description != "" else None,
             tag=tag if tag != "" else None,
             quadrant=int(quadrant) if int(quadrant) >= 0 else None,
+            completed_at=completed_at or None,
         )
         return True
 

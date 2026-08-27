@@ -373,7 +373,7 @@ body.frost .icon-btn-sm.danger:hover{background:rgba(255,80,80,.15)}
 body.paper .icon-btn-sm:hover{background:rgba(0,0,0,.06)}
 body.paper .icon-btn-sm.danger:hover{background:rgba(255,80,80,.12)}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;
-  justify-content:center;z-index:100;opacity:0;animation:fadeIn .25s forwards}
+  justify-content:center;z-index:300;opacity:0;animation:fadeIn .25s forwards}
 @keyframes fadeIn{to{opacity:1}}
 .modal{border-radius:16px;padding:24px;width:420px;max-width:90vw;max-height:85vh;overflow:auto;
   box-shadow:0 30px 60px rgba(0,0,0,.6)}
@@ -461,9 +461,10 @@ body.frost .report-nav-btn:hover,body.paper .report-nav-btn:hover{background:rgb
 .report-stats .total{font-size:14px;font-weight:700;color:#4caf7d;margin-bottom:4px}
 .report-stats .stat-line{font-size:12px;margin-bottom:2px}
 .report-table{flex:1;overflow-y:auto;min-height:0}
-.report-table table{width:100%;border-collapse:collapse;font-size:12px}
-.report-table th{padding:7px 8px;text-align:left;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1)}
-.report-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+.report-table table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.report-table th{padding:7px 8px;text-align:left;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);white-space:nowrap}
+.report-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;word-break:break-all}
+.report-table td:nth-child(-n+4),.report-table td:nth-child(6){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:normal}
 .report-table tr:hover{background:rgba(255,255,255,.04)}
 .report-table tr:nth-child(even){background:rgba(255,255,255,.02)}
 
@@ -498,6 +499,9 @@ body.paper .drawer-header{border-bottom:1px solid rgba(150,138,110,.2)}
 body.paper .report-table th{background:#ede4cd}
 body.paper .calendar-grid .day.selected{background:#b23a2e;color:#fdf6e8}
 body.paper .report-stats .total{color:#5f8c6b}
+
+/* 四象限两行等高：任务多时在格子内部滚动，互不挤压 */
+body.midnight .grid,body.frost .grid,body.neon .grid,body.paper .grid{grid-template-rows:1fr 1fr}
 
 /* ================================================================
    E . 标签筛选（上拉面板，低调按钮）
@@ -776,8 +780,8 @@ function renderQuadrant(q, tasks) {
   document.getElementById(`count-${q}`).textContent = tasks.length;
   container.innerHTML = tasks.map(t => {
     const tags = parseTags(t.tag);
-    const tagHTML = tags.slice(0,2).map(tg => `<span class="tag">${esc(tg)}</span>`).join('')
-      + (tags.length > 2 ? `<span class="tag">+${tags.length-2}</span>` : '');
+    const tagHTML = tags.slice(0,2).map((tg,i) => tagSpan(tg, i)).join('')
+      + (tags.length > 2 ? `<span class="tag" style="opacity:.7">+${tags.length-2}</span>` : '');
     return `<div class="task" draggable="true" data-id="${t.id}" data-quadrant="${q}"
       ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" onclick="openDetail(${t.id})">
       <span class="cb" onclick="event.stopPropagation();completeTask(${t.id},this)"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
@@ -793,6 +797,16 @@ function parseTags(raw) {
   if (!raw || !raw.trim()) return [];
   try { const a = JSON.parse(raw); return Array.isArray(a) ? a.filter(x => String(x).trim()).map(String) : [raw]; }
   catch { return [raw]; }
+}
+
+/* 多标签配色：按索引循环分配颜色，四主题通用 */
+const TAG_PALETTE = [
+  ['#cfc4ff', '#3a3170'], ['#ffd9a3', '#5a3d10'], ['#9fe8c3', '#0f3a26'],
+  ['#a8c2ff', '#1a2d55'], ['#ffb0a6', '#55201a'], ['#ffb3ec', '#4a1a3a'],
+];
+function tagSpan(tg, idx) {
+  const [fg, bg] = TAG_PALETTE[idx % TAG_PALETTE.length];
+  return `<span class="tag" style="background:${bg};color:${fg}">${esc(tg)}</span>`;
 }
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -956,10 +970,15 @@ async function openEdit(id) {
   const t = await api.get_task(id);
   if (!t) return;
   const tags = parseTags(t.tag);
+  // 已完成任务支持编辑完成时间（datetime-local）
+  const completedHTML = t.completed_at
+    ? `<label>完成时间</label><input type="datetime-local" id="edit-completed" value="${esc(t.completed_at.replace(' ', 'T'))}">`
+    : '';
   showModal('编辑任务', `
     <label>标题</label><input id="edit-title" maxlength="80" value="${esc(t.title)}">
     <label>描述</label><textarea id="edit-desc">${esc(t.description)}</textarea>
     <label>标签</label><input id="edit-tags" value="${esc(tags.join(' '))}">
+    ${completedHTML}
     <label>所属象限</label>
     <div class="radio-group" id="edit-quads">
       ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===t.quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
@@ -973,8 +992,21 @@ async function openEdit(id) {
         const rawTags = document.getElementById('edit-tags').value;
         const tags = rawTags.split(/[,，;；、\s]+/).filter(x=>x.trim());
         const quad = parseInt(document.querySelector('#edit-quads .selected')?.dataset.v ?? '0');
-        await api.update_task(id, title, desc, JSON.stringify([...new Set(tags)]), quad);
-        closeModal(); refreshAll();
+        // 完成时间：datetime-local 无秒，分钟数补 :00；清空表示恢复进行中
+        let completedVal = '';
+        const completedEl = document.getElementById('edit-completed');
+        if (completedEl) {
+          completedVal = completedEl.value ? completedEl.value.replace('T', ' ') : '';
+          if (completedVal && completedVal.split(' ')[1].split(':').length === 2) completedVal += ':00';
+        }
+        await api.update_task(id, title, desc, JSON.stringify([...new Set(tags)]), quad, completedVal);
+        closeModal();
+        refreshAll();
+        // 若原任务已完成，同步刷新日报内容与日历标记
+        if (t.completed_at) {
+          completedDatesCache = await api.get_completed_dates();
+          loadReportDay(fmtDate(reportDate));
+        }
       } catch(err) { alert('保存失败: ' + err.message); }
     }}]);
   setTimeout(() => document.getElementById('edit-title').focus(), 100);
@@ -1060,7 +1092,7 @@ async function openDetail(id) {
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <span style="width:8px;height:8px;border-radius:50%;background:${qColor};display:inline-block"></span>
       <span style="font-size:11px">${qName}</span>
-      ${tags.map(tg => `<span class="tag">${esc(tg)}</span>`).join('')}
+      ${tags.map((tg,i) => tagSpan(tg, i)).join('')}
     </div>
     <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 16px;margin-bottom:14px">
       <div style="font-size:11px;margin-bottom:6px">任务描述</div>
@@ -1361,11 +1393,18 @@ async function loadReportDay(ds) {
       <div class="stat-line">按标签：${Object.entries(stats.byTag).sort((a,b)=>b[1]-a[1]).map(([t,c])=>`${t}：${c}`).join('、')||'无'}</div>
     </div>
     <div class="report-table"><table>
-      <thead><tr><th>完成时间</th><th>标题</th><th>标签</th><th>象限</th><th>描述</th><th style="width:80px;text-align:center">操作</th></tr></thead>
+      <thead><tr>
+        <th style="width:56px">时间</th>
+        <th style="width:124px">标题</th>
+        <th style="width:88px">标签</th>
+        <th style="width:88px">象限</th>
+        <th>描述</th>
+        <th style="width:76px;text-align:center">操作</th>
+      </tr></thead>
       <tbody>${tasks.map(t=>`<tr>
-        <td>${esc(t.completed_at)}</td>
+        <td>${esc(((t.completed_at||'').split(' ')[1]||'').slice(0,5))}</td>
         <td>${esc(t.title)}</td>
-        <td>${esc(parseTags(t.tag).join('、'))}</td>
+        <td>${parseTags(t.tag).map((tg,i)=>tagSpan(tg,i)).join('')}</td>
         <td>${esc(QUADRANT_NAMES[t.quadrant])}</td>
         <td>${esc(t.description)}</td>
         <td style="text-align:center;white-space:nowrap">
