@@ -430,15 +430,22 @@ body.paper .switch input:checked + .slider{background:#b23a2e}
 .update-card{border:1px solid var(--stroke);border-radius:12px;padding:14px 16px;
   background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   display:flex;flex-direction:column;gap:10px}
+.update-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .update-ver{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
 .update-ver b{font-weight:700}
 .update-new{color:var(--q2,#e8912d);font-weight:600;margin-left:6px;white-space:nowrap}
-.update-status{font-size:11.5px;line-height:1.7;color:var(--muted);min-height:34px;white-space:pre-wrap}
+.update-links{display:flex;align-items:center;gap:14px;white-space:nowrap;flex-shrink:0}
+.update-link{font-size:11.5px;padding:0;border:none;background:none;
+  color:var(--q3,#5b8cff);text-decoration:underline;text-underline-offset:3px;
+  cursor:pointer;user-select:none;transition:.15s}
+.update-link:hover{color:var(--ink)}
+.update-link:disabled{opacity:.4;cursor:default}
+.update-link.primary{color:var(--q4,#3dd68c)}
+.update-link.primary:hover{color:var(--ink)}
+.update-status{font-size:11.5px;line-height:1.7;color:var(--muted);min-height:30px;white-space:pre-wrap}
 .update-status.ok{color:var(--q4,#3dd68c)}
 .update-status.err{color:#ff6b6b}
-.update-actions{display:flex;gap:8px;flex-wrap:wrap}
-.update-actions .btn{padding:5px 13px;font-size:11px}
 .report-modal{display:flex;gap:20px;height:100%;min-height:0}
 .report-left{flex:0 0 280px;display:flex;flex-direction:column;overflow-y:auto}
 .report-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
@@ -826,7 +833,7 @@ window.addEventListener('pywebviewready', async () => {
 function applyDate() {
   const d = new Date();
   document.getElementById('today-date').textContent =
-    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.3.2`;
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.3.3`;
 }
 
 /* ================================================================
@@ -1290,13 +1297,15 @@ async function openSettings() {
         </div>
         <label>软件更新</label>
         <div class="update-card">
-          <div class="update-ver" id="ver-label">当前版本 <b>v${esc(ver) || '未知'}</b><span class="update-new" id="update-new" style="display:none"></span></div>
-          <div id="update-status" class="update-status">尚未检查更新，点击下方按钮开始</div>
-          <div class="update-actions">
-            <button class="btn" id="btn-check-update" onclick="checkUpdate()">检查更新</button>
-            <button class="btn primary" id="btn-download-update" onclick="downloadUpdate()" style="display:none">下载并更新</button>
-            <button class="btn primary" id="btn-apply-update" onclick="applyUpdateNow()" style="display:none">立即重启更新</button>
+          <div class="update-head">
+            <span class="update-ver" id="ver-label">当前版本 <b>v${esc(ver) || '未知'}</b><span class="update-new" id="update-new" style="display:none"></span></span>
+            <span class="update-links">
+              <button class="update-link" id="btn-check-update" onclick="checkUpdate()">检查更新</button>
+              <button class="update-link primary" id="btn-download-update" onclick="downloadUpdate()" style="display:none">下载并更新</button>
+              <button class="update-link primary" id="btn-apply-update" onclick="applyUpdateNow()" style="display:none">立即重启更新</button>
+            </span>
           </div>
+          <div id="update-status" class="update-status">尚未检查更新</div>
         </div>
       </div>
       <div class="drawer-footer">
