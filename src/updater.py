@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.1"
+APP_VERSION = "1.3.2"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -251,19 +251,26 @@ def apply_update() -> Dict[str, Any]:
 
 
 def _launch_replace_script(local_path: Path) -> None:
-    """生成并启动 update.bat：等旧进程退出 → 替换 exe → 启动新版本。"""
+    """生成并启动 update.bat：等旧进程退出 → 替换 exe → 启动新版本。
+
+    重命名目标固定为「四象.exe」（与当前 exe 名、release 资产名无关），
+    保证开机自启等依赖固定路径/名称的机制始终有效。
+    """
     target_exe = Path(sys.executable).resolve()
     update_dir = _update_dir()
     update_dir.mkdir(parents=True, exist_ok=True)
     new_name = local_path.name
-    target_name = target_exe.name
+    # 当前进程名：用于结束旧进程（用户可能改过 exe 名）
+    process_name = target_exe.name
+    # 固定重命名目标：应用更新后统一为「四象.exe」
+    target_name = "四象.exe"
 
     bat_lines = [
         "@echo off",
         "chcp 65001 >nul",
         'cd /d "%~dp0"',
         "timeout /t 2 /nobreak >nul",
-        f'taskkill /f /im "{target_name}" >nul 2>&1',
+        f'taskkill /f /im "{process_name}" >nul 2>&1',
         "timeout /t 1 /nobreak >nul",
         f'move /y "%~dp0{new_name}" "%~dp0..\\{target_name}" >nul',
         "if errorlevel 1 goto :fail",

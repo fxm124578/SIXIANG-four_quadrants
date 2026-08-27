@@ -425,6 +425,20 @@ body.frost .switch input:checked + .slider{background:#7b9bd2}
 body.neon .switch input:checked + .slider{background:#00e5ff}
 body.paper .switch .slider{background:rgba(0,0,0,.15)}
 body.paper .switch input:checked + .slider{background:#b23a2e}
+
+/* 软件更新卡片（上下布局） */
+.update-card{border:1px solid var(--stroke);border-radius:12px;padding:14px 16px;
+  background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:flex;flex-direction:column;gap:10px}
+.update-ver{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.update-ver b{font-weight:700}
+.update-new{color:var(--q2,#e8912d);font-weight:600;margin-left:6px;white-space:nowrap}
+.update-status{font-size:11.5px;line-height:1.7;color:var(--muted);min-height:34px;white-space:pre-wrap}
+.update-status.ok{color:var(--q4,#3dd68c)}
+.update-status.err{color:#ff6b6b}
+.update-actions{display:flex;gap:8px;flex-wrap:wrap}
+.update-actions .btn{padding:5px 13px;font-size:11px}
 .report-modal{display:flex;gap:20px;height:100%;min-height:0}
 .report-left{flex:0 0 280px;display:flex;flex-direction:column;overflow-y:auto}
 .report-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
@@ -812,7 +826,7 @@ window.addEventListener('pywebviewready', async () => {
 function applyDate() {
   const d = new Date();
   document.getElementById('today-date').textContent =
-    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.3.1`;
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.3.2`;
 }
 
 /* ================================================================
@@ -1275,16 +1289,17 @@ async function openSettings() {
           ).join('')}
         </div>
         <label>软件更新</label>
-        <div class="radio-group" style="padding:12px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-            <span id="ver-label" style="font-size:12px;font-weight:600;white-space:nowrap">当前版本 v${esc(ver) || '未知'}</span>
-            <span style="flex:1"></span>
+        <div class="update-card">
+          <div class="update-ver" id="ver-label">当前版本 <b>v${esc(ver) || '未知'}</b><span class="update-new" id="update-new" style="display:none"></span></div>
+          <div id="update-status" class="update-status">尚未检查更新，点击下方按钮开始</div>
+          <div class="update-actions">
+            <button class="btn" id="btn-check-update" onclick="checkUpdate()">检查更新</button>
+            <button class="btn primary" id="btn-download-update" onclick="downloadUpdate()" style="display:none">下载并更新</button>
+            <button class="btn primary" id="btn-apply-update" onclick="applyUpdateNow()" style="display:none">立即重启更新</button>
           </div>
-          <div id="update-status" style="font-size:11px;line-height:1.6;color:#8a93b0;white-space:pre-wrap"></div>
         </div>
       </div>
       <div class="drawer-footer">
-        <button class="btn" id="btn-check-update" onclick="checkUpdate()">检查更新</button>
         <span style="flex:1"></span>
         <button class="btn" onclick="closeDrawer()">取消</button>
         <button class="btn primary" onclick="saveSettingsFromDrawer()">确定</button>
@@ -1331,47 +1346,68 @@ async function checkUpdate() {
 
 function renderUpdateState(st) {
   const status = document.getElementById('update-status');
-  const btn = document.getElementById('btn-check-update');
+  const checkBtn = document.getElementById('btn-check-update');
+  const dlBtn = document.getElementById('btn-download-update');
+  const applyBtn = document.getElementById('btn-apply-update');
+  const newBadge = document.getElementById('update-new');
   if (!status) return;
+  status.classList.remove('ok', 'err');
   if (st.phase === 'checking') {
+    if (checkBtn) checkBtn.disabled = true;
     status.textContent = '正在检查更新…';
   } else if (st.phase === 'error') {
-    if (btn) btn.disabled = false;
+    if (checkBtn) checkBtn.disabled = false;
+    if (dlBtn) { dlBtn.style.display = 'none'; dlBtn.textContent = '下载并更新'; }
+    if (applyBtn) applyBtn.style.display = 'none';
     clearUpdatePoll();
+    status.classList.add('err');
     status.textContent = st.error || '更新出错，请稍后重试';
   } else if (st.phase === 'result') {
-    if (btn) btn.disabled = false;
+    if (checkBtn) checkBtn.disabled = false;
     clearUpdatePoll();
     if (st.has_update) {
-      const notes = (st.notes || '').split('\n').filter(Boolean).slice(0, 6).map(s => esc(s)).join('<br>');
-      status.innerHTML = `<div style="color:#e8912d;font-weight:600;margin-bottom:4px">发现新版本 v${esc(st.latest_version)}（当前 v${esc(st.current_version)}）</div>
-        ${notes ? `<div style="margin-bottom:8px">${notes}</div>` : ''}
-        <button class="btn primary" onclick="downloadUpdate()" style="padding:5px 14px;font-size:11px">下载并更新</button>`;
+      if (newBadge) { newBadge.style.display = ''; newBadge.innerHTML = `（检测到新版本 <b>v${esc(st.latest_version)}</b>）`; }
+      const notes = (st.notes || '').split('\n').filter(Boolean).slice(0, 6).map(s => esc(s)).join('\n');
+      status.innerHTML = notes ? notes : '已找到新版本，可点击下方按钮下载';
+      if (dlBtn) { dlBtn.style.display = ''; dlBtn.disabled = false; dlBtn.textContent = '下载并更新'; }
+      if (applyBtn) applyBtn.style.display = 'none';
     } else {
+      if (newBadge) newBadge.style.display = 'none';
+      if (dlBtn) dlBtn.style.display = 'none';
+      if (applyBtn) applyBtn.style.display = 'none';
+      status.classList.add('ok');
       status.textContent = `已是最新版本 v${st.current_version}`;
     }
   } else if (st.phase === 'downloading') {
-    if (btn) btn.disabled = true;
+    if (checkBtn) checkBtn.disabled = true;
+    if (dlBtn) { dlBtn.disabled = true; dlBtn.textContent = '下载中…'; }
     status.textContent = `正在下载更新… ${Math.round(st.progress)}%`;
   } else if (st.phase === 'ready') {
-    if (btn) btn.disabled = false;
+    if (checkBtn) checkBtn.disabled = false;
+    if (dlBtn) dlBtn.style.display = 'none';
     clearUpdatePoll();
-    status.innerHTML = `<div style="color:#3dd68c;font-weight:600;margin-bottom:8px">更新已下载完成</div>
-      <button class="btn primary" onclick="applyUpdateNow()" style="padding:5px 14px;font-size:11px">立即重启更新</button>
-      <span style="font-size:10.5px;color:#8a93b0;margin-left:8px">将关闭当前窗口，完成后自动重新打开</span>`;
+    status.classList.add('ok');
+    status.textContent = '更新已下载完成，点击「立即重启更新」安装（将关闭当前窗口，自动以「四象.exe」重新打开）';
+    if (applyBtn) { applyBtn.style.display = ''; applyBtn.disabled = false; }
   } else if (st.phase === 'applying') {
-    status.textContent = '正在应用更新…';
+    status.textContent = '正在应用更新，程序即将重启…';
   } else {
-    status.textContent = '';
+    status.textContent = '尚未检查更新，点击上方按钮开始';
   }
 }
 
 async function downloadUpdate() {
   const status = document.getElementById('update-status');
+  const dlBtn = document.getElementById('btn-download-update');
   if (status) status.textContent = '准备下载…';
+  if (dlBtn) { dlBtn.disabled = true; dlBtn.textContent = '下载中…'; }
   clearUpdatePoll();
   try { await api.start_download_update(); }
-  catch(e) { if (status) status.textContent = '下载失败：' + e.message; return; }
+  catch(e) {
+    if (status) status.textContent = '下载失败：' + e.message;
+    if (dlBtn) { dlBtn.disabled = false; dlBtn.textContent = '下载并更新'; }
+    return;
+  }
   updateTimer = setInterval(async () => {
     let st;
     try { st = await api.get_update_state(); } catch(e) { return; }
