@@ -83,16 +83,18 @@ class MainWindow(tk.Tk):
         content = tk.Frame(self.card, bg=T.bg)
         content.pack(fill="both", expand=True)
 
-        # 顶部：标题 + 日期；空白区域可拖动整个窗口
+        # 顶部：标题 + 日期；空白区域可拖动整个窗口。标题栏文字整体居中展示
         header = tk.Frame(content, bg=T.bg)
         header.pack(fill="x", padx=14, pady=(16, 0))
-        self.title_label = tk.Label(header, text="四象", bg=T.bg,
+        title_bar = tk.Frame(header, bg=T.bg)
+        title_bar.pack()  # pack 默认 anchor=center，整体水平居中
+        self.title_label = tk.Label(title_bar, text="四象", bg=T.bg,
                                     fg=T.title_text, font=font(15, bold=True))
         self.title_label.pack(side="left")
-        self.date_label = tk.Label(header, text=self._today_str(),
+        self.date_label = tk.Label(title_bar, text=self._today_str(),
                                    bg=T.bg, fg=T.secondary, font=font(12))
-        self.date_label.pack(side="right")
-        for widget in (header, self.title_label, self.date_label):
+        self.date_label.pack(side="left", padx=(14, 0))
+        for widget in (header, title_bar, self.title_label, self.date_label):
             widget.bind("<ButtonPress-1>", self._on_window_press)
             widget.bind("<B1-Motion>", self._on_window_drag)
             widget.bind("<ButtonRelease-1>", self._on_window_release)

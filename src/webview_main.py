@@ -51,6 +51,11 @@ class JsApi:
         self.db.complete_task(task_id)
         return True
 
+    def uncomplete_task(self, task_id: int) -> bool:
+        """取消完成：清空完成时间，任务回到四象限主页。"""
+        self.db.update_task(task_id, completed_at="")
+        return True
+
     def delete_task(self, task_id: int) -> bool:
         self.db.delete_task(task_id)
         return True

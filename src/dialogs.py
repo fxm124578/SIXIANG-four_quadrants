@@ -286,9 +286,10 @@ class TaskDetailDialog(ModalDialog):
         desc_box.pack(fill="x")
         tk.Label(desc_box, text="任务描述", bg=T.panel, fg=T.muted,
                  font=font(11)).pack(anchor="w", padx=12, pady=(10, 2))
-        tk.Label(desc_box, text=task.description or "（无描述）", bg=T.panel,
-                 fg=T.text, font=font(12), anchor="w", justify="left",
-                 wraplength=420).pack(fill="x", padx=12, pady=(0, 12))
+        # Message 组件支持 \n 换行（Label 不渲染换行符）
+        tk.Message(desc_box, text=task.description or "（无描述）", bg=T.panel,
+                   fg=T.text, font=font(12), anchor="w", justify="left",
+                   width=36).pack(fill="x", padx=12, pady=(0, 12))
 
         meta2 = tk.Frame(body, bg=T.bg)
         meta2.pack(fill="x", pady=(10, 0))
@@ -486,8 +487,8 @@ class ReportDialog(tk.Toplevel):
             columns=("time", "title", "tag", "quadrant", "desc"),
             show="headings", style="Dark.Treeview", selectmode="browse",
         )
-        widths = {"time": 120, "title": 140, "tag": 70, "quadrant": 95,
-                  "desc": 220}
+        widths = {"time": 80, "title": 150, "tag": 70, "quadrant": 95,
+                  "desc": 240}
         for column, heading in zip(self.tree["columns"], CSV_HEADERS):
             self.tree.heading(column, text=heading)
             self.tree.column(column, width=widths[column], anchor="w",
@@ -503,8 +504,12 @@ class ReportDialog(tk.Toplevel):
 
         btn_row = tk.Frame(right, bg=T.bg)
         btn_row.pack(fill="x", pady=(10, 0))
+        flat_button(btn_row, "取消完成", bg=T.green, fg="#ffffff",
+                    hover_bg=T.accent_light, press_bg=T.accent_dark,
+                    command=self._uncomplete_selected).pack(side="left")
         flat_button(btn_row, "导出所选日期",
-                    command=self._export_current_day).pack(side="left")
+                    command=self._export_current_day).pack(side="left",
+                                                           padx=(8, 0))
         flat_button(btn_row, "导出日期范围",
                     command=self._export_range).pack(
             side="left", padx=(8, 0))
@@ -555,11 +560,46 @@ class ReportDialog(tk.Toplevel):
             self.tree.insert(
                 "", "end", iid=str(task.id),
                 values=[
-                    task.completed_at or "", task.title, "、".join(task.tags),
-                    task.quadrant_label, task.description,
+                    self._time_part(task.completed_at), task.title,
+                    "、".join(task.tags), task.quadrant_label,
+                    # Treeview 单元格不支持换行，用 ⏎ 保留换行信息，
+                    # 完整换行在双击打开的任务详情中展示
+                    task.description.replace("\n", "⏎"),
                 ],
                 tags=("odd",) if index % 2 else (),
             )
+
+    @staticmethod
+    def _time_part(value: str) -> str:
+        """提取完成时间的 HH:MM 部分（对齐 WebView 日报列）。"""
+        if not value:
+            return ""
+        parts = value.split(" ")
+        return parts[1][:5] if len(parts) > 1 else value[:5]
+
+    def _uncomplete_selected(self) -> None:
+        """取消完成：清空完成时间，任务回到四象限主页。"""
+        selection = self.tree.selection()
+        if not selection:
+            safe_messagebox(self, "warning", "提示",
+                            "请先在列表中选择要恢复为未完成的任务。")
+            return
+        try:
+            task = self.db.get_task(int(selection[0]))
+        except (ValueError, TypeError):
+            return
+        if task is None:
+            return
+        if not safe_messagebox(
+                self, "askyesno", "取消完成",
+                f"确定将「{task.title}」恢复为未完成？任务将回到四象限主页。"):
+            return
+        self.db.update_task(task.id, completed_at="")
+        self.calendar.refresh_marks()
+        self._load_date(self.current_date_str
+                        or date.today().strftime("%Y-%m-%d"))
+        if hasattr(self.master, "refresh_all"):
+            self.master.refresh_all()
 
     def _open_task_detail(self, event) -> None:
         iid = self.tree.identify_row(event.y)

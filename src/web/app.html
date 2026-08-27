@@ -43,7 +43,7 @@ body.midnight .widget::before{content:"";position:absolute;top:0;left:0;right:0;
 body.midnight .widget::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:4;
   background:linear-gradient(115deg,rgba(255,255,255,.10) 0%,transparent 26%)}
 @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
-body.midnight header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px;flex-shrink:0}
+body.midnight header{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 22px 12px;flex-shrink:0}
 body.midnight h1{font-family:"ZCOOL XiaoWei",serif;font-weight:400;font-size:23px;letter-spacing:.14em}
 body.midnight .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
 body.midnight .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4);box-shadow:0 0 8px var(--q4);animation:pulse 2.4s infinite}
@@ -126,7 +126,7 @@ body.frost .widget{
 }
 body.frost .widget::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;
   background:linear-gradient(115deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 30%)}
-body.frost header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px;flex-shrink:0}
+body.frost header{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 22px 12px;flex-shrink:0}
 body.frost h1{font-family:"LXGW WenKai",serif;font-weight:700;font-size:22px;letter-spacing:.1em}
 body.frost .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
 body.frost .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4);box-shadow:0 0 6px rgba(143,199,166,.8)}
@@ -177,6 +177,7 @@ body.neon{
   --bg:#04060d;--ink:#e8f2ff;--muted:#5f708e;
   --glass:rgba(10,16,34,.62);
   --c1:#00e5ff;--c2:#ff4dd8;--c3:#ffe14d;--c4:#3dffa2;
+  --q1:#00e5ff;--q2:#ff4dd8;--q3:#ffe14d;--q4:#3dffa2;
   width:100%;height:100%;margin:0;padding:0;overflow:hidden;
   position:relative;
   font-family:"Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);background:var(--bg);
@@ -207,7 +208,7 @@ body.neon .widget{
 @keyframes boot{from{opacity:0;transform:translateY(22px) skewX(1.5deg)}to{opacity:1;transform:none}}
 body.neon .widget::after{content:"";position:absolute;right:0;bottom:0;width:14px;height:14px;
   background:linear-gradient(315deg,var(--c1) 50%,transparent 50%);filter:drop-shadow(0 0 6px var(--c1))}
-body.neon header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px;flex-shrink:0}
+body.neon header{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 22px 12px;flex-shrink:0}
 body.neon h1{font-family:"ZCOOL QingKe HuangYou",serif;font-weight:400;font-size:24px;letter-spacing:.2em;
   color:#fff;text-shadow:0 0 12px rgba(0,229,255,.75),0 0 30px rgba(0,229,255,.4)}
 body.neon .date{font-size:12px;color:#7a9ab8;display:flex;align-items:center;gap:7px;letter-spacing:.08em;
@@ -302,7 +303,7 @@ body.paper .thread{position:absolute;top:0;left:26px;right:26px;height:2px;z-ind
   background:linear-gradient(90deg,transparent,#b23a2e 12%,#b23a2e 88%,transparent)}
 body.paper .thread::before,.paper .thread::after{content:"";position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;background:#b23a2e}
 body.paper .thread::before{left:-3px}.body.paper .thread::after{right:-3px}
-body.paper header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 12px;flex-shrink:0}
+body.paper header{display:flex;align-items:center;justify-content:center;gap:14px;padding:20px 22px 12px;flex-shrink:0}
 body.paper h1{font-family:"LXGW WenKai",serif;font-weight:700;font-size:23px;letter-spacing:.22em}
 body.paper .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
 body.paper .date .dot{width:8px;height:8px;border-radius:50%;background:var(--q4);border:1px solid rgba(95,140,107,.5)}
@@ -389,6 +390,15 @@ body.paper .icon-btn-sm.danger:hover{background:rgba(255,80,80,.12)}
 .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 .modal .hint{font-size:11px;margin-bottom:8px}
 
+/* 新建任务：历史标签快速点选 */
+.dlg-tag-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;max-height:66px;overflow-y:auto}
+.dlg-tag-chip{font-size:11px;padding:3px 10px;border-radius:99px;cursor:pointer;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+  color:inherit;transition:.15s;user-select:none}
+.dlg-tag-chip:hover{border-color:var(--q3,#5b8cff);background:rgba(91,140,255,.18)}
+.dlg-tag-chip.used{opacity:.4;border-color:transparent;cursor:default}
+.dlg-tag-empty{font-size:10.5px;color:var(--muted)}
+
 /* 字体统一：弹窗/抽屉内所有元素与正文一致。
    input/textarea/select/button 默认不继承 body 字体，会显示成系统默认字体造成混杂 */
 .modal,.drawer,
@@ -419,7 +429,7 @@ body.paper .switch input:checked + .slider{background:#b23a2e}
 .report-left{flex:0 0 280px;display:flex;flex-direction:column;overflow-y:auto}
 .report-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 /* 日报顶部日期导航 + 下拉日历 */
-.report-nav{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.report-nav{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:8px;white-space:nowrap;z-index:70}
 .report-nav-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:inherit;cursor:pointer;transition:.2s;flex-shrink:0;-webkit-app-region:no-drag}
 .report-nav-btn:hover{background:rgba(255,255,255,.14);transform:translateY(-1px)}
 .report-nav-center{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:7px 12px;border-radius:9px;border:1px solid rgba(255,255,255,.12);transition:.2s;user-select:none;-webkit-app-region:no-drag}
@@ -443,7 +453,8 @@ body.frost .report-nav-btn:hover,body.paper .report-nav-btn:hover{background:rgb
   transform:translateY(100%);animation:slideUp .3s cubic-bezier(.2,.8,.2,1) forwards;
   box-shadow:0 -8px 40px rgba(0,0,0,.4);border-radius:18px 18px 0 0}
 @keyframes slideUp{to{transform:translateY(0)}}
-.drawer-header{display:flex;align-items:center;padding:18px 24px 14px;flex-shrink:0;gap:12px}
+.drawer-header{display:flex;align-items:center;padding:18px 24px 14px;flex-shrink:0;gap:12px;
+  position:relative;z-index:60}
 .drawer-header h2{margin:0;flex:1;font-size:16px;font-weight:700}
 .drawer-body{flex:1;display:flex;gap:20px;padding:0 24px 18px;overflow:hidden;min-height:0}
 .drawer-footer{display:flex;align-items:center;gap:8px;padding:12px 24px 16px;flex-shrink:0}
@@ -457,16 +468,79 @@ body.frost .report-nav-btn:hover,body.paper .report-nav-btn:hover{background:rgb
 .calendar-grid .day.today{outline:1.5px solid #8a93b0}
 .calendar-grid .day.selected{background:#4f7df9;color:#fff}
 .calendar-grid .day.completed{background:#4caf7d;color:#fff}
-.report-stats{margin-bottom:8px}
-.report-stats .total{font-size:14px;font-weight:700;color:#4caf7d;margin-bottom:4px}
-.report-stats .stat-line{font-size:12px;margin-bottom:2px}
 .report-table{flex:1;overflow-y:auto;min-height:0}
 .report-table table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
 .report-table th{padding:7px 8px;text-align:left;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);white-space:nowrap}
 .report-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;word-break:break-all}
 .report-table td:nth-child(-n+4),.report-table td:nth-child(6){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:normal}
+/* 日报标签：flex 换行容器，避免胶囊跨行重叠 */
+.report-tags{display:flex;flex-wrap:wrap;gap:4px}
 .report-table tr:hover{background:rgba(255,255,255,.04)}
 .report-table tr:nth-child(even){background:rgba(255,255,255,.02)}
+
+/* 日报报告：概览卡片 + 图表（内联 CSS/SVG，零第三方依赖） */
+.report-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.hero-card{position:relative;overflow:hidden;border-radius:14px;padding:15px 18px 13px 20px;
+  background:var(--glass);border:1px solid var(--stroke);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.hero-card .hero-bar{position:absolute;left:0;top:0;bottom:0;width:4px}
+.hero-card .hero-num{font-size:23px;font-weight:700;line-height:1.2;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.hero-card .hero-label{font-size:11px;color:var(--muted);margin-top:5px}
+.report-charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.chart-card{border-radius:14px;padding:14px 16px;background:var(--glass);
+  border:1px solid var(--stroke);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.chart-card.full{grid-column:1/-1}
+.chart-card h3{font-size:12.5px;font-weight:700;margin-bottom:12px;
+  display:flex;align-items:center;gap:7px}
+.chart-card h3::before{content:"";width:4px;height:13px;border-radius:2px;background:var(--q3,#5b8cff)}
+.donut-wrap{display:flex;align-items:center;gap:20px}
+.donut-num{font-size:28px;font-weight:700;fill:currentColor}
+.donut-cap{font-size:11px;fill:var(--muted)}
+.legend{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0}
+.legend-row{display:flex;align-items:center;gap:8px;font-size:12px}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.legend-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.legend-val{font-weight:700;min-width:20px;text-align:right}
+.legend-pct{color:var(--muted);font-size:11px;width:38px;text-align:right}
+.tbar-row{display:flex;align-items:center;gap:9px;font-size:12px;margin-bottom:8px}
+.tbar-name{width:70px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbar-track{flex:1;height:9px;border-radius:5px;background:rgba(128,136,160,.18);overflow:hidden}
+.tbar-fill{height:100%;border-radius:5px}
+.tbar-val{width:24px;text-align:right;font-weight:700}
+.horbars{display:flex;align-items:flex-end;gap:14px;height:130px;padding:0 4px}
+.hbar-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;
+  justify-content:flex-end;gap:6px}
+.hbar{width:100%;max-width:46px;border-radius:6px 6px 3px 3px;background:var(--q3,#5b8cff);min-height:2px}
+.hbar-val{font-size:11px;font-weight:700;color:var(--muted)}
+.hbar-label{font-size:10.5px;color:var(--muted);text-align:center;line-height:1.3}
+.hbar-col.empty .hbar{background:rgba(128,136,160,.14)}
+.hbar-col.empty .hbar-val{color:rgba(128,136,160,.4)}
+.chart-empty{color:var(--muted);font-size:12px;padding:12px 2px}
+/* 日报页签（页面内部，非标题栏） */
+.report-tabs{display:flex;justify-content:center;align-items:center;gap:12px;
+  margin:0 0 16px;padding-bottom:12px;border-bottom:1px solid var(--stroke)}
+.report-tab{display:flex;align-items:center;padding:5px 16px;border-radius:12px;
+  cursor:pointer;transition:.2s;user-select:none;-webkit-app-region:no-drag;
+  border:1px solid transparent}
+.report-tab:hover{background:rgba(255,255,255,.07)}
+.report-tab .report-overview-title{font-size:15px;color:var(--muted);flex:1;justify-content:center}
+.report-tab .report-overview-title::before,
+.report-tab .report-overview-title::after{opacity:.35;box-shadow:none}
+.report-tab.active{background:var(--glass);border-color:var(--stroke)}
+.report-tab.active .report-overview-title{color:var(--ink)}
+.report-tab.active .report-overview-title::before,
+.report-tab.active .report-overview-title::after{opacity:1}
+.report-overview-title{font-size:16px;font-weight:700;letter-spacing:.08em;white-space:nowrap;
+  display:flex;align-items:center;justify-content:center;gap:9px;color:var(--ink)}
+.report-overview-title::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--q2,#e8912d);
+  box-shadow:0 0 8px var(--q2,#e8912d)}
+.report-overview-title::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--q4,#3dd68c);
+  box-shadow:0 0 8px var(--q4,#3dd68c)}
+.report-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:52px 0;color:var(--muted);gap:10px}
+.report-empty .sub{font-size:11.5px;opacity:.75}
+.report-empty svg{opacity:.5}
 
 /* 主题切换时弹窗背景色适配 */
 body.midnight .modal{background:rgba(28,33,56,.97);color:#eef0fb}
@@ -493,12 +567,10 @@ body.neon .drawer{background:rgba(10,16,34,.97);color:#e8f2ff}
 body.neon .drawer-header{border-bottom:1px solid rgba(0,229,255,.12)}
 body.neon .report-table th{background:rgba(0,229,255,.06)}
 body.neon .calendar-grid .day.completed{background:#3dffa2;color:#02121a}
-body.neon .report-stats .total{color:#3dffa2}
 body.paper .drawer{background:rgba(251,246,232,.97);color:#3d3a33}
 body.paper .drawer-header{border-bottom:1px solid rgba(150,138,110,.2)}
 body.paper .report-table th{background:#ede4cd}
 body.paper .calendar-grid .day.selected{background:#b23a2e;color:#fdf6e8}
-body.paper .report-stats .total{color:#5f8c6b}
 
 /* 四象限两行等高：任务多时在格子内部滚动，互不挤压 */
 body.midnight .grid,body.frost .grid,body.neon .grid,body.paper .grid{grid-template-rows:1fr 1fr}
@@ -711,6 +783,7 @@ let api = null;
 const QUADRANT_NAMES = ['紧急且重要','紧急不重要','不紧急重要','不紧急不重要'];
 const QUADRANT_COLORS = ['#e5533c','#e8912d','#3f7fd9','#4caf7d'];
 const WEEKDAYS = ['周一','周二','周三','周四','周五','周六','周日'];
+const HOUR_SLOTS = [['深夜','0-4'],['清晨','4-8'],['上午','8-12'],['下午','12-16'],['傍晚','16-20'],['夜晚','20-24']];
 const THEME_BACKGROUNDS = {
   midnight: { orbs: true, blobs: false, grid: false, leaves: false, thread: false },
   frost:    { orbs: false, blobs: true,  grid: false, leaves: false, thread: false },
@@ -739,7 +812,7 @@ window.addEventListener('pywebviewready', async () => {
 function applyDate() {
   const d = new Date();
   document.getElementById('today-date').textContent =
-    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.2.0`;
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.3.0`;
 }
 
 /* ================================================================
@@ -780,8 +853,11 @@ function renderQuadrant(q, tasks) {
   document.getElementById(`count-${q}`).textContent = tasks.length;
   container.innerHTML = tasks.map(t => {
     const tags = parseTags(t.tag);
-    const tagHTML = tags.slice(0,2).map((tg,i) => tagSpan(tg, i)).join('')
-      + (tags.length > 2 ? `<span class="tag" style="opacity:.7">+${tags.length-2}</span>` : '');
+    // 标签筛选生效时，任务行只展示被勾选的标签
+    let shownTags = tags;
+    if (selectedTags.length > 0) shownTags = tags.filter(tg => selectedTags.includes(tg));
+    const tagHTML = shownTags.slice(0,2).map((tg,i) => tagSpan(tg, i)).join('')
+      + (shownTags.length > 2 ? `<span class="tag" style="opacity:.7">+${shownTags.length-2}</span>` : '');
     return `<div class="task" draggable="true" data-id="${t.id}" data-quadrant="${q}"
       ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" onclick="openDetail(${t.id})">
       <span class="cb" onclick="event.stopPropagation();completeTask(${t.id},this)"><svg viewBox="0 0 12 10" fill="none"><path d="M1 5.5 4.2 8.5 11 1.5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
@@ -822,6 +898,7 @@ async function loadAllTags() {
     allTags = await api.get_all_tags();
     renderTagPanel();
     updateTagFilterBtn();
+    renderTagChips();
   } catch(e) {
     console.error('加载标签失败:', e);
   }
@@ -966,6 +1043,15 @@ async function deleteReportTask(id, title) {
   loadReportDay(fmtDate(reportDate));
 }
 
+async function uncompleteReportTask(id, title) {
+  if (!confirm(`确定将「${title}」恢复为未完成？任务将回到四象限主页。`)) return;
+  await api.uncomplete_task(id);
+  // 刷新日报内容和日历标记，同时刷新主页（任务回到四象限）
+  completedDatesCache = await api.get_completed_dates();
+  loadReportDay(fmtDate(reportDate));
+  refreshAll();
+}
+
 async function openEdit(id) {
   const t = await api.get_task(id);
   if (!t) return;
@@ -1012,6 +1098,34 @@ async function openEdit(id) {
   setTimeout(() => document.getElementById('edit-title').focus(), 100);
 }
 
+/* 新建任务抽屉：历史标签快速点选 */
+function addTagToInput(tag) {
+  const input = document.getElementById('dlg-tags');
+  if (!input) return;
+  const existing = input.value.split(/[,，;；、\s]+/).filter(Boolean);
+  if (existing.includes(tag)) return;
+  existing.push(tag);
+  input.value = existing.join(' ');
+  renderTagChips();
+}
+
+function renderTagChips() {
+  const box = document.getElementById('dlg-tag-chips');
+  if (!box) return;
+  const input = document.getElementById('dlg-tags');
+  const existing = input ? input.value.split(/[,，;；、\s]+/).filter(Boolean) : [];
+  if (!allTags.length) {
+    box.innerHTML = '<span class="dlg-tag-empty">暂无历史标签</span>';
+    return;
+  }
+  box.innerHTML = allTags.map(tag => {
+    const used = existing.includes(tag);
+    return used
+      ? `<span class="dlg-tag-chip used">${esc(tag)}</span>`
+      : `<span class="dlg-tag-chip" onclick="addTagToInput('${esc(tag).replace(/'/g,"\\'")}')">${esc(tag)}</span>`;
+  }).join('');
+}
+
 /* ================================================================
    新建任务
    ================================================================ */
@@ -1037,8 +1151,9 @@ function openAdd(quadrant = 0) {
           <label>描述</label>
           <textarea id="dlg-desc" style="flex:1;min-height:88px;margin-bottom:12px"></textarea>
           <label>标签</label>
-          <input id="dlg-tags" style="margin-bottom:6px">
-          <div class="hint" style="margin-bottom:0;font-size:10px;color:var(--muted)">多个标签用逗号或空格分隔</div>
+          <input id="dlg-tags" style="margin-bottom:8px">
+          <div id="dlg-tag-chips" class="dlg-tag-chips"></div>
+          <div class="hint" style="margin-bottom:0;font-size:10px;color:var(--muted)">多个标签用逗号或空格分隔，点击下方标签可快速添加</div>
         </div>
         <div style="flex:1;display:flex;flex-direction:column;min-width:0">
           <label>所属象限</label>
@@ -1071,6 +1186,11 @@ function openAdd(quadrant = 0) {
     } catch(err) { alert('保存失败: ' + err.message); console.error(err); }
   };
   setTimeout(() => document.getElementById('dlg-title').focus(), 100);
+  // 历史标签快速点选：输入变化同步 chip 状态；标签未加载时拉取
+  const tagInput = document.getElementById('dlg-tags');
+  if (tagInput) tagInput.addEventListener('input', renderTagChips);
+  if (allTags.length === 0) loadAllTags();
+  renderTagChips();
 }
 
 function selectRadio(el) {
@@ -1096,7 +1216,7 @@ async function openDetail(id) {
     </div>
     <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 16px;margin-bottom:14px">
       <div style="font-size:11px;margin-bottom:6px">任务描述</div>
-      <div style="font-size:12.5px;line-height:1.6">${esc(t.description) || '（无描述）'}</div>
+      <div style="font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word">${esc(t.description) || '（无描述）'}</div>
     </div>
     <div style="font-size:12px;margin-bottom:4px">创建时间：${esc(t.created_at)}</div>
     ${t.completed_at ? `<div style="font-size:12px">完成归档：${esc(t.completed_at)}</div>` :
@@ -1380,34 +1500,169 @@ function selectReportDay(ds) {
   loadReportDay(ds);
 }
 
+function computeReportStats(tasks) {
+  const byQ = [0,0,0,0], byTag = {}, hours = new Array(24).fill(0);
+  tasks.forEach(t => {
+    byQ[t.quadrant] = (byQ[t.quadrant]||0) + 1;
+    (parseTags(t.tag)||['（无标签）']).forEach(tg => byTag[tg]=(byTag[tg]||0)+1);
+    const hm = (t.completed_at||'').split(' ')[1];
+    if (hm) {
+      const h = parseInt(hm.split(':')[0], 10);
+      if (!isNaN(h) && h >= 0 && h < 24) hours[h]++;
+    }
+  });
+  const slots = HOUR_SLOTS.map((_, i) => hours.slice(i*4, i*4+4).reduce((a,b)=>a+b, 0));
+  const tagCount = Object.keys(byTag).length;
+  let peak = null;
+  slots.forEach((c, i) => { if (c > 0 && (!peak || c > peak.count)) peak = {count: c, name: HOUR_SLOTS[i][0] + ' ' + HOUR_SLOTS[i][1]}; });
+  const times = tasks.map(t => t.completed_at).filter(Boolean).sort();
+  let avgMin = null;
+  if (times.length >= 2) {
+    let total = 0;
+    for (let i = 1; i < times.length; i++) {
+      total += (new Date(times[i].replace(' ','T')) - new Date(times[i-1].replace(' ','T'))) / 60000;
+    }
+    avgMin = Math.round(total / (times.length - 1));
+  }
+  return {total: tasks.length, byQ, byTag, slots, tagCount, peak, avgMin};
+}
+
+function fmtInterval(m) {
+  if (m == null) return '—';
+  if (m < 1) return '<1 分钟';
+  if (m < 60) return m + ' 分钟';
+  const h = Math.floor(m / 60), r = m % 60;
+  return r ? `${h} 小时 ${r} 分` : `${h} 小时`;
+}
+
+function cardsHTML(stats) {
+  const cards = [
+    {num: stats.total, label: '完成任务', color: QUADRANT_COLORS[3]},
+    {num: stats.tagCount, label: '涉及标签', color: QUADRANT_COLORS[2]},
+    {num: stats.peak ? stats.peak.name : '—', label: '高峰时段', color: QUADRANT_COLORS[1]},
+    {num: fmtInterval(stats.avgMin), label: '平均完成间隔', color: QUADRANT_COLORS[0]},
+  ];
+  return `<div class="report-hero">` + cards.map(c =>
+    `<div class="hero-card"><span class="hero-bar" style="background:${c.color}"></span>` +
+    `<div class="hero-num">${esc(String(c.num))}</div><div class="hero-label">${c.label}</div></div>`
+  ).join('') + `</div>`;
+}
+
+function donutHTML(stats) {
+  const size = 168, stroke = 22;
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r, cx = size / 2;
+  let acc = 0, circles = '';
+  for (let q = 0; q < 4; q++) {
+    const v = stats.byQ[q] || 0;
+    if (v <= 0) continue;
+    const frac = v / stats.total;
+    const len = frac * c;
+    circles += `<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${QUADRANT_COLORS[q]}" ` +
+      `stroke-width="${stroke}" stroke-dasharray="${len.toFixed(2)} ${(c-len).toFixed(2)}" ` +
+      `transform="rotate(${(acc*360-90).toFixed(2)} ${cx} ${cx})"/>`;
+    acc += frac;
+  }
+  const legend = QUADRANT_NAMES.map((n, q) => {
+    const v = stats.byQ[q] || 0;
+    const pct = stats.total ? Math.round(v / stats.total * 100) : 0;
+    return `<div class="legend-row"><span class="legend-dot" style="background:${QUADRANT_COLORS[q]}"></span>` +
+      `<span class="legend-name">${n}</span><span class="legend-val">${v}</span>` +
+      `<span class="legend-pct">${pct}%</span></div>`;
+  }).join('');
+  return `<div class="donut-wrap">` +
+    `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" class="donut">${circles}` +
+    `<text x="${cx}" y="${cx-1}" text-anchor="middle" class="donut-num">${stats.total}</text>` +
+    `<text x="${cx}" y="${cx+15}" text-anchor="middle" class="donut-cap">完成任务</text></svg>` +
+    `<div class="legend">${legend}</div></div>`;
+}
+
+function tagBarsHTML(byTag) {
+  const entries = Object.entries(byTag).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  if (!entries.length) return '<div class="chart-empty">今日无标签记录</div>';
+  const top = entries[0][1];
+  return entries.map(([tag, count], i) => {
+    const [fg] = TAG_PALETTE[i % TAG_PALETTE.length];
+    const pct = Math.round(count / top * 100);
+    return `<div class="tbar-row"><span class="tbar-name" title="${esc(tag)}">${esc(tag)}</span>` +
+      `<div class="tbar-track"><div class="tbar-fill" style="width:${pct}%;background:${fg}"></div></div>` +
+      `<span class="tbar-val">${count}</span></div>`;
+  }).join('');
+}
+
+function hourBarsHTML(slots) {
+  const top = Math.max.apply(null, slots.concat([1]));
+  return slots.map((count, i) => {
+    const pct = count ? Math.max(3, Math.round(count / top * 100)) : 0;
+    const [name, span] = HOUR_SLOTS[i];
+    return `<div class="hbar-col${count ? '' : ' empty'}"><span class="hbar-val">${count}</span>` +
+      `<div class="hbar" style="height:${pct}%"></div>` +
+      `<span class="hbar-label">${name}<br>${span}</span></div>`;
+  }).join('');
+}
+
+function reportEmptyHTML(ds) {
+  return `<div class="report-empty">` +
+    `<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>` +
+    `<div style="font-size:13px">${ds} 暂无已完成任务</div>` +
+    `<div class="sub">去四象限勾选任务，完成记录会出现在这里</div></div>`;
+}
+
 async function loadReportDay(ds) {
   const tasks = await api.get_completed_tasks(ds);
-  const stats = {total:tasks.length, byQ:[0,0,0,0], byTag:{}};
-  tasks.forEach(t => { stats.byQ[t.quadrant]++; (parseTags(t.tag)||['（无标签）']).forEach(tg => stats.byTag[tg]=(stats.byTag[tg]||0)+1); });
   const el = document.getElementById('report-content');
   if (!el) return;
+  if (!tasks.length) {
+    el.innerHTML = reportEmptyHTML(ds);
+    return;
+  }
+  const stats = computeReportStats(tasks);
+  const tagsCell = t => '<div class="report-tags">' + parseTags(t.tag).map((tg,i)=>tagSpan(tg,i)).join('') + '</div>';
   el.innerHTML = `
-    <div class="report-stats">
-      <div class="total">${ds} 日报 · 完成 ${stats.total} 个任务</div>
-      <div class="stat-line">按象限：${stats.byQ.map((c,i) => c?`${QUADRANT_NAMES[i]}：${c}`:'').filter(Boolean).join('、')||'无'}</div>
-      <div class="stat-line">按标签：${Object.entries(stats.byTag).sort((a,b)=>b[1]-a[1]).map(([t,c])=>`${t}：${c}`).join('、')||'无'}</div>
+    <div class="report-tabs">
+      <div class="report-tab active" data-tab="detail" onclick="switchReportTab('detail')">
+        <span class="report-overview-title">任务明细</span>
+      </div>
+      <div class="report-tab" data-tab="overview" onclick="switchReportTab('overview')">
+        <span class="report-overview-title">日报概览</span>
+      </div>
     </div>
-    <div class="report-table"><table>
+    <div id="report-page-overview" style="display:none">
+      ${cardsHTML(stats)}
+      <div class="report-charts">
+        <div class="chart-card">
+          <h3>象限分布</h3>
+          ${donutHTML(stats)}
+        </div>
+        <div class="chart-card">
+          <h3>标签分布</h3>
+          ${tagBarsHTML(stats.byTag)}
+        </div>
+        <div class="chart-card full">
+          <h3>完成时段</h3>
+          <div class="horbars">${hourBarsHTML(stats.slots)}</div>
+        </div>
+      </div>
+    </div>
+    <div id="report-page-detail">
+      <div class="report-table"><table>
       <thead><tr>
-        <th style="width:56px">时间</th>
+        <th style="width:72px">完成时间</th>
         <th style="width:124px">标题</th>
-        <th style="width:88px">标签</th>
+        <th style="width:110px">标签</th>
         <th style="width:88px">象限</th>
         <th>描述</th>
-        <th style="width:76px;text-align:center">操作</th>
+        <th style="width:112px;text-align:center">操作</th>
       </tr></thead>
       <tbody>${tasks.map(t=>`<tr>
         <td>${esc(((t.completed_at||'').split(' ')[1]||'').slice(0,5))}</td>
         <td>${esc(t.title)}</td>
-        <td>${parseTags(t.tag).map((tg,i)=>tagSpan(tg,i)).join('')}</td>
+        <td style="white-space:normal;word-break:break-word">${tagsCell(t)}</td>
         <td>${esc(QUADRANT_NAMES[t.quadrant])}</td>
-        <td>${esc(t.description)}</td>
+        <td style="white-space:pre-wrap;word-break:break-word">${esc(t.description)}</td>
         <td style="text-align:center;white-space:nowrap">
+          <span class="icon-btn-sm" onclick="uncompleteReportTask(${t.id},'${esc(t.title).replace(/'/g,"\\'")}')" title="取消完成" style="color:var(--q4,#3dd68c)">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="currentColor" stroke="currentColor" stroke-width="1.2"/><path d="M5 8.2l2 2 4-4.4" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
           <span class="icon-btn-sm" onclick="openEdit(${t.id})" title="编辑">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </span>
@@ -1416,7 +1671,18 @@ async function loadReportDay(ds) {
           </span>
         </td>
       </tr>`).join('')}</tbody>
-    </table></div>`;
+    </table></div>
+    </div>`;
+}
+
+function switchReportTab(name) {
+  document.querySelectorAll('.report-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === name);
+  });
+  const overview = document.getElementById('report-page-overview');
+  const detail = document.getElementById('report-page-detail');
+  if (overview) overview.style.display = name === 'overview' ? '' : 'none';
+  if (detail) detail.style.display = name === 'detail' ? '' : 'none';
 }
 
 function calPrev() {
