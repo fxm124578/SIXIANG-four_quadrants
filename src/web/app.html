@@ -799,10 +799,10 @@ function parseTags(raw) {
   catch { return [raw]; }
 }
 
-/* 多标签配色：按索引循环分配颜色，四主题通用 */
+/* 多标签配色：按索引循环分配颜色，浅底深字保证四主题下高对比可读 */
 const TAG_PALETTE = [
-  ['#cfc4ff', '#3a3170'], ['#ffd9a3', '#5a3d10'], ['#9fe8c3', '#0f3a26'],
-  ['#a8c2ff', '#1a2d55'], ['#ffb0a6', '#55201a'], ['#ffb3ec', '#4a1a3a'],
+  ['#5b4bb5', '#e8e3ff'], ['#8a5a10', '#fff0d4'], ['#2e7d52', '#dcf5e8'],
+  ['#2f6fc4', '#dcebff'], ['#b04a3c', '#fde3de'], ['#a83e80', '#fde3f2'],
 ];
 function tagSpan(tg, idx) {
   const [fg, bg] = TAG_PALETTE[idx % TAG_PALETTE.length];
