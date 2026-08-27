@@ -470,7 +470,7 @@ body.frost .report-nav-btn:hover,body.paper .report-nav-btn:hover{background:rgb
 .calendar-grid .day.completed{background:#4caf7d;color:#fff}
 .report-table{flex:1;overflow-y:auto;min-height:0}
 .report-table table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
-.report-table th{padding:7px 8px;text-align:left;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);white-space:nowrap}
+.report-table th{padding:7px 8px;text-align:center;font-weight:600;border-bottom:1px solid rgba(255,255,255,.1);white-space:nowrap}
 .report-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;word-break:break-all}
 .report-table td:nth-child(-n+4),.report-table td:nth-child(6){white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:normal}
 /* 日报标签：flex 换行容器，避免胶囊跨行重叠 */
@@ -812,7 +812,7 @@ window.addEventListener('pywebviewready', async () => {
 function applyDate() {
   const d = new Date();
   document.getElementById('today-date').textContent =
-    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.3.0`;
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.3.1`;
 }
 
 /* ================================================================
