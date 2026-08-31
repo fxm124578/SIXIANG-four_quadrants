@@ -879,6 +879,11 @@ function startSplashRotation() {
       el.innerHTML = splashLineHtml(SPLASH_LINES[idx]);
       el.style.opacity = '1';
     }, 150);
+    // 三句各 1s 播完一遍即停止，之后停留在最后一句（共 3s）
+    if (idx >= SPLASH_LINES.length - 1) {
+      clearInterval(splashTimer);
+      splashTimer = null;
+    }
   }, 1000);
 }
 startSplashRotation();
@@ -887,7 +892,7 @@ function hideSplash() {
   const splash = document.getElementById('splash');
   if (!splash || splash.classList.contains('hide')) return;
   if (splashTimer) { clearInterval(splashTimer); splashTimer = null; }
-  // 加载文案至少轮播 3s 再淡出
+  // 加载文案至少轮播 3s 再淡出（超过 3s 则停留在最后一句）
   const delay = Math.max(0, 3000 - (Date.now() - splashStart));
   setTimeout(() => {
     splash.classList.add('hide');
@@ -895,7 +900,7 @@ function hideSplash() {
   }, delay);
 }
 // 非 pywebview 环境（如浏览器直接打开）兜底隐藏加载页
-setTimeout(() => { if (!api) hideSplash(); }, 3500);
+setTimeout(() => { if (!api) hideSplash(); }, 3000);
 
 function applyDate() {
   const d = new Date();
