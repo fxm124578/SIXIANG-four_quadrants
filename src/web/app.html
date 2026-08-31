@@ -616,7 +616,12 @@ body.midnight .grid,body.frost .grid,body.neon .grid,body.paper .grid{grid-templ
   background:linear-gradient(90deg,#e5533c,#e8912d,#3f7fd9,#4caf7d);
   animation:splashSlide 1.2s ease-in-out infinite}
 @keyframes splashSlide{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
-#splash .splash-text{font-size:12px;color:#9aa3b5;letter-spacing:.14em;transition:opacity .15s ease}
+#splash .splash-text{font-size:13px;color:#9aa3b5;letter-spacing:.14em;transition:opacity .15s ease}
+#splash .splash-text .splash-brand{
+  font-weight:700;letter-spacing:.06em;
+  background:linear-gradient(90deg,#e5533c,#e8912d,#3f7fd9,#4caf7d);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent}
 
 /* ================================================================
    E . 标签筛选（上拉面板，低调按钮）
@@ -855,10 +860,14 @@ window.addEventListener('pywebviewready', async () => {
   hideSplash();
 });
 
-// 加载页文案四句轮播（每句 0.5s，至少轮播 2s）
-const SPLASH_LINES = ['无极生太极','太极生两仪','两仪生四象','四象生八卦'];
+// 加载页文案三句轮播（每句 1s，至少轮播 3s）
+const SPLASH_LINES = ['无极生太极','太极生两仪','两仪生四象'];
 const splashStart = Date.now();
 let splashTimer = null;
+function splashLineHtml(line) {
+  // 「四象」品牌字用四色渐变高亮
+  return line.replace('四象', '<span class="splash-brand">四象</span>');
+}
 function startSplashRotation() {
   const el = document.getElementById('splash-text');
   if (!el) return;
@@ -867,10 +876,10 @@ function startSplashRotation() {
     idx = (idx + 1) % SPLASH_LINES.length;
     el.style.opacity = '0';
     setTimeout(() => {
-      el.textContent = SPLASH_LINES[idx];
+      el.innerHTML = splashLineHtml(SPLASH_LINES[idx]);
       el.style.opacity = '1';
     }, 150);
-  }, 500);
+  }, 1000);
 }
 startSplashRotation();
 
@@ -878,15 +887,15 @@ function hideSplash() {
   const splash = document.getElementById('splash');
   if (!splash || splash.classList.contains('hide')) return;
   if (splashTimer) { clearInterval(splashTimer); splashTimer = null; }
-  // 加载文案至少轮播 2s 再淡出
-  const delay = Math.max(0, 2000 - (Date.now() - splashStart));
+  // 加载文案至少轮播 3s 再淡出
+  const delay = Math.max(0, 3000 - (Date.now() - splashStart));
   setTimeout(() => {
     splash.classList.add('hide');
     setTimeout(() => { if (splash.parentNode) splash.remove(); }, 400);
   }, delay);
 }
 // 非 pywebview 环境（如浏览器直接打开）兜底隐藏加载页
-setTimeout(() => { if (!api) hideSplash(); }, 3000);
+setTimeout(() => { if (!api) hideSplash(); }, 3500);
 
 function applyDate() {
   const d = new Date();
