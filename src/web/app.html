@@ -1076,46 +1076,94 @@ async function openEdit(id) {
   const t = await api.get_task(id);
   if (!t) return;
   const tags = parseTags(t.tag);
-  // 已完成任务支持编辑完成时间（datetime-local）
+  closeModal();
+  closeDrawer();
+  const overlay = document.createElement('div');
+  overlay.id = 'drawer-overlay';
+  overlay.className = 'drawer-overlay';
+  overlay.onclick = e => { if (e.target === overlay) closeDrawer(); };
+
+  // 已完成任务支持编辑完成时间（datetime-local）；进行中任务不显示
   const completedHTML = t.completed_at
-    ? `<label>完成时间</label><input type="datetime-local" id="edit-completed" value="${esc(t.completed_at.replace(' ', 'T'))}">`
+    ? `<label>完成时间</label><input type="datetime-local" id="edit-completed" value="${esc(t.completed_at.replace(' ', 'T'))}" style="margin-bottom:10px">`
     : '';
-  showModal('编辑任务', `
-    <label>标题</label><input id="edit-title" maxlength="80" value="${esc(t.title)}">
-    <label>描述</label><textarea id="edit-desc">${esc(t.description)}</textarea>
-    <label>标签</label><input id="edit-tags" value="${esc(tags.join(' '))}">
-    ${completedHTML}
-    <label>所属象限</label>
-    <div class="radio-group" id="edit-quads">
-      ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===t.quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
-        <span style="width:8px;height:8px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
-    </div>`,
-    [{text:'取消',action:'close'},{text:'保存',action:'submit',primary:true,handler:async()=>{
-      try {
-        const title = document.getElementById('edit-title').value.trim();
-        if (!title) { alert('任务标题不能为空'); return; }
-        const desc = document.getElementById('edit-desc').value.trim();
-        const rawTags = document.getElementById('edit-tags').value;
-        const tags = rawTags.split(/[,，;；、\s]+/).filter(x=>x.trim());
-        const quad = parseInt(document.querySelector('#edit-quads .selected')?.dataset.v ?? '0');
-        // 完成时间：datetime-local 无秒，分钟数补 :00；清空表示恢复进行中
-        let completedVal = '';
-        const completedEl = document.getElementById('edit-completed');
-        if (completedEl) {
-          completedVal = completedEl.value ? completedEl.value.replace('T', ' ') : '';
-          if (completedVal && completedVal.split(' ')[1].split(':').length === 2) completedVal += ':00';
-        }
-        await api.update_task(id, title, desc, JSON.stringify([...new Set(tags)]), quad, completedVal);
-        closeModal();
-        refreshAll();
-        // 若原任务已完成，同步刷新日报内容与日历标记
-        if (t.completed_at) {
-          completedDatesCache = await api.get_completed_dates();
-          loadReportDay(fmtDate(reportDate));
-        }
-      } catch(err) { alert('保存失败: ' + err.message); }
-    }}]);
-  setTimeout(() => document.getElementById('edit-title').focus(), 100);
+
+  // 与新建任务完全相同的抽屉排版（复用 dlg-* 输入框，历史标签胶囊/快捷键逻辑共用）
+  overlay.innerHTML = `
+    <div class="drawer" style="height:480px;min-height:400px;max-height:80vh" onclick="event.stopPropagation()">
+      <div class="drawer-header" style="padding-top:24px">
+        <h2>✏️ 编辑任务</h2>
+        <span style="flex:1"></span>
+        <span class="icon-btn-sm" onclick="closeDrawer()" title="关闭">${ICON_SVGS.close}</span>
+      </div>
+      <div class="drawer-body" style="gap:22px;padding-top:16px">
+        <div style="flex:3;display:flex;flex-direction:column;min-width:0">
+          <label>标题 *</label>
+          <input id="dlg-title" maxlength="80" value="${esc(t.title)}" style="margin-bottom:12px">
+          <label>描述</label>
+          <textarea id="dlg-desc" style="flex:1;min-height:88px;margin-bottom:12px">${esc(t.description)}</textarea>
+          <label>标签 <span style="opacity:.45;font-size:10px;font-weight:400;letter-spacing:.02em">多个标签用逗号或空格分隔</span></label>
+          <input id="dlg-tags" value="${esc(tags.join(' '))}" style="margin-bottom:8px">
+          <div id="dlg-tag-chips" class="dlg-tag-chips"></div>
+          ${completedHTML}
+          <div class="hint" style="margin-bottom:0;font-size:10px;color:var(--muted);opacity:.72;text-align:right">ctrl + ↩︎ 快速保存</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+          <label>所属象限</label>
+          <div class="radio-group" id="dlg-quads" style="grid-template-columns:1fr;align-content:start;margin-bottom:0">
+            ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===t.quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
+              <span style="width:9px;height:9px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer" style="justify-content:flex-end;gap:10px">
+        <button class="btn" onclick="closeDrawer()" style="display:inline-flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>取消</button>
+        <button class="btn primary" id="dlg-submit" style="display:inline-flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  document.getElementById('dlg-submit').onclick = async () => {
+    try {
+      const title = document.getElementById('dlg-title').value.trim();
+      if (!title) { alert('任务标题不能为空'); document.getElementById('dlg-title').focus(); return; }
+      const desc = document.getElementById('dlg-desc').value.trim();
+      const rawTags = document.getElementById('dlg-tags').value;
+      const tags = rawTags.split(/[,，;；、\s]+/).filter(x=>x.trim());
+      const quad = parseInt(document.querySelector('#dlg-quads .selected')?.dataset.v ?? '0');
+      // 完成时间：datetime-local 无秒，分钟数补 :00；清空表示恢复进行中
+      let completedVal = '';
+      const completedEl = document.getElementById('edit-completed');
+      if (completedEl) {
+        completedVal = completedEl.value ? completedEl.value.replace('T', ' ') : '';
+        if (completedVal && completedVal.split(' ')[1].split(':').length === 2) completedVal += ':00';
+      }
+      await api.update_task(id, title, desc, JSON.stringify([...new Set(tags)]), quad, completedVal);
+      closeDrawer();
+      refreshAll();
+      // 若原任务已完成，同步刷新日报内容与日历标记
+      if (t.completed_at) {
+        completedDatesCache = await api.get_completed_dates();
+        loadReportDay(fmtDate(reportDate));
+      }
+    } catch(err) { alert('保存失败: ' + err.message); console.error(err); }
+  };
+  setTimeout(() => document.getElementById('dlg-title').focus(), 100);
+  // Ctrl+Enter 快速保存
+  overlay.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      const submit = document.getElementById('dlg-submit');
+      if (submit) submit.click();
+    }
+  });
+  // 历史标签快速点选：输入变化同步 chip 状态；标签未加载时拉取
+  const tagInput = document.getElementById('dlg-tags');
+  if (tagInput) tagInput.addEventListener('input', renderTagChips);
+  if (allTags.length === 0) loadAllTags();
+  renderTagChips();
 }
 
 /* 新建任务抽屉：历史标签快速点选 */
