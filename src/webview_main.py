@@ -275,7 +275,7 @@ def _make_window(api: JsApi, db: Database, html_path: str) -> webview.Window:
         width=width, height=height, x=x, y=y,
         frameless=frameless,
         on_top=on_top,
-        easy_drag=True,  # 默认整个窗口可拖动，CSS 排除交互区域
+        easy_drag=False,  # 拖动仅限 .pywebview-drag-region 头部区域（见 run()）
     )
     api.set_window(window)
     return window
@@ -284,6 +284,10 @@ def _make_window(api: JsApi, db: Database, html_path: str) -> webview.Window:
 def run() -> int:
     db = Database()
     try:
+        # 窗口拖动限定在标记了 .pywebview-drag-region 的头部区域：
+        # pywebview 6.2.1 的 easy_drag=True 会无条件捕获 window mousedown 移动
+        # 窗口（CSS no-drag 无效），导致长按选词/拖任务时误拖窗口，故关闭它。
+        webview.settings['DRAG_REGION_SELECTOR'] = '.pywebview-drag-region'
         # 更新就绪状态持久化：下载完成写入 DB，重启后恢复，可随时进设置安装
         updater.set_persist_ready_cb(
             lambda p: db.set_setting("update_ready_path", p))
