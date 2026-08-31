@@ -9,10 +9,9 @@
 from __future__ import annotations
 
 import tkinter as tk
-from datetime import date
+from datetime import date, datetime
 
 import dialogs
-import updater
 from db import Database
 from styles import (
     T,
@@ -35,6 +34,7 @@ class MainWindow(tk.Tk):
         self._locked = False
         self._opacity = 0.97
         self._save_after_id = None
+        self._clock_after_id = None
         self._window_drag = None
         self._resize_drag = None
         self._task_drag = None
@@ -61,6 +61,7 @@ class MainWindow(tk.Tk):
         self._apply_window_mode(self._window_mode)
         self.attributes("-alpha", self._opacity)
         self._refresh_all()
+        self._schedule_clock()
 
         self.protocol("WM_DELETE_WINDOW", self.quit_app)
         self.bind_all("<MouseWheel>", self._on_global_wheel)
@@ -510,9 +511,24 @@ class MainWindow(tk.Tk):
     # ------------------------------------------------------------ 设置持久化
     @staticmethod
     def _today_str() -> str:
-        today = date.today()
-        return (f"{today.strftime('%Y-%m-%d')} "
-                f"{WEEKDAY_NAMES[today.weekday()]} · v{updater.APP_VERSION}")
+        now = datetime.now()
+        return (f"{now.strftime('%Y-%m-%d')} "
+                f"{WEEKDAY_NAMES[now.weekday()]} · {now.strftime('%H:%M')}")
+
+    def _schedule_clock(self) -> None:
+        """顶部时钟每分钟刷新（与 WebView 版保持一致）。"""
+        try:
+            self.after_cancel(self._clock_after_id)
+        except (AttributeError, tk.TclError):
+            pass
+        self._clock_after_id = self.after(30000, self._tick_clock)
+
+    def _tick_clock(self) -> None:
+        try:
+            self.date_label.configure(text=self._today_str())
+        except tk.TclError:
+            return
+        self._schedule_clock()
 
     def _load_settings(self) -> None:
         # 主题（先于 _build_ui 生效）

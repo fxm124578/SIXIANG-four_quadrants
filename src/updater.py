@@ -14,7 +14,7 @@ import threading
 import urllib.error
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
 APP_VERSION = "1.3.3"
@@ -24,6 +24,27 @@ USER_AGENT = f"Sixiang/{APP_VERSION}"
 DOWNLOAD_TIMEOUT = 20
 
 _UPDATE_DIR_NAME = ".__update__"
+
+# 「下载完成」持久化回调：WebView 版注册后写入设置库，重启后可恢复就绪状态
+_persist_ready_cb = None
+
+
+def set_persist_ready_cb(cb) -> None:
+    """注册下载完成回调（接收本地 exe 路径）。"""
+    global _persist_ready_cb
+    _persist_ready_cb = cb
+
+
+def restore_ready(local_path: str) -> bool:
+    """启动时恢复上次已下载但未安装的更新；文件不存在则忽略。"""
+    p = Path(local_path)
+    if not p.is_file():
+        return False
+    with _state["lock"]:
+        _state["phase"] = "ready"
+        _state["progress"] = 100.0
+        _state["local_path"] = str(p)
+    return True
 
 
 def _parse_version(version: str) -> tuple:
@@ -220,6 +241,11 @@ def _download_worker(url: str, name: str) -> None:
             _state["phase"] = "error"
             _state["error"] = f"下载失败：{result}"
             _state["progress"] = 0.0
+    if ok and _persist_ready_cb:
+        try:
+            _persist_ready_cb(result)
+        except Exception:
+            pass
 
 
 # ---------------------------------------------------------------- 应用更新
@@ -255,27 +281,28 @@ def _launch_replace_script(local_path: Path) -> None:
 
     重命名目标固定为「四象.exe」（与当前 exe 名、release 资产名无关），
     保证开机自启等依赖固定路径/名称的机制始终有效。
+
+    关键：bat 内容保持纯 ASCII，含中文的 exe 路径通过命令行参数（%1，
+    Python 以宽字符传给 cmd）传入，避免 cmd 在 GBK/UTF-8 代码页下解析
+    中文批处理出现乱码（历史 bug：更新后 exe 被命名为乱码且未覆盖旧版）。
+    结束旧进程改用 PID，不再依赖可能含中文的进程映像名。
     """
     target_exe = Path(sys.executable).resolve()
     update_dir = _update_dir()
     update_dir.mkdir(parents=True, exist_ok=True)
-    new_name = local_path.name
-    # 当前进程名：用于结束旧进程（用户可能改过 exe 名）
-    process_name = target_exe.name
-    # 固定重命名目标：应用更新后统一为「四象.exe」
-    target_name = "四象.exe"
+    new_name = local_path.name  # release 资产名为 ASCII，如 Sixiang-v1.3.4.exe
+    pid = os.getpid()
 
     bat_lines = [
         "@echo off",
-        "chcp 65001 >nul",
         'cd /d "%~dp0"',
         "timeout /t 2 /nobreak >nul",
-        f'taskkill /f /im "{process_name}" >nul 2>&1',
+        f"taskkill /f /pid {pid} >nul 2>&1",
         "timeout /t 1 /nobreak >nul",
-        f'move /y "%~dp0{new_name}" "%~dp0..\\{target_name}" >nul',
+        f'move /y "%~dp0{new_name}" "%1" >nul',
         "if errorlevel 1 goto :fail",
-        f'start "" "%~dp0..\\{target_name}"',
-        'cd ..',
+        'start "" "%1"',
+        "cd ..",
         'rmdir /s /q ".__update__" >nul 2>&1',
         '(goto) 2>nul & del "%~f0"',
         "exit /b 0",
@@ -284,12 +311,12 @@ def _launch_replace_script(local_path: Path) -> None:
         "exit /b 1",
     ]
     bat_path = update_dir / "update.bat"
-    # cmd 默认按 ANSI(GBK) 解析 bat；含中文 exe 名必须用 GBK 编码写入
-    bat_path.write_text("\r\n".join(bat_lines), encoding="gbk", errors="replace")
+    # 全 ASCII 内容，任何代码页下解析一致，无需 chcp / GBK
+    bat_path.write_text("\r\n".join(bat_lines), encoding="ascii")
 
     creation_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     subprocess.Popen(
-        ["cmd", "/c", str(bat_path)],
+        ["cmd", "/c", str(bat_path), str(target_exe)],
         cwd=str(update_dir),
         creationflags=creation_flags,
         close_fds=True,

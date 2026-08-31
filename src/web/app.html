@@ -390,13 +390,13 @@ body.paper .icon-btn-sm.danger:hover{background:rgba(255,80,80,.12)}
 .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
 .modal .hint{font-size:11px;margin-bottom:8px}
 
-/* 新建任务：历史标签快速点选 */
+/* 新建任务：历史标签快速点选（胶囊配色，点击后变淡不可选） */
 .dlg-tag-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;max-height:66px;overflow-y:auto}
 .dlg-tag-chip{font-size:11px;padding:3px 10px;border-radius:99px;cursor:pointer;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.07);border:1px solid transparent;
   color:inherit;transition:.15s;user-select:none}
-.dlg-tag-chip:hover{border-color:var(--q3,#5b8cff);background:rgba(91,140,255,.18)}
-.dlg-tag-chip.used{opacity:.4;border-color:transparent;cursor:default}
+.dlg-tag-chip:hover{box-shadow:0 0 0 1.5px var(--q3,#5b8cff)}
+.dlg-tag-chip.used{opacity:.4;border-color:transparent;cursor:default;box-shadow:none}
 .dlg-tag-empty{font-size:10.5px;color:var(--muted)}
 
 /* 字体统一：弹窗/抽屉内所有元素与正文一致。
@@ -815,13 +815,8 @@ const THEME_BACKGROUNDS = {
 window.addEventListener('pywebviewready', async () => {
   api = window.pywebview.api;
   applyDate();
-  try {
-    const ver = await api.get_app_version();
-    const el = document.getElementById('today-date');
-    if (el && ver && ver.version) {
-      el.textContent = el.textContent.replace(/v[\d.]+$/, 'v' + ver.version);
-    }
-  } catch(e) {}
+  setInterval(applyDate, 30000); // 时钟每分钟刷新（30s 间隔保证整分后尽快更新）
+  startUpdateMonitor(); // 后台更新监控：下载完成后弹窗提示
   const st = await api.get_settings();
   isLocked = st.locked === '1';
   updateLockUI();
@@ -832,8 +827,11 @@ window.addEventListener('pywebviewready', async () => {
 
 function applyDate() {
   const d = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  // 顶部小字：日期 + 星期 + 当前时间（24 小时制）；版本号只在设置中显示
   document.getElementById('today-date').textContent =
-    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · v1.3.3`;
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${WEEKDAYS[(d.getDay()+6)%7]} · ${hh}:${mm}`;
 }
 
 /* ================================================================
@@ -1139,11 +1137,16 @@ function renderTagChips() {
     box.innerHTML = '<span class="dlg-tag-empty">暂无历史标签</span>';
     return;
   }
-  box.innerHTML = allTags.map(tag => {
+  // 按任务标签配色展示胶囊；已加入输入框的胶囊变淡且不可再点选
+  box.innerHTML = allTags.map((tag, i) => {
     const used = existing.includes(tag);
+    const [fg, bg] = TAG_PALETTE[i % TAG_PALETTE.length];
+    const style = used
+      ? `background:${bg};color:${fg};opacity:.38`
+      : `background:${bg};color:${fg}`;
     return used
-      ? `<span class="dlg-tag-chip used">${esc(tag)}</span>`
-      : `<span class="dlg-tag-chip" onclick="addTagToInput('${esc(tag).replace(/'/g,"\\'")}')">${esc(tag)}</span>`;
+      ? `<span class="dlg-tag-chip used" style="${style}">${esc(tag)}</span>`
+      : `<span class="dlg-tag-chip" style="${style}" onclick="addTagToInput('${esc(tag).replace(/'/g,"\\'")}')">${esc(tag)}</span>`;
   }).join('');
 }
 
@@ -1171,10 +1174,10 @@ function openAdd(quadrant = 0) {
           <input id="dlg-title" maxlength="80" style="margin-bottom:12px">
           <label>描述</label>
           <textarea id="dlg-desc" style="flex:1;min-height:88px;margin-bottom:12px"></textarea>
-          <label>标签</label>
+          <label>标签 <span style="opacity:.45;font-size:10px;font-weight:400;letter-spacing:.02em">多个标签用逗号或空格分隔</span></label>
           <input id="dlg-tags" style="margin-bottom:8px">
           <div id="dlg-tag-chips" class="dlg-tag-chips"></div>
-          <div class="hint" style="margin-bottom:0;font-size:10px;color:var(--muted)">多个标签用逗号或空格分隔，点击下方标签可快速添加</div>
+          <div class="hint" style="margin-bottom:0;font-size:10px;color:var(--muted);opacity:.72">ctrl + ↩︎ 快速添加任务</div>
         </div>
         <div style="flex:1;display:flex;flex-direction:column;min-width:0">
           <label>所属象限</label>
@@ -1207,6 +1210,14 @@ function openAdd(quadrant = 0) {
     } catch(err) { alert('保存失败: ' + err.message); console.error(err); }
   };
   setTimeout(() => document.getElementById('dlg-title').focus(), 100);
+  // Ctrl+Enter 快速添加任务
+  overlay.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      const submit = document.getElementById('dlg-submit');
+      if (submit) submit.click();
+    }
+  });
   // 历史标签快速点选：输入变化同步 chip 状态；标签未加载时拉取
   const tagInput = document.getElementById('dlg-tags');
   if (tagInput) tagInput.addEventListener('input', renderTagChips);
@@ -1316,19 +1327,36 @@ async function openSettings() {
     </div>`;
 
   document.body.appendChild(overlay);
+  // 展示当前更新状态（含后台已下载完成、可随时安装的情况）
+  try {
+    const st = await api.get_update_state();
+    if (st && st.phase) {
+      renderUpdateState(st);
+      if (st.phase === 'checking' || st.phase === 'downloading') {
+        updateTimer = setInterval(async () => {
+          let s; try { s = await api.get_update_state(); } catch(e) { return; }
+          renderUpdateState(s);
+        }, 500);
+      }
+    }
+  } catch(e) {}
 }
 
 async function saveSettingsFromDrawer() {
   const newMode = document.querySelector('#set-modes .selected')?.dataset.v;
   const newTheme = document.querySelector('#set-themes .selected')?.dataset.v;
   const newAutoStart = document.getElementById('set-autostart')?.checked;
-  await api.save_settings({window_mode: newMode, theme: newTheme});
-  if (newTheme) applyTheme(newTheme);
+  // 先写开机自启动，再保存设置：窗口模式变更会触发进程重启，
+  // 若顺序颠倒，自启动写入会被随窗口销毁的 JS 桥跳过，导致重启后仍显示未开启
   if (typeof newAutoStart === 'boolean') {
-    try { await api.set_autostart(newAutoStart); } catch(e) {}
+    try {
+      const ok = await api.set_autostart(newAutoStart);
+      if (!ok) alert('开机自启动设置失败，请检查系统权限后重试');
+    } catch(e) {}
   }
+  if (newTheme) applyTheme(newTheme);
+  await api.save_settings({window_mode: newMode, theme: newTheme});
   closeDrawer();
-  // 窗口模式切换由 Python 端关闭窗口并重启，无需 JS reload
 }
 
 /* ================================================================
@@ -1411,6 +1439,8 @@ async function downloadUpdate() {
   if (status) status.textContent = '准备下载…';
   if (dlBtn) { dlBtn.disabled = true; dlBtn.textContent = '下载中…'; }
   clearUpdatePoll();
+  updateReadyPrompted = false; // 新一轮下载完成后可再次弹窗
+  startUpdateMonitor();
   try { await api.start_download_update(); }
   catch(e) {
     if (status) status.textContent = '下载失败：' + e.message;
@@ -1432,6 +1462,39 @@ async function applyUpdateNow() {
     const r = await api.apply_update();
     if (r && r.ok === false) { if (status) status.textContent = (r.error || '更新失败') + '（请稍后重试）'; }
   } catch(e) { if (status) status.textContent = '应用更新失败：' + e.message; }
+}
+
+/* 后台更新监控：设置页关闭后仍持续轮询，下载完成弹窗询问是否立即更新 */
+let updateMonitorTimer = null;
+let updateReadyPrompted = false;
+function startUpdateMonitor() {
+  if (updateMonitorTimer) return;
+  updateMonitorTimer = setInterval(async () => {
+    let st;
+    try { st = await api.get_update_state(); } catch(e) { return; }
+    if (!st || st.phase !== 'ready' || updateReadyPrompted) return;
+    // 设置抽屉打开时由抽屉内轮询展示状态，不重复弹窗
+    if (document.getElementById('update-status')) return;
+    updateReadyPrompted = true;
+    clearInterval(updateMonitorTimer);
+    updateMonitorTimer = null;
+    showUpdateReadyModal();
+  }, 2000);
+}
+
+function showUpdateReadyModal() {
+  showModal('更新已就绪', `
+    <div style="font-size:13px;line-height:1.8">
+      新版本已下载完成，是否现在更新？<br>
+      <span style="font-size:11px;color:var(--muted)">现在更新会关闭当前窗口，自动以「四象.exe」重新打开；选择稍后，可随时在设置中点击「立即重启更新」。</span>
+    </div>`,
+    [
+      {text:'稍后再说', action:'close'},
+      {text:'现在更新', action:'noop', primary:true, handler: async () => {
+        closeModal();
+        await applyUpdateNow();
+      }},
+    ]);
 }
 
 /* ================================================================

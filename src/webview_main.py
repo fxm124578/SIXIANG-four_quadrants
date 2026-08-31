@@ -129,12 +129,17 @@ class JsApi:
         return dict(self.settings)
 
     def save_settings(self, patch: Dict[str, Any]) -> bool:
+        # 仅当窗口模式实际变化时才重启（避免只改自启动/主题也强制重启，
+        # 并确保自启动等写操作在重启前完成）
+        restart = False
+        if "window_mode" in patch:
+            restart = str(patch["window_mode"]) != self.settings.get(
+                "window_mode", "topmost")
         for key, value in patch.items():
             value_str = str(value)
             self.settings[key] = value_str
             self.db.set_setting(key, value_str)
-        # 窗口模式变更需要重启（关闭当前窗口，run() 循环会重新创建）
-        if "window_mode" in patch:
+        if restart:
             self.restart_requested = True
             if self._window:
                 try:
@@ -171,7 +176,11 @@ class JsApi:
         return updater.start_download()
 
     def apply_update(self) -> Dict:
-        return updater.apply_update()
+        r = updater.apply_update()
+        if r.get("ok"):
+            # 更新已进入应用流程，清除持久化就绪状态
+            self.db.set_setting("update_ready_path", "")
+        return r
 
     def resize(self, width: int, height: int) -> bool:
         """调整窗口大小（JS 端拖拽边缘时调用）。"""
@@ -275,6 +284,13 @@ def _make_window(api: JsApi, db: Database, html_path: str) -> webview.Window:
 def run() -> int:
     db = Database()
     try:
+        # 更新就绪状态持久化：下载完成写入 DB，重启后恢复，可随时进设置安装
+        updater.set_persist_ready_cb(
+            lambda p: db.set_setting("update_ready_path", p))
+        ready_path = db.get_setting("update_ready_path") or ""
+        if ready_path:
+            updater.restore_ready(ready_path)
+
         settings = _read_settings(db)
         api = JsApi(db, settings)
         html_path = str(THIS_DIR / "web" / "app.html")
