@@ -1469,16 +1469,22 @@ let updateMonitorTimer = null;
 let updateReadyPrompted = false;
 function startUpdateMonitor() {
   if (updateMonitorTimer) return;
+  const stop = () => { clearInterval(updateMonitorTimer); updateMonitorTimer = null; };
   updateMonitorTimer = setInterval(async () => {
     let st;
     try { st = await api.get_update_state(); } catch(e) { return; }
-    if (!st || st.phase !== 'ready' || updateReadyPrompted) return;
-    // 设置抽屉打开时由抽屉内轮询展示状态，不重复弹窗
-    if (document.getElementById('update-status')) return;
-    updateReadyPrompted = true;
-    clearInterval(updateMonitorTimer);
-    updateMonitorTimer = null;
-    showUpdateReadyModal();
+    if (!st) return;
+    if (st.phase === 'ready') {
+      if (updateReadyPrompted) { stop(); return; }
+      // 设置抽屉打开时由抽屉内轮询展示状态，等关闭后再弹窗
+      if (document.getElementById('update-status')) return;
+      updateReadyPrompted = true;
+      stop();
+      showUpdateReadyModal();
+      return;
+    }
+    // 非下载/检查中的状态无需继续监控，停止轮询
+    if (st.phase !== 'downloading' && st.phase !== 'checking') stop();
   }, 2000);
 }
 
