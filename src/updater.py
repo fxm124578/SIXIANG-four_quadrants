@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.13"
+APP_VERSION = "1.3.14"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -330,7 +330,17 @@ def _launch_replace_script(local_path: Path) -> None:
         "timeout /t 1 /nobreak >nul",
         f'move /y "%~dp0{new_name}" "%~dp0..\\SIXIANG.exe" >nul',
         "if errorlevel 1 goto :fail",
+        # 替换后等 1 秒再启动：给杀软实时扫描/文件系统稳定时间，
+        # 避免 PyInstaller 解压 python314.dll 时被瞬时锁住导致 LoadLibrary 失败
+        "timeout /t 1 /nobreak >nul",
         'start "" "%~dp0..\\SIXIANG.exe"',
+        # 启动后 6 秒检查进程是否存活；若首次启动失败（已退出）则重试一次
+        "timeout /t 6 /nobreak >nul",
+        'tasklist /fi "imagename eq SIXIANG.exe" | findstr /i "SIXIANG.exe" >nul',
+        "if errorlevel 1 (",
+        "  timeout /t 2 /nobreak >nul",
+        '  start "" "%~dp0..\\SIXIANG.exe"',
+        ")",
         "cd ..",
         'rmdir /s /q ".__update__" >nul 2>&1',
         '(goto) 2>nul & del "%~f0"',
