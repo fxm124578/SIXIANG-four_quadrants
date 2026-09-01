@@ -36,7 +36,6 @@ body.frost header{display:flex;align-items:center;justify-content:center;gap:14p
 body.frost h1{font-family:"LXGW WenKai",serif;font-weight:700;font-size:22px;letter-spacing:.1em}
 body.frost .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
 body.frost .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4);box-shadow:0 0 6px rgba(143,199,166,.8)}
-body.frost .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
 body.frost .quad{border-radius:17px;padding:12px 12px 10px;border:1px solid rgba(255,255,255,.8);transition:.25s;
   display:flex;flex-direction:column;min-height:0}
 body.frost .quad:hover{transform:translateY(-2px);box-shadow:0 10px 26px -12px rgba(90,104,140,.4)}
@@ -85,6 +84,7 @@ body.frost .report-nav-btn,body.paper .report-nav-btn{border-color:rgba(0,0,0,.1
 body.frost .report-nav-btn:hover,body.paper .report-nav-btn:hover{background:rgba(0,0,0,.1)}
 body.frost .modal{background:rgba(244,247,251,.97);color:#2c3242}
 body.frost .modal input,.frost .modal textarea{background:#fff;color:#2c3242;border-color:#d6dcea}
+body.frost .drawer input,.frost .drawer textarea{background:#fff;color:#2c3242;border-color:#d6dcea}
 body.frost .modal .radio-option.selected, body.frost .drawer .radio-option.selected{border-color:rgba(123,155,210,.7);background:rgba(123,155,210,.15)}
 body.frost .drawer{background:rgba(244,247,251,.97);color:#2c3242}
 body.frost .drawer-header{border-bottom:1px solid rgba(0,0,0,.08)}

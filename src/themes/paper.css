@@ -39,7 +39,6 @@ body.paper header{display:flex;align-items:center;justify-content:center;gap:14p
 body.paper h1{font-family:"LXGW WenKai",serif;font-weight:700;font-size:23px;letter-spacing:.22em}
 body.paper .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
 body.paper .date .dot{width:8px;height:8px;border-radius:50%;background:var(--q4);border:1px solid rgba(95,140,107,.5)}
-body.paper .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
 body.paper .quad{border-radius:4px;padding:12px 12px 10px;border:1px solid rgba(150,138,110,.28);transition:.25s;position:relative;
   display:flex;flex-direction:column;min-height:0}
 body.paper .quad:hover{transform:translateY(-2px) rotate(-.3deg);box-shadow:0 10px 22px -10px rgba(90,75,45,.4)}
@@ -85,6 +84,7 @@ body.paper .switch input:checked + .slider{background:#b23a2e}
 body.paper .report-calendar{background:rgba(251,246,232,.98);border-color:rgba(150,138,110,.3)}
 body.paper .modal{background:rgba(251,246,232,.97);color:#3d3a33}
 body.paper .modal input,.paper .modal textarea{background:#fff;color:#3d3a33;border-color:#d8cfb4}
+body.paper .drawer input,.paper .drawer textarea{background:#fff;color:#3d3a33;border-color:#d8cfb4}
 body.paper .modal .radio-option.selected, body.paper .drawer .radio-option.selected{border-color:rgba(178,58,46,.7);background:rgba(178,58,46,.12)}
 body.paper .drawer{background:rgba(251,246,232,.97);color:#3d3a33}
 body.paper .drawer-header{border-bottom:1px solid rgba(150,138,110,.2)}

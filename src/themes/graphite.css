@@ -13,26 +13,39 @@ body.graphite{
   --q1:#ff7a6b;--q2:#e8b26f;--q3:#7ba5d8;--q4:#6fc49a;
   --card:#3a4043;--panel:#34393c;--panel2:#2a2e32;
   --shadow:rgba(0,0,0,.35);
+  --row_bg:#3a4043;--row_hover:#41474b;--btn_hover:#434a4e;--btn_press:#2f3437;--check_box:#3a4043;--check_border:#5a6165;--check_border_hover:#6fc49a;--tag_bg:#4a4447;--tag_fg:#d8b4c0;--report_bg:#33463d;--report_fg:#8fd0ab;--report_hover:#3d5549;--report_press:#2e4037;--grip:#6a7174;--lock_bg:#a87e3c;--lock_hover:#b88c44;--lock_press:#8f6830;--ghost_bg:#3a4043;
+  ;
   width:100%;height:100%;margin:0;padding:0;overflow:hidden;
   position:relative;
   font-family:"Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);
-  background:linear-gradient(160deg,#34393c 0%,#2a2e32 100%);
+  background:
+    radial-gradient(480px 320px at 84% 6%,rgba(247,107,92,.20) 0%,transparent 60%),
+    radial-gradient(420px 300px at 8% 94%,rgba(123,165,216,.14) 0%,transparent 55%),
+    linear-gradient(165deg,#3c4146 0%,#2e3236 60%,#25292d 100%);
 }
+body.graphite .orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;animation:pulse 9s ease-in-out infinite alternate}
+body.graphite .orb.a{width:300px;height:300px;background:rgba(247,107,92,.3);top:-80px;right:12%}
+body.graphite .orb.b{width:260px;height:260px;background:rgba(123,165,216,.26);bottom:-70px;left:10%;animation-delay:-4s}
 body.graphite .widget{
-  position:relative;width:100%;height:100%;border-radius:0;overflow:hidden;
-  background:var(--card);
-  border:1px solid var(--border);
-  box-shadow:0 1px 3px var(--shadow),0 12px 32px -20px var(--shadow);
+  position:relative;width:100%;height:100%;border-radius:0;
+  background:rgba(46,50,54,.72);backdrop-filter:blur(26px) saturate(140%);
+  -webkit-backdrop-filter:blur(26px) saturate(140%);
+  border:1px solid rgba(255,255,255,.09);
+  box-shadow:0 24px 60px -18px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.12);
   display:flex;flex-direction:column;
 }
+body.graphite .widget::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;
+  background:linear-gradient(115deg,rgba(255,255,255,.14) 0%,rgba(255,255,255,0) 30%)}
+body.graphite .thread{position:absolute;top:0;left:26px;right:26px;height:2px;z-index:3;
+  background:linear-gradient(90deg,transparent,rgba(247,107,92,.8) 14%,rgba(247,107,92,.8) 86%,transparent);
+  box-shadow:0 0 8px rgba(247,107,92,.55)}
 body.graphite header{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 22px 12px;flex-shrink:0}
-body.graphite h1{font-family:"Noto Sans SC",sans-serif;font-weight:700;font-size:21px;letter-spacing:.06em}
+body.graphite h1{font-family:"Noto Sans SC",sans-serif;font-weight:700;font-size:21px;letter-spacing:.1em}
 body.graphite .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
 body.graphite .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4)}
-body.graphite .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
-body.graphite .quad{border-radius:12px;padding:12px 12px 10px;border:1px solid var(--border);
-  background:var(--panel);transition:.2s;display:flex;flex-direction:column;min-height:0}
-body.graphite .quad:hover{box-shadow:0 6px 18px -12px var(--shadow);transform:translateY(-1px)}
+body.graphite .quad{border-radius:12px;padding:12px 12px 10px;border:1px solid rgba(255,255,255,.1);transition:.2s;
+  background:rgba(58,64,67,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+body.graphite .quad:hover{box-shadow:0 8px 22px -12px rgba(0,0,0,.55);transform:translateY(-1px)}
 body.graphite .q1{background:rgba(255,122,107,.10)}
 body.graphite .q2{background:rgba(232,178,111,.10)}
 body.graphite .q3{background:rgba(123,165,216,.10)}
@@ -49,8 +62,8 @@ body.graphite .q-add{width:22px;height:22px;border-radius:7px;display:grid;place
   color:var(--muted);cursor:pointer;transition:.2s}
 body.graphite .q-add:hover{color:var(--ink);background:var(--panel2)}
 body.graphite .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:10px;
-  background:var(--row_bg);border:1px solid var(--border);margin-bottom:6px;
-  cursor:pointer;transition:.18s;box-shadow:0 1px 2px var(--shadow)}
+  background:rgba(58,64,67,.55);border:1px solid rgba(255,255,255,.1);margin-bottom:6px;
+  cursor:pointer;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
 body.graphite .task:hover{background:var(--row_hover);transform:translateX(2px)}
 body.graphite .task.dragging{background:var(--row_hover);border-color:var(--accent)}
 body.graphite .task.done .t-title{color:var(--muted);text-decoration:line-through;opacity:.8}
@@ -64,8 +77,8 @@ body.graphite .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ell
 body.graphite .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--tag_bg);color:var(--tag_fg);flex:none}
 body.graphite .tag.amber{background:#4a4133;color:#e0b26a}
 body.graphite footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
-body.graphite .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;border:1px solid var(--border);
-  background:var(--panel);color:var(--ink);transition:.18s;user-select:none}
+body.graphite .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.14);
+  background:rgba(58,64,67,.55);color:var(--ink);transition:.18s;user-select:none}
 body.graphite .btn:hover{background:var(--btn_hover);transform:translateY(-1px)}
 body.graphite .btn.primary{background:var(--accent);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 4px 14px -6px var(--accent)}
 body.graphite .btn.report{background:var(--report_bg);border-color:var(--report_bg);color:var(--report_fg)}
@@ -82,6 +95,7 @@ body.graphite .report-nav-btn{border-color:var(--border);background:var(--panel)
 body.graphite .report-nav-btn:hover{background:var(--panel2)}
 body.graphite .modal{background:var(--card);color:var(--ink)}
 body.graphite .modal input,body.graphite .modal textarea{background:var(--row_bg);color:var(--ink);border-color:var(--border)}
+body.graphite .drawer input,body.graphite .drawer textarea{background:var(--row_bg);color:var(--ink);border-color:var(--border)}
 body.graphite .modal .radio-option.selected, body.graphite .drawer .radio-option.selected{border-color:var(--accent)}
 body.graphite .drawer{background:var(--card);color:var(--ink)}
 body.graphite .drawer-header{border-bottom:1px solid var(--border)}
@@ -91,3 +105,5 @@ body.graphite .tag-panel{background:var(--row_bg)}
 body.graphite .tag-panel-item{color:var(--ink)}
 body.graphite .tag-panel-item:hover{background:var(--panel2)}
 body.graphite .tag-panel-item.selected{background:var(--accent);color:#fff}
+body.graphite .orb{display:block}
+body.graphite .thread{display:block}

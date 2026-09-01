@@ -40,7 +40,6 @@ body.midnight header{display:flex;align-items:center;justify-content:center;gap:
 body.midnight h1{font-family:"ZCOOL XiaoWei",serif;font-weight:400;font-size:23px;letter-spacing:.14em}
 body.midnight .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
 body.midnight .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4);box-shadow:0 0 8px var(--q4);animation:pulse 2.4s infinite}
-body.midnight .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
 body.midnight .quad{border-radius:16px;padding:12px 12px 10px;border:1px solid transparent;position:relative;
   backdrop-filter:blur(8px);transition:border-color .25s,box-shadow .25s,transform .25s;
   display:flex;flex-direction:column;min-height:0}
@@ -90,10 +89,10 @@ body.midnight .grip{width:14px;height:14px;background:linear-gradient(135deg,tra
   linear-gradient(135deg,transparent 30%,rgba(255,255,255,.25) 30%,rgba(255,255,255,.25) 38%,transparent 38%);cursor:se-resize}
 body.midnight .modal{background:rgba(28,33,56,.97);color:#eef0fb}
 body.midnight .modal input,.midnight .modal textarea{background:#232738;color:#eef0fb}
+body.midnight .drawer input,.midnight .drawer textarea{background:#232738;color:#eef0fb}
 body.midnight .drawer{background:rgba(20,24,48,.97);color:#eef0fb}
 body.midnight .drawer-header{border-bottom:1px solid rgba(255,255,255,.08)}
 body.midnight .report-table th{background:rgba(255,255,255,.06)}
-body.midnight .grid,body.frost .grid,body.neon .grid,body.paper .grid{grid-template-rows:1fr 1fr}
 body.midnight .tag-panel{ background: rgba(24,29,58,0.95); }
 body.midnight .tag-panel-item{ color: var(--ink); }
 body.midnight .tag-panel-item:hover{ background: rgba(255,255,255,0.1); }

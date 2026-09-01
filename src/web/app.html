@@ -17,14 +17,13 @@
 /*__THEMES_CSS__*/
 /* 装饰层默认隐藏：由各主题 CSS 自行启用（body.xxx .orb{display:block} 等） */
 .orb,.blob,.grid-bg,.leaf,.thread{display:none}
+/* 四象限布局骨架（程序层统一）：两行等高，任务超出在格内滚动，互不挤压；主题只管配色外观 */
+.grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
+.quad{position:relative;display:flex;flex-direction:column;min-height:0}
 @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(40px,-30px) scale(1.12)}}
 @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes pulse{50%{opacity:.35}}
 @keyframes morph{from{border-radius:44% 56% 60% 40%/48% 42% 58% 52%;transform:rotate(0)}to{border-radius:58% 42% 44% 56%/40% 58% 42% 60%;transform:rotate(14deg)}}
-
-
-
-
 @keyframes gridmove{from{background-position:0 0,0 0}to{background-position:0 42px,0 0}}
 @keyframes boot{from{opacity:0;transform:translateY(22px) skewX(1.5deg)}to{opacity:1;transform:none}}
 @keyframes blink{50%{opacity:.2}}
@@ -58,8 +57,8 @@ button,a,.q-add,.cb,select,input,textarea,.radio-option,.calendar-grid .day,.nav
   box-shadow:0 30px 60px rgba(0,0,0,.6)}
 .modal h2{font-size:16px;font-weight:700;margin-bottom:18px}
 .modal label, .drawer label{display:block;font-size:12px;margin-bottom:5px}
-.modal input,.modal textarea{width:100%;border-radius:8px;padding:8px 10px;margin-bottom:12px;border:1px solid rgba(255,255,255,.12)}
-.modal textarea{height:70px;resize:vertical}
+.modal input,.modal textarea,.drawer input,.drawer textarea{width:100%;border-radius:8px;padding:8px 10px;margin-bottom:12px;border:1px solid rgba(255,255,255,.12)}
+.modal textarea,.drawer textarea{height:70px;resize:vertical}
 .modal .radio-group, .drawer .radio-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
 .modal .radio-option, .drawer .radio-option{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;
   border:1px solid rgba(255,255,255,.12);cursor:pointer;transition:.2s}
@@ -84,16 +83,16 @@ button,a,.q-add,.cb,select,input,textarea,.radio-option,.calendar-grid .day,.nav
 .modal,.drawer{font-size:13px}
 .modal label,.drawer label{font-size:13px}
 .modal .radio-option,.drawer .radio-option{font-size:13px}
-.modal input,.modal textarea{font-size:13px}
+.modal input,.modal textarea,.drawer input,.drawer textarea{font-size:13px}
 .switch{position:relative;display:inline-flex;width:42px;height:24px;flex-shrink:0;cursor:pointer;-webkit-app-region:no-drag;vertical-align:middle}
 .switch input{position:absolute;opacity:0;width:0;height:0}
 .switch .slider{position:absolute;inset:0;border-radius:99px;background:rgba(255,255,255,.18);transition:background .25s}
 .switch .slider::before{content:"";position:absolute;width:18px;height:18px;border-radius:50%;left:3px;top:3px;background:#fff;transition:transform .25s;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .switch input:checked + .slider{background:#5b8cff}
 .switch input:checked + .slider::before{transform:translateX(18px)}
-.update-card{border:1px solid var(--stroke);border-radius:12px;padding:14px 16px;
+.update-card{border:1px solid var(--stroke);border-radius:12px;padding:10px 16px 12px;
   background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  display:flex;flex-direction:column;gap:10px}
+  display:flex;flex-direction:column;gap:9px}
 .update-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .update-ver{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
@@ -506,9 +505,6 @@ function applyTheme(theme) {
 function onThemeSelect(themeId) {
   // 下拉选择即时预览（保存后持久化，重启由 Python 注入对应主题 CSS）
   applyTheme(themeId);
-  const t = THEME_LIST.find(x => x.id === themeId);
-  const desc = document.getElementById('theme-desc');
-  if (desc) desc.textContent = (t && t.desc) || '';
 }
 
 async function importThemeFile(input) {
@@ -1037,7 +1033,7 @@ async function openSettings() {
               <div><div style="font-weight:600;font-size:12.5px">${m.n}</div><div style="font-size:10.5px">${m.d}</div></div></div>`
           ).join('')}
         </div>
-        <label>主题外观 <span style="opacity:.45;font-size:10px;font-weight:400;letter-spacing:.02em">可导入 .css 主题文件快速安装</span></label>
+        <label>主题外观</label>
         <div style="display:flex;gap:8px;align-items:center">
           <select id="set-theme-select" onchange="onThemeSelect(this.value)" style="flex:1;min-width:0;padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--ink);font-size:12.5px;outline:none;cursor:pointer">
             ${THEME_LIST.map(t =>
@@ -1048,7 +1044,6 @@ async function openSettings() {
           <button class="btn" onclick="document.getElementById('theme-file-input').click()" style="padding:8px 12px;flex:none">导入主题</button>
           <input type="file" id="theme-file-input" accept=".css" style="display:none" onchange="importThemeFile(this)">
         </div>
-        <div id="theme-desc" style="font-size:10.5px;color:var(--muted);opacity:.7;margin-top:2px">${(THEME_LIST.find(t=>t.id===theme)||{}).desc || ''}</div>
         <label>软件更新</label>
         <div class="update-card">
           <div class="update-head">
