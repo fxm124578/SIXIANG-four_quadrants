@@ -486,7 +486,7 @@ body.frost .report-nav-btn:hover,body.paper .report-nav-btn:hover{background:rgb
 .calendar-grid .weekday{font-size:11px;text-align:center;padding:4px 0}
 .calendar-grid .day{font-size:12px;text-align:center;padding:7px 4px;border-radius:8px;cursor:pointer;transition:.2s}
 .calendar-grid .day:hover{background:rgba(255,255,255,.12)}
-.calendar-grid .day.other{opacity:.35}
+.calendar-grid .day.today{outline:1px solid var(--border);outline-offset:-1px}
 .calendar-grid .day.today{outline:1.5px solid #8a93b0}
 .calendar-grid .day.selected{background:#4f7df9;color:#fff}
 .calendar-grid .day.completed{background:#4caf7d;color:#fff}
@@ -961,8 +961,6 @@ function renderQuadrant(q, tasks) {
       ${tagHTML ? `<div class="tags">${tagHTML}</div>` : ''}
     </div>`;
   }).join('');
-  container.parentElement.ondragover = e => e.preventDefault();
-  container.parentElement.ondrop = e => onDrop(e, q);
 }
 
 function parseTags(raw) {
@@ -1148,6 +1146,44 @@ async function uncompleteReportTask(id, title) {
   refreshAll();
 }
 
+/* 任务抽屉公共骨架（新建/编辑共用） */
+const DRAWER_SAVE_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+const DRAWER_ADD_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+function taskDrawerShell({titleText, submitText, submitIcon, titleValue='', descValue='', tagsValue='', defaultQuad=0, completedHTML='', hintText='ctrl + ↩︎ 快速保存'}) {
+  return `<div class="drawer" style="height:480px;min-height:400px;max-height:80vh" onclick="event.stopPropagation()">
+      <div class="drawer-header" style="padding-top:24px">
+        <h2>${titleText}</h2>
+        <span style="flex:1"></span>
+        <span class="icon-btn-sm" onclick="closeDrawer()" title="关闭">${ICON_SVGS.close}</span>
+      </div>
+      <div class="drawer-body" style="gap:22px;padding-top:16px">
+        <div style="flex:3;display:flex;flex-direction:column;min-width:0">
+          <label>标题 *</label>
+          <input id="dlg-title" maxlength="80" value="${esc(titleValue)}" style="margin-bottom:12px">
+          <label>描述</label>
+          <textarea id="dlg-desc" style="flex:1;min-height:88px;margin-bottom:12px">${esc(descValue)}</textarea>
+          <label>标签 <span style="opacity:.45;font-size:10px;font-weight:400;letter-spacing:.02em">多个标签用逗号或空格分隔</span></label>
+          <input id="dlg-tags" value="${esc(tagsValue)}" style="margin-bottom:8px">
+          <div id="dlg-tag-chips" class="dlg-tag-chips"></div>
+          ${completedHTML}
+          <div class="hint" style="margin-bottom:0;font-size:10px;color:var(--muted);opacity:.72;text-align:right">${hintText}</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+          <label>所属象限</label>
+          <div class="radio-group" id="dlg-quads" style="grid-template-columns:1fr;align-content:start;margin-bottom:0">
+            ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===defaultQuad?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
+              <span style="width:9px;height:9px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer" style="justify-content:flex-end;gap:10px">
+        <button class="btn" onclick="closeDrawer()" style="display:inline-flex;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>取消</button>
+        <button class="btn primary" id="dlg-submit" style="display:inline-flex;align-items:center;gap:5px">${submitIcon}${submitText}</button>
+      </div>
+    </div>`;
+}
+
 async function openEdit(id) {
   const t = await api.get_task(id);
   if (!t) return;
@@ -1165,40 +1201,16 @@ async function openEdit(id) {
     : '';
 
   // 与新建任务完全相同的抽屉排版（复用 dlg-* 输入框，历史标签胶囊/快捷键逻辑共用）
-  overlay.innerHTML = `
-    <div class="drawer" style="height:480px;min-height:400px;max-height:80vh" onclick="event.stopPropagation()">
-      <div class="drawer-header" style="padding-top:24px">
-        <h2>✏️ 编辑任务</h2>
-        <span style="flex:1"></span>
-        <span class="icon-btn-sm" onclick="closeDrawer()" title="关闭">${ICON_SVGS.close}</span>
-      </div>
-      <div class="drawer-body" style="gap:22px;padding-top:16px">
-        <div style="flex:3;display:flex;flex-direction:column;min-width:0">
-          <label>标题 *</label>
-          <input id="dlg-title" maxlength="80" value="${esc(t.title)}" style="margin-bottom:12px">
-          <label>描述</label>
-          <textarea id="dlg-desc" style="flex:1;min-height:88px;margin-bottom:12px">${esc(t.description)}</textarea>
-          <label>标签 <span style="opacity:.45;font-size:10px;font-weight:400;letter-spacing:.02em">多个标签用逗号或空格分隔</span></label>
-          <input id="dlg-tags" value="${esc(tags.join(' '))}" style="margin-bottom:8px">
-          <div id="dlg-tag-chips" class="dlg-tag-chips"></div>
-          ${completedHTML}
-          <div class="hint" style="margin-bottom:0;font-size:10px;color:var(--muted);opacity:.72;text-align:right">ctrl + ↩︎ 快速保存</div>
-        </div>
-        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
-          <label>所属象限</label>
-          <div class="radio-group" id="dlg-quads" style="grid-template-columns:1fr;align-content:start;margin-bottom:0">
-            ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===t.quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
-              <span style="width:9px;height:9px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
-          </div>
-        </div>
-      </div>
-      <div class="drawer-footer" style="justify-content:flex-end;gap:10px">
-        <button class="btn" onclick="closeDrawer()" style="display:inline-flex;align-items:center;gap:5px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>取消</button>
-        <button class="btn primary" id="dlg-submit" style="display:inline-flex;align-items:center;gap:5px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>保存</button>
-      </div>
-    </div>`;
+  overlay.innerHTML = taskDrawerShell({
+    titleText: '✏️ 编辑任务',
+    submitText: '保存',
+    submitIcon: DRAWER_SAVE_SVG,
+    titleValue: t.title,
+    descValue: t.description,
+    tagsValue: tags.join(' '),
+    defaultQuad: t.quadrant,
+    completedHTML,
+  });
 
   document.body.appendChild(overlay);
   document.getElementById('dlg-submit').onclick = async () => {
@@ -1297,39 +1309,13 @@ function openAdd(quadrant = 0) {
   overlay.className = 'drawer-overlay';
   overlay.onclick = e => { if (e.target === overlay) closeDrawer(); };
 
-  overlay.innerHTML = `
-    <div class="drawer" style="height:480px;min-height:400px;max-height:80vh" onclick="event.stopPropagation()">
-      <div class="drawer-header" style="padding-top:24px">
-        <h2>＋ 新建任务</h2>
-        <span style="flex:1"></span>
-        <span class="icon-btn-sm" onclick="closeDrawer()" title="关闭">${ICON_SVGS.close}</span>
-      </div>
-      <div class="drawer-body" style="gap:22px;padding-top:16px">
-        <div style="flex:3;display:flex;flex-direction:column;min-width:0">
-          <label>标题 *</label>
-          <input id="dlg-title" maxlength="80" style="margin-bottom:12px">
-          <label>描述</label>
-          <textarea id="dlg-desc" style="flex:1;min-height:88px;margin-bottom:12px"></textarea>
-          <label>标签 <span style="opacity:.45;font-size:10px;font-weight:400;letter-spacing:.02em">多个标签用逗号或空格分隔</span></label>
-          <input id="dlg-tags" style="margin-bottom:8px">
-          <div id="dlg-tag-chips" class="dlg-tag-chips"></div>
-          <div class="hint" style="margin-bottom:0;font-size:10px;color:var(--muted);opacity:.72;text-align:right">ctrl + ↩︎ 快速添加任务</div>
-        </div>
-        <div style="flex:1;display:flex;flex-direction:column;min-width:0">
-          <label>所属象限</label>
-          <div class="radio-group" id="dlg-quads" style="grid-template-columns:1fr;align-content:start;margin-bottom:0">
-            ${QUADRANT_NAMES.map((n,i) => `<div class="radio-option${i===quadrant?' selected':''}" data-v="${i}" onclick="selectRadio(this)">
-              <span style="width:9px;height:9px;border-radius:50%;background:${QUADRANT_COLORS[i]};flex-shrink:0"></span>${n}</div>`).join('')}
-          </div>
-        </div>
-      </div>
-      <div class="drawer-footer" style="justify-content:flex-end;gap:10px">
-        <button class="btn" onclick="closeDrawer()" style="display:inline-flex;align-items:center;gap:5px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>取消</button>
-        <button class="btn primary" id="dlg-submit" style="display:inline-flex;align-items:center;gap:5px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加</button>
-      </div>
-    </div>`;
+  overlay.innerHTML = taskDrawerShell({
+    titleText: '＋ 新建任务',
+    submitText: '添加',
+    submitIcon: DRAWER_ADD_SVG,
+    defaultQuad: quadrant,
+    hintText: 'ctrl + ↩︎ 快速添加任务',
+  });
 
   document.body.appendChild(overlay);
   document.getElementById('dlg-submit').onclick = async () => {
@@ -1739,7 +1725,6 @@ function buildCalendarCells(y, m, sel, today) {
     const inMonth = d.getMonth() === m;
     if (!inMonth && (i - offset >= daysInMonth || i < offset)) { html += `<div class="day" style="visibility:hidden">0</div>`; continue; }
     const cls = ['day'];
-    if (!inMonth) cls.push('other');
     if (ds === today) cls.push('today');
     if (ds === sel) cls.push('selected');
     if (completedDatesCache.includes(ds)) cls.push('completed');
@@ -1918,11 +1903,9 @@ async function loadReportDay(ds) {
           <span class="icon-btn-sm" onclick="uncompleteReportTask(${t.id},'${esc(t.title).replace(/'/g,"\\'")}')" title="取消完成" style="color:var(--q4,#3dd68c)">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="currentColor" stroke="currentColor" stroke-width="1.2"/><path d="M5 8.2l2 2 4-4.4" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>
-          <span class="icon-btn-sm" onclick="openEdit(${t.id})" title="编辑">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </span>
+          <span class="icon-btn-sm" onclick="openEdit(${t.id})" title="编辑">${ICON_SVGS.edit}</span>
           <span class="icon-btn-sm danger" onclick="deleteReportTask(${t.id},'${esc(t.title).replace(/'/g,"\\'")}')" title="删除">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            ${ICON_SVGS.delete}
           </span>
         </td>
       </tr>`).join('')}</tbody>
@@ -2051,7 +2034,7 @@ function showModal(title, bodyHTML, buttons=[], opts={}) {
     }
     return `<button class="btn${b.primary?' primary':''}">${b.text||''}</button>`;
   }).join('');
-  overlay.innerHTML = `<div class="modal${opts.wide?' report-modal-wrap':''}" style="${opts.wide?'width:400px;max-width:94vw;height:600px;max-height:88vh':''}">
+  overlay.innerHTML = `<div class="modal">
     <div style="display:flex;align-items:center;margin-bottom:16px"><h2 style="margin:0;flex:1">${title}</h2></div>
     <div class="modal-body">${bodyHTML}</div>
     <div class="actions">${btnsHTML}</div>

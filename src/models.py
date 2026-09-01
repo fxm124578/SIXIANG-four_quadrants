@@ -87,8 +87,6 @@ class Task:
             "tag": self.tag,
             "quadrant": self.quadrant,
             "quadrant_label": self.quadrant_label,
-            "quadrant_color": self.quadrant_color,
-            "quadrant_name": quadrant_name(self.quadrant),
             "completed_at": self.completed_at,
             "created_at": self.created_at,
         }

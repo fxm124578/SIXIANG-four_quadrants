@@ -21,6 +21,7 @@ from report import (
     export_report_range,
 )
 from styles import THEMES, T, ensure_app_icon, font, theme_names
+import updater
 
 WEEKDAY_NAMES = ["一", "二", "三", "四", "五", "六", "日"]
 
@@ -112,7 +113,6 @@ class ModalDialog(tk.Toplevel):
     def __init__(self, parent, title: str):
         super().__init__(parent)
         self.result = None
-        self._on_show = None
         self.title(title)
         self.configure(bg=T.bg)
         self.resizable(False, False)
@@ -143,7 +143,6 @@ class ModalDialog(tk.Toplevel):
             self.grab_set()
         except tk.TclError:
             pass
-        self._on_show()
         self.wait_window()
         return self.result
 
@@ -226,7 +225,7 @@ class AddTaskDialog(ModalDialog):
                     hover_bg=T.accent_light, press_bg=T.accent_dark,
                     command=self._submit).pack(side="right", padx=(0, 8))
         # 模态显示后聚焦标题输入框
-        self._on_show = self.title_entry.focus_set
+        self.after(200, self.title_entry.focus_set)
 
     def _limit(self, entry: tk.Entry, max_len: int) -> None:
         vcmd = (self.register(self._limit_len), "%P", max_len)

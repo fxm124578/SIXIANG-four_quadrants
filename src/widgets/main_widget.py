@@ -16,6 +16,7 @@ from db import Database
 from styles import (
     T,
     apply_dark_ttk_style,
+    blend,
     ensure_app_icon,
     font,
     set_theme,
@@ -158,7 +159,6 @@ class MainWindow(tk.Tk):
     def _draw_background(self, _event=None) -> None:
         """绘制主题背景氛围：垂直渐变 + 光斑 + 网格 + 顶部装饰线。"""
         try:
-            from styles import blend
             canvas = self.bg_canvas
             canvas.delete("all")
             width = canvas.winfo_width()
@@ -211,7 +211,6 @@ class MainWindow(tk.Tk):
     def _draw_topline(self, canvas: tk.Canvas, width: int) -> None:
         """按主题绘制顶部装饰线：彩虹光谱 / 白色高光 / 霓虹 / 朱砂红绳。"""
         try:
-            from styles import blend
             kind = T.topline
             if kind == "spectrum":
                 from models import QUADRANTS as QUAD_COLORS

@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from models import Task
+from models import Task, parse_tags
 
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
 
@@ -227,23 +227,13 @@ class Database:
     # --------------------------------------------------------------- tags
     def get_all_tags(self) -> List[str]:
         """获取所有任务中的标签（去重、排序）。"""
-        import json
         rows = self.conn.execute(
             "SELECT DISTINCT tag FROM tasks WHERE tag IS NOT NULL AND tag != ''"
         ).fetchall()
 
         all_tags = set()
         for row in rows:
-            tag_str = str(row["tag"])
-            try:
-                tags = json.loads(tag_str)
-                if isinstance(tags, list):
-                    for tag in tags:
-                        if tag and tag.strip():
-                            all_tags.add(tag.strip())
-            except (ValueError, TypeError):
-                if tag_str.strip():
-                    all_tags.add(tag_str.strip())
+            all_tags.update(parse_tags(str(row["tag"])))
 
         return sorted(all_tags)
 

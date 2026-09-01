@@ -5,10 +5,7 @@
 """
 from __future__ import annotations
 
-import os
-import subprocess
 import sys
-import webview
 from datetime import date
 from pathlib import Path
 from typing import Any, Dict, List, Optional

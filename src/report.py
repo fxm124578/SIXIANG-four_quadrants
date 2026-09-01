@@ -296,12 +296,9 @@ margin:1px 4px 1px 0}
 
 
 def _render_report_html(tasks: List[Task], date_str: str) -> str:
-    by_quadrant = {q["key"]: 0 for q in QUADRANTS}
-    by_tag: Dict[str, int] = {}
-    for task in tasks:
-        by_quadrant[task.quadrant] += 1
-        for tag in (task.tags or ["（无标签）"]):
-            by_tag[tag] = by_tag.get(tag, 0) + 1
+    stats = build_report_stats(tasks)
+    by_quadrant = stats["by_quadrant"]
+    by_tag = stats["by_tag"]
 
     hours = _hour_distribution(tasks)
     slots = _slot_distribution(hours)
