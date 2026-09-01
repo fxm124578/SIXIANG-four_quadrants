@@ -19,6 +19,7 @@ src/                  应用源码
   app_icon.ico/.svg   应用图标（打包必需，已入库）
 designs/              四套 HTML 设计参考（非运行资源）
 run.bat               Windows 启动脚本
+RELEASE.md            版本发布流程（打包/tag/release 验证）
 README.md / DESIGN.md / LICENSE / requirements.txt
 ```
 
@@ -26,11 +27,8 @@ README.md / DESIGN.md / LICENSE / requirements.txt
 
 - 运行：`python src\main.py` 或双击 `run.bat`（优先 pythonw）
 - 编译检查：`python -m py_compile src/*.py src/widgets/*.py`
-- 打包：
-  ```
-  pyinstaller --noconfirm --clean --onefile --windowed --name 四象 --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/app_icon.ico;." src/main.py
-  ```
-- 发布流程：bump `src/updater.py` 的 `APP_VERSION` 与 `src/web/app.html` 初始版本显示 → commit → `git tag vX.Y.Z` → push --tags → 打包 → `gh release create vX.Y.Z "dist/Sixiang-vX.Y.Z.exe"`（先复制 dist/四象.exe 为 ASCII 名）
+- 打包：`python -m PyInstaller --noconfirm --clean --onefile --windowed --name SIXIANG --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/app_icon.ico;." src/main.py`
+- 发布流程：@RELEASE.md
 
 ## 验证
 
@@ -42,8 +40,8 @@ README.md / DESIGN.md / LICENSE / requirements.txt
 - 零第三方依赖（仅标准库）；pywebview 可选（WebView 版），缺失自动回退 tkinter
 - 数据库：源码模式 `src/data.db`；打包模式 exe 同目录 `data.db`。onefile 下 `__file__` 指向临时解压目录，禁止用于数据落盘（用 `sys.executable`）
 - 数据/产物不提交：`data.db`、`build/`、`dist/`、`*.spec`（见 .gitignore）
-- 自动更新：替换 onefile exe 用 update.bat（GBK 编码，含中文 exe 名）等旧进程退出后替换并重启
-- GitHub 资产名必须 ASCII：`Sixiang-vX.Y.Z.exe`（中文名会被平台强制替换为 default.exe）
+- 自动更新：update.bat（纯 ASCII，由 `updater.py::_launch_replace_script` 生成）等旧进程退出后替换 exe 为 `SIXIANG.exe` 并重启
+- GitHub 资产名必须 ASCII：`SIXIANG-vX.Y.Z.exe`（中文名会被平台强制替换为 default.exe）
 - 远端：https://github.com/fxm124578/SIXIANG-four_quadrants（公开），tag 与 release 一一对应
 
 ## 关键文档索引
@@ -51,3 +49,4 @@ README.md / DESIGN.md / LICENSE / requirements.txt
 - `README.md`：功能、快速开始、目录结构、打包命令
 - `DESIGN.md`：WebView 版改造方案文档
 - `designs/`：四套主题 HTML 设计参考
+- `RELEASE.md`：版本发布流程（@RELEASE.md 引用）
