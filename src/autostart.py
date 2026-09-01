@@ -38,6 +38,21 @@ def is_enabled() -> bool:
         return False
 
 
+def set_exe_path(exe_path: str) -> bool:
+    """已启用自启动时，把启动命令更新为指定 exe 路径（更新后文件名可能变化）。"""
+    if sys.platform != "win32" or not is_enabled():
+        return False
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, RUN_KEY, 0,
+                            winreg.KEY_SET_VALUE) as key:
+            winreg.SetValueEx(key, APP_NAME, 0, winreg.REG_SZ,
+                              f'"{exe_path}"')
+        return True
+    except OSError:
+        return False
+
+
 def set_enabled(enabled: bool) -> bool:
     """设置 / 取消开机自启动；成功返回 True。"""
     if sys.platform != "win32":

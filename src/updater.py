@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.6"
+APP_VERSION = "1.3.7"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -135,14 +135,20 @@ def _snapshot() -> Dict[str, Any]:
 
 
 def start_check() -> Dict[str, Any]:
-    """后台线程检查更新；立即返回当前状态，UI 轮询 get_state()。"""
+    """后台线程检查更新；立即返回当前状态，UI 轮询 get_state()。
+
+    若本地已有下载好的新包（phase=ready），保持就绪状态不重复检查/下载。
+    注意：持锁期间不得调用 _snapshot()（锁不可重入）。
+    """
     with _state["lock"]:
-        if _state["phase"] in ("checking", "downloading", "applying"):
-            return _snapshot()
-        _state["phase"] = "checking"
-        _state["progress"] = 0.0
-        _state["error"] = None
-        _state["info"] = None
+        phase = _state["phase"]
+        if phase not in ("ready", "checking", "downloading", "applying"):
+            _state["phase"] = "checking"
+            _state["progress"] = 0.0
+            _state["error"] = None
+            _state["info"] = None
+    if phase in ("ready", "checking", "downloading", "applying"):
+        return _snapshot()
     threading.Thread(target=_check_worker, daemon=True).start()
     return _snapshot()
 
@@ -177,16 +183,33 @@ def _update_dir() -> Path:
 def start_download() -> Dict[str, Any]:
     """后台线程下载已确认的新版 exe；UI 轮询 get_state() 看进度。"""
     with _state["lock"]:
-        if _state["phase"] != "result" or not _state["info"] \
-                or not _state["info"].get("download_url"):
-            return _snapshot()
-        url = _state["info"]["download_url"]
-        name = _state["info"]["file_name"] or "update.exe"
+        phase = _state["phase"]
+        info = _state["info"]
+        url = info.get("download_url") if info else None
+        if phase != "result" or not url:
+            return _snapshot_locked()
+        name = info["file_name"] or "update.exe"
         _state["phase"] = "downloading"
         _state["progress"] = 0.0
         _state["error"] = None
     threading.Thread(target=_download_worker, args=(url, name), daemon=True).start()
     return _snapshot()
+
+
+def _snapshot_locked() -> Dict[str, Any]:
+    """仅在已持有 _state['lock'] 时调用：构造快照而不重复加锁。"""
+    info = _state["info"] or {}
+    return {
+        "phase": _state["phase"],
+        "progress": round(_state["progress"], 1),
+        "error": _state["error"],
+        "current_version": APP_VERSION,
+        "latest_version": info.get("latest_version"),
+        "has_update": bool(info.get("has_update")),
+        "notes": info.get("notes") or "",
+        "file_name": info.get("file_name"),
+        "size": int(info.get("size") or 0),
+    }
 
 
 def _download_file(url: str, name: str):
@@ -271,6 +294,13 @@ def apply_update() -> Dict[str, Any]:
             _state["error"] = f"启动更新失败：{exc}"
         return {"ok": False, "error": str(exc)}
 
+    # 统一 SIXIANG 命名：若已开启自启动，把注册表指向新 exe 路径
+    try:
+        import autostart
+        autostart.set_exe_path(str(_exe_dir() / "SIXIANG.exe"))
+    except Exception:
+        pass
+
     # 替换脚本会等旧进程退出后替换 exe；这里安排本进程尽快退出
     threading.Thread(target=_delayed_exit, daemon=True).start()
     return {"ok": True, "restarting": True}
@@ -294,6 +324,9 @@ def _launch_replace_script(local_path: Path) -> None:
         'cd /d "%~dp0"',
         "timeout /t 2 /nobreak >nul",
         f"taskkill /f /pid {pid} >nul 2>&1",
+        "timeout /t 1 /nobreak >nul",
+        # 清理可能残留的 SIXIANG 实例，避免旧进程占用导致 move 失败
+        "taskkill /f /im SIXIANG.exe >nul 2>&1",
         "timeout /t 1 /nobreak >nul",
         f'move /y "%~dp0{new_name}" "%~dp0..\\SIXIANG.exe" >nul',
         "if errorlevel 1 goto :fail",
@@ -326,6 +359,26 @@ def _delayed_exit() -> None:
         os._exit(0)
     except Exception:
         pass
+
+
+def cleanup_legacy_exes() -> None:
+    """统一 SIXIANG 命名后：若已存在 SIXIANG.exe（新命名已生效），
+    删除历史遗留的中文名 exe，避免用户误开旧版本。仅在打包环境执行。
+    """
+    if not getattr(sys, "frozen", False):
+        return
+    exe_dir = Path(sys.executable).resolve().parent
+    current = Path(sys.executable).resolve()
+    target = exe_dir / "SIXIANG.exe"
+    if not target.is_file():
+        return
+    for legacy in ("四象.exe",):
+        p = exe_dir / legacy
+        if p.is_file() and p.resolve() != current:
+            try:
+                p.unlink(missing_ok=True)
+            except OSError:
+                pass
 
 
 # ---------------------------------------------------------------- 便捷入口

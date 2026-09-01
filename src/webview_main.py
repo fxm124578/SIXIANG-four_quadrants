@@ -293,7 +293,11 @@ def run() -> int:
             lambda p: db.set_setting("update_ready_path", p))
         ready_path = db.get_setting("update_ready_path") or ""
         if ready_path:
-            updater.restore_ready(ready_path)
+            if not updater.restore_ready(ready_path):
+                # 文件已不存在（如手动删除），清除过期持久化状态
+                db.set_setting("update_ready_path", "")
+        # 统一 SIXIANG 命名：新命名已生效时清理历史遗留中文 exe，避免误开旧版
+        updater.cleanup_legacy_exes()
 
         settings = _read_settings(db)
         api = JsApi(db, settings)
