@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;700&family=LXGW+WenKai:wght@400;700&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
 <style>
+:root{--brand-grad:linear-gradient(90deg,#e5533c,#e8912d,#3f7fd9,#4caf7d)}
 /* ================================================================
    公共样式（布局 / 组件 / 动画）。主题样式由启动时从 themes/ 目录
    注入到下方主题占位处，可插拔、可快速安装：
@@ -228,11 +229,12 @@ button,a,.q-add,.cb,select,input,textarea,.radio-option,.calendar-grid .day,.nav
   animation:splashSlide 1.2s ease-in-out infinite}
 @keyframes splashSlide{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}
 #splash .splash-text{font-size:13px;color:#9aa3b5;letter-spacing:.14em;transition:opacity .15s ease}
-#splash .splash-text .splash-brand{
-  font-weight:700;letter-spacing:.06em;
-  background:linear-gradient(90deg,#e5533c,#e8912d,#3f7fd9,#4caf7d);
+.app-brand,.splash-brand{
+  background:var(--brand-grad);
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;color:transparent}
+#splash .splash-text .splash-brand{
+  font-weight:700;letter-spacing:.06em;font-size:1.5em}
 .tag-filter-btn{
   display: inline-flex;
   align-items: center;
@@ -353,7 +355,7 @@ button,a,.q-add,.cb,select,input,textarea,.radio-option,.calendar-grid .day,.nav
         <rect x="1" y="11" width="8" height="8" rx="2" fill="#3f7fd9"/>
         <rect x="11" y="11" width="8" height="8" rx="2" fill="#4caf7d"/>
       </svg>
-      <span>四象</span>
+      <span class="app-brand">四象</span>
     </h1>
     <div class="date"><span class="dot"></span><span id="today-date"></span></div>
   </header>
