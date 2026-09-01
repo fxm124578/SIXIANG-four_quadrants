@@ -1,0 +1,93 @@
+/*!
+ * id: sage
+ * name: 盐青
+ * desc: 淡青护眼，青绿静谧
+ * default: 0
+ */
+
+body.sage{
+    --tk-bg:#e2ecec;--tk-card:#f5faf9;--tk-panel:#eef6f5;--tk-panel2:#e3eceb;--tk-row_bg:#f5faf9;--tk-row_hover:#eaf3f1;--tk-row_active:#e2eeec;--tk-text:#2f4a4a;--tk-title_text:#243b3b;--tk-muted:#7fa3a1;--tk-secondary:#6d9491;--tk-border:#cfdddc;--tk-accent:#3d9b8f;--tk-accent_light:#5cb5a9;--tk-accent_dark:#2e7d73;--tk-green:#4a9b6d;--tk-tag_bg:#dfeae8;--tk-tag_fg:#3f6b66;--tk-check_box:#f5faf9;--tk-check_border:#a9c5c1;--tk-check_border_hover:#4a9b6d;--tk-btn_hover:#e7f1ef;--tk-btn_press:#dce8e5;--tk-report_bg:#dceee9;--tk-report_fg:#39715f;--tk-report_hover:#cfe8e1;--tk-report_press:#c3ddd5;--tk-grip:#8fb0ac;--tk-lock_bg:#b08a44;--tk-lock_hover:#c09a4f;--tk-lock_press:#967238;--tk-ghost_bg:#f5faf9;--tk-alpha:0.94;--tk-topline:glow;--tk-check_round:1;--tk-grad_hi:#f5faf9;--tk-grad_lo:#e2eceb;--tk-bg_accent:#d2e8e5 #d8e4ee;--tk-bg_grid:0;--tk-qc0:#f7e7e2;--tk-qb0:#d9724f;--tk-qc1:#f5ecd9;--tk-qb1:#c99a3f;--tk-qc2:#e4eef4;--tk-qb2:#5b8fae;--tk-qc3:#e4f1e9;--tk-qb3:#4a9b6d;
+
+  --ink:#2f4a4a;--muted:#7fa3a1;--secondary:#6d9491;--border:#cfdddc;
+  --accent:#3d9b8f;--accent-light:#5cb5a9;--accent-dark:#2e7d73;
+  --q1:#d9724f;--q2:#c99a3f;--q3:#5b8fae;--q4:#4a9b6d;
+  --card:#f5faf9;--panel:#eef6f5;--panel2:#e3eceb;
+  --shadow:rgba(45,90,85,.10);
+  width:100%;height:100%;margin:0;padding:0;overflow:hidden;
+  position:relative;
+  font-family:"Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);
+  background:linear-gradient(160deg,#eef6f6 0%,#e2ecec 100%);
+}
+body.sage .widget{
+  position:relative;width:100%;height:100%;border-radius:0;overflow:hidden;
+  background:var(--card);
+  border:1px solid var(--border);
+  box-shadow:0 1px 3px var(--shadow),0 12px 32px -20px var(--shadow);
+  display:flex;flex-direction:column;
+}
+body.sage header{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 22px 12px;flex-shrink:0}
+body.sage h1{font-family:"Noto Sans SC",sans-serif;font-weight:700;font-size:21px;letter-spacing:.06em}
+body.sage .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+body.sage .date .dot{width:7px;height:7px;border-radius:50%;background:var(--q4)}
+body.sage .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
+body.sage .quad{border-radius:12px;padding:12px 12px 10px;border:1px solid var(--border);
+  background:var(--panel);transition:.2s;display:flex;flex-direction:column;min-height:0}
+body.sage .quad:hover{box-shadow:0 6px 18px -12px var(--shadow);transform:translateY(-1px)}
+body.sage .q1{background:rgba(217,114,79,.08)}
+body.sage .q2{background:rgba(201,154,63,.08)}
+body.sage .q3{background:rgba(91,143,174,.08)}
+body.sage .q4{background:rgba(74,155,109,.08)}
+body.sage .q-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+body.sage .q-head .tint{width:8px;height:8px;border-radius:50%}
+body.sage .q1 .tint{background:var(--q1)}
+body.sage .q2 .tint{background:var(--q2)}
+body.sage .q3 .tint{background:var(--q3)}
+body.sage .q4 .tint{background:var(--q4)}
+body.sage .q-name{font-size:12.5px;font-weight:700;flex:1}
+body.sage .q-count{font-size:11px;color:var(--muted)}
+body.sage .q-add{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:15px;
+  color:var(--muted);cursor:pointer;transition:.2s}
+body.sage .q-add:hover{color:var(--ink);background:var(--panel2)}
+body.sage .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:10px;
+  background:var(--row_bg);border:1px solid var(--border);margin-bottom:6px;
+  cursor:pointer;transition:.18s;box-shadow:0 1px 2px var(--shadow)}
+body.sage .task:hover{background:var(--row_hover);transform:translateX(2px)}
+body.sage .task.dragging{background:var(--row_hover);border-color:var(--accent)}
+body.sage .task.done .t-title{color:var(--muted);text-decoration:line-through;opacity:.8}
+body.sage .cb{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--check_border);flex:none;
+  display:grid;place-items:center;background:var(--check_box);transition:.18s;cursor:pointer}
+body.sage .cb:hover{border-color:var(--check_border_hover)}
+body.sage .cb svg{width:10px;height:10px;opacity:0;transform:scale(.4);transition:.18s cubic-bezier(.34,1.56,.64,1)}
+body.sage .task.done .cb{background:var(--q4);border-color:var(--q4)}
+body.sage .task.done .cb svg{opacity:1;transform:none}
+body.sage .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.sage .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--tag_bg);color:var(--tag_fg);flex:none}
+body.sage .tag.amber{background:#f3ecdc;color:#94793f}
+body.sage footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
+body.sage .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;border:1px solid var(--border);
+  background:var(--panel);color:var(--ink);transition:.18s;user-select:none}
+body.sage .btn:hover{background:var(--btn_hover);transform:translateY(-1px)}
+body.sage .btn.primary{background:var(--accent);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 4px 14px -6px var(--accent)}
+body.sage .btn.report{background:var(--report_bg);border-color:var(--report_bg);color:var(--report_fg)}
+body.sage .spacer{flex:1}
+body.sage .grip{width:14px;height:14px;background:linear-gradient(135deg,transparent 46%,var(--grip) 46%,var(--grip) 54%,transparent 54%),
+  linear-gradient(135deg,transparent 30%,var(--grip) 30%,var(--grip) 38%,transparent 38%);cursor:se-resize;opacity:.7}
+body.sage .icon-btn-sm:hover{background:var(--panel2)}
+body.sage .icon-btn-sm.danger:hover{background:rgba(255,80,80,.15)}
+body.sage .switch .slider{background:var(--border)}
+body.sage .switch input:checked + .slider{background:var(--accent)}
+body.sage .report-calendar{background:var(--card);border-color:var(--border)}
+body.sage .report-nav-center:hover{background:var(--panel2)}
+body.sage .report-nav-btn{border-color:var(--border);background:var(--panel)}
+body.sage .report-nav-btn:hover{background:var(--panel2)}
+body.sage .modal{background:var(--card);color:var(--ink)}
+body.sage .modal input,body.sage .modal textarea{background:var(--row_bg);color:var(--ink);border-color:var(--border)}
+body.sage .modal .radio-option.selected, body.sage .drawer .radio-option.selected{border-color:var(--accent)}
+body.sage .drawer{background:var(--card);color:var(--ink)}
+body.sage .drawer-header{border-bottom:1px solid var(--border)}
+body.sage .report-table th{background:var(--panel2)}
+body.sage .calendar-grid .day:hover{background:var(--panel2)}
+body.sage .tag-panel{background:var(--row_bg)}
+body.sage .tag-panel-item{color:var(--ink)}
+body.sage .tag-panel-item:hover{background:var(--panel2)}
+body.sage .tag-panel-item.selected{background:var(--accent);color:#fff}
