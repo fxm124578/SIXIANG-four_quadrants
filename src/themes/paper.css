@@ -1,0 +1,99 @@
+/*!
+ * id: paper
+ * name: 晨雾纸墨
+ * desc: 暖米纸张质感，朱砂印章点缀
+ * default: 1
+ */
+
+body.paper{
+  --tk-bg:#e8e0cc;--tk-card:#fbf6e8;--tk-panel:#f3ecd9;--tk-panel2:#ede4cd;--tk-row_bg:#fdf8ea;--tk-row_hover:#ffffff;--tk-row_active:#f5edd8;--tk-text:#3d3a33;--tk-title_text:#2c2a24;--tk-muted:#9a927e;--tk-secondary:#8d856f;--tk-border:#d8cfb4;--tk-accent:#b23a2e;--tk-accent_light:#c4554a;--tk-accent_dark:#93301f;--tk-green:#5f8c6b;--tk-tag_bg:#e8eef4;--tk-tag_fg:#4d6b8c;--tk-check_box:#fdf8ea;--tk-check_border:#9a927e;--tk-check_border_hover:#b23a2e;--tk-qc0:#f7ece6;--tk-qc1:#f7f0df;--tk-qc2:#eaeff4;--tk-qc3:#eaf2ec;--tk-qb0:#d9a99c;--tk-qb1:#ddc489;--tk-qb2:#a9bcd0;--tk-qb3:#a9c9b2;--tk-btn_hover:#ffffff;--tk-btn_press:#f0e8d3;--tk-report_bg:#e4efe7;--tk-report_fg:#44664e;--tk-report_hover:#d8e9dd;--tk-report_press:#cde0d4;--tk-grip:#8d856f;--tk-lock_bg:#c9973a;--tk-lock_hover:#d8a94e;--tk-lock_press:#a87e2c;--tk-ghost_bg:#fbf6e8;--tk-alpha:0.92;--tk-topline:thread;--tk-check_round:1;--tk-grad_hi:#fbf6e8;--tk-grad_lo:#efe7d2;--tk-bg_accent:#c9973a #5f8c6b;--tk-bg_grid:0;
+
+  --paper:#f5efdf;--card:#fbf6e8;--ink:#3d3a33;--muted:#9a927e;
+  --q1:#c2543f;--q2:#c9973a;--q3:#4d6b8c;--q4:#5f8c6b;--seal:#b23a2e;
+  width:100%;height:100%;margin:0;padding:0;overflow:hidden;
+  position:relative;
+  font-family:"Noto Sans SC","Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;color:var(--ink);
+  background:
+    radial-gradient(900px 600px at 80% 12%,#f3e8cf 0%,transparent 60%),
+    radial-gradient(700px 500px at 12% 90%,#e9e2cc 0%,transparent 55%),
+    var(--paper);
+}
+body.paper::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.55' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .62 0 0 0 0 .55 0 0 0 0 .42 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23p)'/%3E%3C/svg%3E")}
+body.paper .leaf{position:absolute;width:150px;height:150px;border-radius:0 100% 0 100%;opacity:.16;filter:blur(2px)}
+body.paper .leaf.a{background:#c9973a;top:6%;left:10%;transform:rotate(20deg)}
+body.paper .leaf.b{background:#5f8c6b;bottom:8%;right:12%;transform:rotate(160deg)}
+body.paper .widget{
+  position:relative;width:100%;height:100%;border-radius:0;
+  background:rgba(251,246,232,.82);backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(150,138,110,.35);
+  box-shadow:0 2px 0 rgba(255,255,255,.8) inset,0 26px 50px -22px rgba(90,75,45,.45),0 3px 10px -2px rgba(90,75,45,.2);
+  display:flex;flex-direction:column;
+}
+body.paper .thread{position:absolute;top:0;left:26px;right:26px;height:2px;z-index:3;
+  background:linear-gradient(90deg,transparent,#b23a2e 12%,#b23a2e 88%,transparent)}
+body.paper .thread::before,.paper .thread::after{content:"";position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;background:#b23a2e}
+body.paper .thread::before{left:-3px}
+body.paper header{display:flex;align-items:center;justify-content:center;gap:14px;padding:20px 22px 12px;flex-shrink:0}
+body.paper h1{font-family:"LXGW WenKai",serif;font-weight:700;font-size:23px;letter-spacing:.22em}
+body.paper .date{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+body.paper .date .dot{width:8px;height:8px;border-radius:50%;background:var(--q4);border:1px solid rgba(95,140,107,.5)}
+body.paper .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
+body.paper .quad{border-radius:4px;padding:12px 12px 10px;border:1px solid rgba(150,138,110,.28);transition:.25s;position:relative;
+  display:flex;flex-direction:column;min-height:0}
+body.paper .quad:hover{transform:translateY(-2px) rotate(-.3deg);box-shadow:0 10px 22px -10px rgba(90,75,45,.4)}
+body.paper .q1{background:rgba(194,84,63,.06)}
+body.paper .q3{background:rgba(77,107,140,.06)}
+body.paper .q-head{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+body.paper .q-head .tint{width:9px;height:9px;border-radius:50%;border:2px solid}
+body.paper .q1 .tint{border-color:var(--q1)}
+body.paper .q3 .tint{border-color:var(--q3)}
+body.paper .q-name{font-size:13px;font-weight:700;flex:1;letter-spacing:.08em}
+body.paper .q-count{font-size:11px;color:var(--muted)}
+body.paper .q-add{width:22px;height:22px;display:grid;place-items:center;font-size:16px;color:var(--muted);
+  cursor:pointer;transition:.2s}
+body.paper .q-add:hover{color:var(--seal);transform:scale(1.15)}
+body.paper .task{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:3px;
+  background:rgba(255,255,255,.5);border:1px solid rgba(150,138,110,.2);margin-bottom:6px;cursor:pointer;transition:.2s}
+body.paper .task:hover{background:rgba(255,255,255,.85);box-shadow:0 3px 8px -3px rgba(90,75,45,.3)}
+body.paper .task.dragging{background:#fff;border-color:rgba(178,58,46,.4)}
+body.paper .task.done .t-title{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(178,58,46,.55)}
+body.paper .cb{width:17px;height:17px;border-radius:50%;border:1.7px solid var(--muted);flex:none;
+  display:grid;place-items:center;background:transparent;transition:.2s;cursor:pointer}
+body.paper .cb:hover{border-color:var(--seal)}
+body.paper .cb svg{width:11px;height:11px;opacity:0;stroke-dasharray:16;stroke-dashoffset:16;transition:.35s ease}
+body.paper .task.done .cb{background:rgba(178,58,46,.12);border-color:var(--seal);animation:stamp .45s cubic-bezier(.2,1.4,.4,1)}
+body.paper .task.done .cb svg{opacity:1;stroke-dashoffset:0}
+body.paper .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.paper .tag{font-size:10px;padding:2px 8px;border-radius:2px;background:rgba(77,107,140,.1);
+  color:var(--q3);border:1px solid rgba(77,107,140,.25);flex:none;letter-spacing:.05em}
+body.paper .tag.amber{background:rgba(201,151,58,.1);color:#8f6a20;border-color:rgba(201,151,58,.3)}
+body.paper footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
+body.paper .btn{font-size:12px;padding:7px 13px;border-radius:3px;cursor:pointer;white-space:nowrap;border:1px solid rgba(150,138,110,.35);
+  background:rgba(255,255,255,.45);transition:.2s;user-select:none;letter-spacing:.05em}
+body.paper .btn:hover{background:#fff;box-shadow:0 3px 8px -3px rgba(90,75,45,.35)}
+body.paper .btn.primary{background:var(--seal);border-color:var(--seal);color:#fdf6e8;font-weight:600;box-shadow:0 4px 10px -4px rgba(178,58,46,.6)}
+body.paper .btn.report{background:rgba(95,140,107,.14);border-color:rgba(95,140,107,.4);color:#44664e}
+body.paper .spacer{flex:1}
+body.paper .grip{width:14px;height:14px;background:linear-gradient(135deg,transparent 46%,rgba(120,110,90,.55) 46%,rgba(120,110,90,.55) 54%,transparent 54%),
+  linear-gradient(135deg,transparent 30%,rgba(120,110,90,.35) 30%,rgba(120,110,90,.35) 38%,transparent 38%);cursor:se-resize}
+body.paper .icon-btn-sm:hover{background:rgba(0,0,0,.06)}
+body.paper .icon-btn-sm.danger:hover{background:rgba(255,80,80,.12)}
+body.paper .switch .slider{background:rgba(0,0,0,.15)}
+body.paper .switch input:checked + .slider{background:#b23a2e}
+body.paper .report-calendar{background:rgba(251,246,232,.98);border-color:rgba(150,138,110,.3)}
+body.paper .modal{background:rgba(251,246,232,.97);color:#3d3a33}
+body.paper .modal input,.paper .modal textarea{background:#fff;color:#3d3a33;border-color:#d8cfb4}
+body.paper .modal .radio-option.selected, body.paper .drawer .radio-option.selected{border-color:rgba(178,58,46,.7);background:rgba(178,58,46,.12)}
+body.paper .drawer{background:rgba(251,246,232,.97);color:#3d3a33}
+body.paper .drawer-header{border-bottom:1px solid rgba(150,138,110,.2)}
+body.paper .report-table th{background:#ede4cd}
+body.paper .calendar-grid .day.selected{background:#b23a2e;color:#fdf6e8}
+body.paper .tag-panel{ background: rgba(251,246,232,0.96); }
+body.paper .tag-panel-item{ color: var(--ink); }
+body.paper .tag-panel-item:hover{ background: rgba(0,0,0,0.07); }
+body.paper .tag-panel-item.selected{ background: rgba(178,58,46,0.15); color: var(--seal); }
+
+body.paper .leaf{display:block}
+body.paper .thread{display:block}

@@ -33,3 +33,7 @@ Thumbs.db
 
 # 日报导出（用户数据，不入库）
 四象限日报导出/
+
+# 运行期用户层主题目录（内置主题在 src/themes/ 入库）
+themes/
+!src/themes/

@@ -27,7 +27,7 @@ README.md / DESIGN.md / LICENSE / requirements.txt
 
 - 运行：`python src\main.py` 或双击 `run.bat`（优先 pythonw）
 - 编译检查：`python -m py_compile src/*.py src/widgets/*.py`
-- 打包：`python -m PyInstaller --noconfirm --clean --onefile --windowed --name SIXIANG --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/app_icon.ico;." src/main.py`
+- 打包：`python -m PyInstaller --noconfirm --clean --onefile --windowed --name SIXIANG --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/themes;themes" --add-data "src/app_icon.ico;." src/main.py`
 - 发布流程：@RELEASE.md
 
 ## 验证

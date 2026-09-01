@@ -26,7 +26,7 @@ AGENTS.md 通过 `@RELEASE.md` 引用本文档。
 
 4. **打包**
    ```
-   python -m PyInstaller --noconfirm --clean --onefile --windowed --name SIXIANG --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/app_icon.ico;." src/main.py
+   python -m PyInstaller --noconfirm --clean --onefile --windowed --name SIXIANG --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/themes;themes" --add-data "src/app_icon.ico;." src/main.py
    ```
    产物：`dist/SIXIANG.exe`
 
@@ -51,3 +51,12 @@ AGENTS.md 通过 `@RELEASE.md` 引用本文档。
 - 开机自启动注册表值名：`SIXIANG`（HKCU\Software\Microsoft\Windows\CurrentVersion\Run）
 - 窗口标题仍为「四象」（中文产品名）
 - update.bat 由 `src/updater.py::_launch_replace_script` 生成：纯 ASCII，用 PID 结束旧进程，等旧进程退出后替换并重启
+
+## 主题可插拔（快速安装）
+
+- 主题目录：应用目录 `themes/`（打包 = exe 同目录；源码 = 项目根），首次启动自动从内置复制 4 套
+- 单文件 = 单主题：`<主题id>.css`（ASCII 文件名），头部 `/*!` 注释提供 `id/name/desc/default`
+- 快速安装：把 `.css` 丢进 `themes/` 重启即生效（或设置 → 主题外观 →「导入主题」文件选择器）
+- 卸载：删除对应 `.css`；当前主题文件丢失时自动回归默认「晨雾纸墨」
+- 内置兜底：`src/themes/`（打包进 exe），用户目录缺失自动补回，同名用户文件优先
+- 回退版配色：主题 CSS 内 `--tk-*` 变量（tkinter 回退版用）；新主题可只写 WebView 样式，回退版仍用默认色

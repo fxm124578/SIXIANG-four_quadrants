@@ -15,9 +15,27 @@ from db import Database
 from models import quadrant_name
 from report import build_report_stats, export_report, export_report_range
 import autostart
+import theme_loader
 import updater
 
 THIS_DIR = Path(__file__).resolve().parent
+
+
+def _render_html() -> str:
+    """渲染 app.html 模板：注入可插拔主题 CSS 与主题清单。
+
+    打包 onefile 下 app.html 位于临时解压目录（_MEIPASS），而主题目录
+    在 exe 同目录 themes/，故不能用 <link> 相对路径，改为启动时把全部
+    主题 CSS 与清单 JSON 内联注入后以 html 字符串加载。
+    """
+    template = (THIS_DIR / "web" / "app.html").read_text(encoding="utf-8")
+    css = theme_loader.all_themes_css()
+    meta = theme_loader.theme_meta_json()
+    return (template
+            .replace("/*__THEMES_CSS__*/",
+                     "/* ============ 主题（themes/ 目录可插拔） ============ */\n" + css)
+            .replace("/*__THEMES_META__*/",
+                     f"window.__PROMATHEMES__ = {meta};"))
 
 
 class JsApi:
@@ -150,6 +168,31 @@ class JsApi:
         if self._window:
             self._window.destroy()
 
+    # --------------------------------------------------------------- 主题
+    def get_theme_list(self) -> List[Dict]:
+        """主题清单（设置下拉框用）。"""
+        return theme_loader.theme_list()
+
+    def import_theme(self, file_name: str, content: str) -> Dict:
+        """导入主题：把 CSS 内容写入用户 themes/ 目录（快速安装）。"""
+        import re as _re
+        if not file_name or not content:
+            return {"ok": False, "error": "文件为空"}
+        name = Path(file_name).name.strip()
+        if not _re.match(r"^[a-z0-9][a-z0-9_-]*\.css$", name):
+            return {"ok": False, "error": "文件名需为 ASCII 且以 .css 结尾（如 my-theme.css）"}
+        tid = name[:-4]
+        if not _re.search(rf"body\.{_re.escape(tid)}\s*{{", content):
+            return {"ok": False, "error": f"CSS 中缺少 body.{tid}{{...}} 定义"}
+        if len(content) > 1024 * 512:
+            return {"ok": False, "error": "文件过大（>512KB）"}
+        try:
+            dst = theme_loader.themes_dir() / name
+            dst.write_text(content, encoding="utf-8")
+        except OSError as exc:
+            return {"ok": False, "error": f"写入失败：{exc}"}
+        return {"ok": True, "id": tid, "file": name}
+
     # --------------------------------------------------------------- 开机自启动
     def get_autostart(self) -> bool:
         """当前是否已注册开机自启动。"""
@@ -252,7 +295,7 @@ def _set_icon_with_retry(window, ico_path: str) -> None:
     threading.Thread(target=_try, daemon=True).start()
 
 
-def _make_window(api: JsApi, db: Database, html_path: str) -> webview.Window:
+def _make_window(api: JsApi, db: Database, rendered_html: str) -> webview.Window:
     settings = api.settings
     mode = settings.get("window_mode", "topmost")
     frameless = mode != "normal"
@@ -268,7 +311,7 @@ def _make_window(api: JsApi, db: Database, html_path: str) -> webview.Window:
 
     window = webview.create_window(
         "四象",
-        url=html_path,
+        html=rendered_html,
         js_api=api,
         width=width, height=height, x=x, y=y,
         frameless=frameless,
@@ -299,13 +342,15 @@ def run() -> int:
 
         settings = _read_settings(db)
         api = JsApi(db, settings)
-        html_path = str(THIS_DIR / "web" / "app.html")
+        # 主题目录初始化（首次复制内置）+ 渲染注入主题
+        theme_loader.ensure_themes_dir()
+        rendered_html = _render_html()
 
         while True:
             settings = _read_settings(db)
             api.settings = settings
             api.restart_requested = False
-            window = _make_window(api, db, html_path)
+            window = _make_window(api, db, rendered_html)
 
             # 监听窗口位置持久化（尺寸固定 4:3，不保存）
             def on_moved(w, x, y, _w=window):
