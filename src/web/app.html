@@ -11,7 +11,7 @@
 <style>
 /* ================================================================
    公共样式（布局 / 组件 / 动画）。主题样式由启动时从 themes/ 目录
-   注入到下方 /*__THEMES_CSS__*/ 占位处，可插拔、可快速安装：
+   注入到下方主题占位处，可插拔、可快速安装：
    把 .css 文件放进应用目录 themes/ 文件夹并重启即可。
    ================================================================ */
 /*__THEMES_CSS__*/
@@ -21,19 +21,19 @@
 @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes pulse{50%{opacity:.35}}
 @keyframes morph{from{border-radius:44% 56% 60% 40%/48% 42% 58% 52%;transform:rotate(0)}to{border-radius:58% 42% 44% 56%/40% 58% 42% 60%;transform:rotate(14deg)}}
-.body.frost .q2{background:rgba(232,178,111,.15)}
-.body.frost .q4{background:rgba(143,199,166,.15)}
-.body.frost .q2 .tint{background:var(--q2)}
-.body.frost .q4 .tint{background:var(--q4)}
+
+
+
+
 @keyframes gridmove{from{background-position:0 0,0 0}to{background-position:0 42px,0 0}}
 @keyframes boot{from{opacity:0;transform:translateY(22px) skewX(1.5deg)}to{opacity:1;transform:none}}
 @keyframes blink{50%{opacity:.2}}
 @keyframes settle{from{opacity:0;transform:translateY(30px) rotate(.6deg)}to{opacity:1;transform:none}}
-.body.paper .thread::after{right:-3px}
-.body.paper .q2{background:rgba(201,151,58,.07)}
-.body.paper .q4{background:rgba(95,140,107,.07)}
-.body.paper .q2 .tint{border-color:var(--q2)}
-.body.paper .q4 .tint{border-color:var(--q4)}
+
+
+
+
+
 @keyframes stamp{40%{transform:scale(1.35)}100%{transform:scale(1)}}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden;cursor:default}
