@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.17"
+APP_VERSION = "1.3.18"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -336,8 +336,12 @@ def _launch_replace_script(local_path: Path) -> None:
         "if errorlevel 1 goto :fail",
         # 替换后等约 1 秒再启动：给杀软实时扫描/文件系统稳定时间
         "ping -n 2 127.0.0.1 >nul",
+        # 清理 Temp 残留的 PyInstaller 解压目录：多次强杀/更新后残留 _MEI*，
+        # Windows PID 复用时新进程解压到同名残留目录导致 python DLL 加载失败
+        'for /d %%d in ("%TEMP%\\_MEI*") do rd /s /q "%%d" >nul 2>&1',
         'echo start-1 >> "%LOG%"',
-        'start "" "%~dp0..\\SIXIANG.exe"',
+        # /d 指定新进程起始目录为 exe 同目录，避免其 cwd 落在 __update__ 导致清理失败
+        'start "" /d "%~dp0.." "%~dp0..\\SIXIANG.exe"',
         # 双段观察：6 秒后检查存活，若存活再过 4 秒二次确认，
         # 避免“进程仍在解压/加载中但即将失败”被误判为成功；中途退出则重试
         "ping -n 7 127.0.0.1 >nul",
@@ -350,14 +354,15 @@ def _launch_replace_script(local_path: Path) -> None:
         ":retry",
         'echo retry >> "%LOG%"',
         "ping -n 3 127.0.0.1 >nul",
-        'start "" "%~dp0..\\SIXIANG.exe"',
+        'for /d %%d in ("%TEMP%\\_MEI*") do rd /s /q "%%d" >nul 2>&1',
+        'start "" /d "%~dp0.." "%~dp0..\\SIXIANG.exe"',
         ":done",
         'echo ok >> "%LOG%"',
+        # bat 流式读取：自删须放最后一行。__update__ 空目录残留无害（下次更新复用）；
+        # 日志删除 + bat 自删保证更新目录只剩空壳
         "cd ..",
-        'rmdir /s /q ".__update__" >nul 2>&1',
         'del "%LOG%" >nul 2>&1',
         '(goto) 2>nul & del "%~f0"',
-        "exit /b 0",
         ":fail",
         'echo fail >> "%LOG%"',
         "ping -n 6 127.0.0.1 >nul",
