@@ -1560,7 +1560,7 @@ function renderUpdateState(st) {
     if (dlBtn) dlBtn.style.display = 'none';
     clearUpdatePoll();
     status.classList.add('ok');
-    status.textContent = '更新已下载完成，点击「立即重启更新」安装（将关闭当前窗口，自动以「四象.exe」重新打开）';
+    status.textContent = '更新已下载完成，点击「立即重启更新」安装（将关闭当前窗口，自动以「SIXIANG.exe」重新打开）';
     if (applyBtn) { applyBtn.style.display = ''; applyBtn.disabled = false; }
   } else if (st.phase === 'applying') {
     status.textContent = '正在应用更新，程序即将重启…';
@@ -1628,7 +1628,7 @@ function showUpdateReadyModal() {
   showModal('更新已就绪', `
     <div style="font-size:13px;line-height:1.8">
       新版本已下载完成，是否现在更新？<br>
-      <span style="font-size:11px;color:var(--muted)">现在更新会关闭当前窗口，自动以「四象.exe」重新打开；选择稍后，可随时在设置中点击「立即重启更新」。</span>
+      <span style="font-size:11px;color:var(--muted)">现在更新会关闭当前窗口，自动以「SIXIANG.exe」重新打开；选择稍后，可随时在设置中点击「立即重启更新」。</span>
     </div>`,
     [
       {text:'稍后再说', action:'close'},

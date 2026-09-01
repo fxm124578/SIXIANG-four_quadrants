@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.5"
+APP_VERSION = "1.3.6"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -279,18 +279,14 @@ def apply_update() -> Dict[str, Any]:
 def _launch_replace_script(local_path: Path) -> None:
     """生成并启动 update.bat：等旧进程退出 → 替换 exe → 启动新版本。
 
-    重命名目标固定为「四象.exe」（与当前 exe 名、release 资产名无关），
-    保证开机自启等依赖固定路径/名称的机制始终有效。
-
-    关键：bat 内容保持纯 ASCII，含中文的 exe 路径通过命令行参数（%1，
-    Python 以宽字符传给 cmd）传入，避免 cmd 在 GBK/UTF-8 代码页下解析
-    中文批处理出现乱码（历史 bug：更新后 exe 被命名为乱码且未覆盖旧版）。
-    结束旧进程改用 PID，不再依赖可能含中文的进程映像名。
+    重命名目标固定为 ASCII 的「SIXIANG.exe」（与当前 exe 名、release 资产名
+    无关），保证开机自启等依赖固定路径/名称的机制始终有效；bat 内容保持纯
+    ASCII，任何代码页下解析一致，彻底避免中文文件名乱码问题。
+    结束旧进程改用 PID，不依赖进程映像名。
     """
-    target_exe = Path(sys.executable).resolve()
     update_dir = _update_dir()
     update_dir.mkdir(parents=True, exist_ok=True)
-    new_name = local_path.name  # release 资产名为 ASCII，如 Sixiang-v1.3.4.exe
+    new_name = local_path.name  # release 资产名为 ASCII，如 SIXIANG-v1.3.6.exe
     pid = os.getpid()
 
     bat_lines = [
@@ -299,9 +295,9 @@ def _launch_replace_script(local_path: Path) -> None:
         "timeout /t 2 /nobreak >nul",
         f"taskkill /f /pid {pid} >nul 2>&1",
         "timeout /t 1 /nobreak >nul",
-        f'move /y "%~dp0{new_name}" "%1" >nul',
+        f'move /y "%~dp0{new_name}" "%~dp0..\\SIXIANG.exe" >nul',
         "if errorlevel 1 goto :fail",
-        'start "" "%1"',
+        'start "" "%~dp0..\\SIXIANG.exe"',
         "cd ..",
         'rmdir /s /q ".__update__" >nul 2>&1',
         '(goto) 2>nul & del "%~f0"',
@@ -316,7 +312,7 @@ def _launch_replace_script(local_path: Path) -> None:
 
     creation_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     subprocess.Popen(
-        ["cmd", "/c", str(bat_path), str(target_exe)],
+        ["cmd", "/c", str(bat_path)],
         cwd=str(update_dir),
         creationflags=creation_flags,
         close_fds=True,

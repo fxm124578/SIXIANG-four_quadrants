@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
-APP_NAME = "四象"
+APP_NAME = "SIXIANG"
 
 
 def _run_command() -> str:
