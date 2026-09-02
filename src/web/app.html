@@ -774,11 +774,11 @@ function taskDrawerShell({titleText, submitText, submitIcon, titleValue='', desc
         <span class="icon-btn-sm" onclick="closeDrawer()" title="关闭">${ICON_SVGS.close}</span>
       </div>
       <div class="drawer-body" style="gap:22px;padding-top:16px">
-        <div style="flex:3;display:flex;flex-direction:column;min-width:0">
+        <div style="flex:3;display:flex;flex-direction:column;min-width:0;overflow-y:auto">
           <label>标题 *</label>
           <input id="dlg-title" maxlength="80" value="${esc(titleValue)}" style="margin-bottom:12px">
           <label>描述</label>
-          <textarea id="dlg-desc" style="flex:1;min-height:88px;margin-bottom:12px">${esc(descValue)}</textarea>
+          <textarea id="dlg-desc" style="height:100px;flex:none;min-height:88px;resize:vertical;margin-bottom:12px">${esc(descValue)}</textarea>
           <label>标签 <span style="opacity:.45;font-size:10px;font-weight:400;letter-spacing:.02em">多个标签用逗号或空格分隔</span></label>
           <input id="dlg-tags" value="${esc(tagsValue)}" style="margin-bottom:8px">
           <div id="dlg-tag-chips" class="dlg-tag-chips"></div>
