@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.20"
+APP_VERSION = "1.3.21"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -372,13 +372,17 @@ def _launch_replace_script(local_path: Path) -> None:
     # 全 ASCII 内容，任何代码页下解析一致，无需 chcp / GBK
     bat_path.write_text("\r\n".join(bat_lines), encoding="ascii")
 
-    creation_flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-    subprocess.Popen(
-        ["cmd", "/c", str(bat_path)],
-        cwd=str(update_dir),
-        creationflags=creation_flags,
-        close_fds=True,
+    # 关键：不能直接用 subprocess.Popen(cmd /c bat, CREATE_NO_WINDOW) 启动 bat——
+    # 实测 Popen 派生的 cmd 环境下 start 出的新 exe 会加载 python DLL 失败
+    # （Failed to load Python DLL，手动双击正常）；ShellExecute 正常环境才稳定。
+    # 方案：生成 vbs 隐藏运行 bat（窗口不可见），并用 os.startfile（ShellExecute）启动。
+    vbs_path = update_dir / "run_update.vbs"
+    vbs_path.write_text(
+        'Set sh = CreateObject("WScript.Shell")\r\n'
+        f'sh.Run "cmd /c ""{bat_path}""", 0, False\r\n',
+        encoding="ascii",
     )
+    os.startfile(str(vbs_path))
 
 
 def _delayed_exit() -> None:
