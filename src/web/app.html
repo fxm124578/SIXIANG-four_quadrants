@@ -612,6 +612,8 @@ async function loadAllTags() {
     renderTagChips();
   } catch(e) {
     console.error('加载标签失败:', e);
+    // 失败也渲染空态，避免胶囊区静默空白
+    renderTagChips();
   }
 }
 
@@ -864,10 +866,10 @@ async function openEdit(id) {
       if (submit) submit.click();
     }
   });
-  // 历史标签快速点选：输入变化同步 chip 状态；标签未加载时拉取
+  // 历史标签快速点选：打开时若未加载则等待拉取完成再渲染（避免空白）
   const tagInput = document.getElementById('dlg-tags');
   if (tagInput) tagInput.addEventListener('input', renderTagChips);
-  if (allTags.length === 0) loadAllTags();
+  if (allTags.length === 0) await loadAllTags();
   renderTagChips();
 }
 
@@ -918,7 +920,7 @@ function renderTagChips() {
 /* ================================================================
    新建任务
    ================================================================ */
-function openAdd(quadrant = 0) {
+async function openAdd(quadrant = 0) {
   closeModal();
   closeDrawer();
   const overlay = document.createElement('div');
@@ -957,10 +959,10 @@ function openAdd(quadrant = 0) {
       if (submit) submit.click();
     }
   });
-  // 历史标签快速点选：输入变化同步 chip 状态；标签未加载时拉取
+  // 历史标签快速点选：打开时若未加载则等待拉取完成再渲染（避免空白）
   const tagInput = document.getElementById('dlg-tags');
   if (tagInput) tagInput.addEventListener('input', renderTagChips);
-  if (allTags.length === 0) loadAllTags();
+  if (allTags.length === 0) await loadAllTags();
   renderTagChips();
 }
 
