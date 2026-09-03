@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.24"
+APP_VERSION = "1.3.25"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -357,7 +357,7 @@ def _launch_replace_script(local_path: Path) -> None:
     update_dir.mkdir(parents=True, exist_ok=True)
     pid = os.getpid()
     target_path = _exe_dir() / "SIXIANG.exe"
-    backup_path = _exe_dir() / "SIXIANG.previous.exe"
+    backup_path = _exe_dir() / "SIXIANG.exe.bak"
     log_path = update_dir / "update.log"
 
     # 所有文本仅来自本地绝对路径和 PID；路径由 VBScript 字符串转义，支持中文目录。
@@ -403,7 +403,7 @@ def _launch_replace_script(local_path: Path) -> None:
         "  If fso.FileExists(target) Then fso.DeleteFile target, True",
         "  fso.MoveFile backup, target",
         "  If Err.Number = 0 Then",
-        "    LogLine \"rollback complete; launching previous version\"",
+        "    LogLine \"rollback complete; launching backup\"",
         "    shell.Run Chr(34) & target & Chr(34), 1, False",
         "  Else",
         "    LogLine \"rollback failed: \" & Err.Description",
@@ -456,7 +456,7 @@ def _launch_replace_script(local_path: Path) -> None:
         "    Exit Function",
         "  End If",
         "  InstallUpdate = True",
-        "  LogLine \"replacement complete; previous version kept as SIXIANG.previous.exe\"",
+        "  LogLine \"replacement complete; backup kept as SIXIANG.exe.bak\"",
         "  On Error GoTo 0",
         "End Function",
         "",
@@ -496,7 +496,7 @@ def cleanup_legacy_exes() -> None:
     target = exe_dir / "SIXIANG.exe"
     if not target.is_file():
         return
-    for legacy in ("四象.exe",):
+    for legacy in ("四象.exe", "SIXIANG.previous.exe"):
         p = exe_dir / legacy
         if p.is_file() and p.resolve() != current:
             try:

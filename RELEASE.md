@@ -40,7 +40,7 @@ AGENTS.md 通过 `@RELEASE.md` 引用本文档。
 
 7. **验证**
    - 升级链路：临时将 `updater.APP_VERSION` 设为旧版本，`check_for_update()` 应发现新版本并**仅**定位 `SIXIANG-vX.Y.Z.exe`；确认 API 返回的资产 `size` 与 `digest`（`sha256:`）均存在。
-   - 更新替换：在独立测试目录放一份旧版 `SIXIANG.exe`，完成下载后点击重启更新；确认新版启动、旧版保留为 `SIXIANG.previous.exe`，并检查 `.__update__/update.log` 无失败记录。
+   - 更新替换：在独立测试目录放一份旧版 `SIXIANG.exe`，完成下载后点击重启更新；确认新版启动、旧版保留为 `SIXIANG.exe.bak`，并检查 `.__update__/update.log` 无失败记录。
    - exe 冒烟：启动 `dist/SIXIANG.exe`，确认主窗口出现、`data.db` 生成在 exe 同目录
 
 ## 命名与编码约定
@@ -51,7 +51,7 @@ AGENTS.md 通过 `@RELEASE.md` 引用本文档。
   - 应用内自动更新替换目标固定：`SIXIANG.exe`；更新助手使用 UTF-16 编码的 `apply_update.vbs`，支持中文安装路径。
 - 开机自启动注册表值名：`SIXIANG`（HKCU\Software\Microsoft\Windows\CurrentVersion\Run）
 - 窗口标题仍为「四象」（中文产品名）
-- `apply_update.vbs` 由 `src/updater.py::_launch_replace_script` 生成：仅等待旧 PID 自行退出，不按进程名强杀、不删除 PyInstaller 的 `%TEMP%\\_MEI*` 目录；替换前保留 `SIXIANG.previous.exe`，新版未能维持启动时自动回滚。
+- `apply_update.vbs` 由 `src/updater.py::_launch_replace_script` 生成：仅等待旧 PID 自行退出，不按进程名强杀、不删除 PyInstaller 的 `%TEMP%\\_MEI*` 目录；替换前保留 `SIXIANG.exe.bak`，新版未能维持启动时自动回滚。
 
 ## 主题可插拔（快速安装）
 
