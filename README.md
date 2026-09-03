@@ -71,9 +71,12 @@ Windows 也可双击 `run.bat`（自动优先 `pythonw`，无控制台窗口）�
 
 ## 打包
 
+先打出主程序，再生成安装器（发布资产为 `SIXIANG-Setup-vX.Y.Z.exe`）：
+
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --windowed --name SIXIANG --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/themes;themes" --add-data "src/app_icon.ico;." src/main.py
+python -m PyInstaller --noconfirm --clean --onefile --windowed --name SIXIANG --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/themes;themes" --add-data "src/app_icon.ico;." src/main.py
+"%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" /DMyAppVersion=X.Y.Z setup\sixiang.iss
 ```
 
 ## 许可证

@@ -69,20 +69,7 @@ def _run_tkinter() -> int:
             db.close()
 
 
-def _finish_installer_update() -> None:
-    """从更新缓存启动时：先通知助手「Python 已起来」，再晋升为 SIXIANG.exe。"""
-    if not getattr(sys, "frozen", False):
-        return
-    try:
-        import updater
-        updater.write_update_ready_marker()
-        updater.promote_staged_exe()
-    except Exception:
-        pass
-
-
 def main() -> int:
-    _finish_installer_update()
     if _try_webview():
         try:
             return _run_webview()

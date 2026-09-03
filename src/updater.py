@@ -1,9 +1,7 @@
 """应用版本与自动更新（GitHub Releases）。
 
-流程：检查最新 release → 用户确认后下载新 exe → 先启动已下载的包 →
-Python 起来后再晋升为 SIXIANG.exe（安装器逻辑，不覆盖后再立刻启动）。
-仅在 PyInstaller onefile 打包环境（sys.frozen）下执行替换；
-源码运行时仍可检查更新，但自动替换会给出提示。
+流程：检查最新 release → 下载 Setup → 退出应用 → 安装器覆盖当前目录并启动。
+仅在 PyInstaller onefile 打包环境（sys.frozen）下执行；源码运行可检查更新。
 """
 from __future__ import annotations
 
@@ -17,7 +15,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.28"
+APP_VERSION = "1.3.29"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -98,7 +96,7 @@ def check_for_update() -> Dict[str, Any]:
     if info["has_update"]:
         # 只接受发布规范约定的资产，不能因为 release 里多了调试工具或
         # 其他架构的 exe 就误下载第一个 .exe。
-        expected_name = f"SIXIANG-v{info['latest_version']}.exe"
+        expected_name = f"SIXIANG-Setup-v{info['latest_version']}.exe"
         for asset in data.get("assets", []) or []:
             name = str(asset.get("name") or "")
             if name == expected_name and asset.get("state") == "uploaded":
@@ -309,7 +307,7 @@ def _download_worker(url: str, name: str, expected_size: int,
 
 # ---------------------------------------------------------------- 应用更新
 def apply_update() -> Dict[str, Any]:
-    """用户确认后：启动已下载的新包 → 本进程退出。晋升由新进程完成。"""
+    """用户确认后：拉起已下载的 Setup，本进程退出，由安装器覆盖并启动。"""
     with _state["lock"]:
         if _state["phase"] != "ready" or not _state["local_path"]:
             return {"ok": False, "error": "没有已下载的更新文件"}
@@ -321,6 +319,12 @@ def apply_update() -> Dict[str, Any]:
         with _state["lock"]:
             _state["phase"] = phase_bak
         return {"ok": False, "error": "源码运行版不支持自动替换，请重新克隆仓库运行"}
+
+    if "Setup" not in local_path.name:
+        with _state["lock"]:
+            _state["phase"] = "error"
+            _state["error"] = "更新包不是安装器"
+        return {"ok": False, "error": "更新包不是安装器"}
 
     try:
         _launch_replace_script(local_path)
@@ -339,86 +343,31 @@ def _vbs_string(value: Path | str) -> str:
     return str(value).replace('"', '""')
 
 
-def write_update_ready_marker() -> None:
-    """新包从 .__update__ 启动且 Python 已加载时写入标记，供更新助手确认。"""
-    if not getattr(sys, "frozen", False):
-        return
-    exe = Path(sys.executable).resolve()
-    if exe.parent.name != _UPDATE_DIR_NAME:
-        return
-    marker = _update_dir() / "started.ok"
-    marker.write_text(str(os.getpid()), encoding="ascii")
-
-
-def promote_staged_exe() -> None:
-    """把正在运行的更新缓存 exe 复制为安装目录的 SIXIANG.exe。
-
-    此时旧进程已退出，SIXIANG.exe 未被占用；当前进程仍从 staged 路径运行，
-    只能复制不能移动。失败不影响本次会话（数据目录已指向安装目录）。
-    """
-    if not getattr(sys, "frozen", False):
-        return
-    exe = Path(sys.executable).resolve()
-    if exe.parent.name != _UPDATE_DIR_NAME:
-        return
-    dest = _exe_dir() / "SIXIANG.exe"
-    backup = _exe_dir() / "SIXIANG.exe.bak"
-    if dest.resolve() == exe:
-        return
-    import shutil
-    import time
-    last_error = None
-    for _ in range(10):
-        try:
-            if dest.exists() and dest.resolve() != exe:
-                if backup.exists():
-                    backup.unlink()
-                dest.replace(backup)
-            shutil.copy2(exe, dest)
-            last_error = None
-            break
-        except OSError as exc:
-            last_error = exc
-            time.sleep(0.5)
-    if last_error is not None:
-        return
-    try:
-        import autostart
-        autostart.set_exe_path(str(dest))
-    except Exception:
-        pass
-
-
 def _launch_replace_script(local_path: Path) -> None:
-    """启动独立助手：等旧进程退出 → 启动已下载的新包（不先覆盖 SIXIANG.exe）。
-
-    新包已经在下载完成后躺在 .__update__ 里，相当于安装器去跑 setup。
-    Python 起来后由新进程自己晋升为 SIXIANG.exe。
-    """
+    """等旧进程退出后，静默运行 Setup，安装目录为当前安装目录。"""
     update_dir = _update_dir()
     update_dir.mkdir(parents=True, exist_ok=True)
     pid = os.getpid()
     install_dir = _exe_dir()
-    marker_path = update_dir / "started.ok"
     lock_path = update_dir / "apply.lock"
     log_path = update_dir / "update.log"
+    setup_log = update_dir / "setup.log"
 
     vbs_lines = [
         "Option Explicit",
-        "Dim fso, shell, pid, staged, installDir, marker, lockPath, logPath, i",
+        "Dim fso, shell, pid, staged, installDir, lockPath, logPath, setupLog, cmd, i",
         "Set fso = CreateObject(\"Scripting.FileSystemObject\")",
         "Set shell = CreateObject(\"WScript.Shell\")",
         f"pid = {pid}",
         f'staged = "{_vbs_string(local_path)}"',
         f'installDir = "{_vbs_string(install_dir)}"',
-        f'marker = "{_vbs_string(marker_path)}"',
         f'lockPath = "{_vbs_string(lock_path)}"',
         f'logPath = "{_vbs_string(log_path)}"',
+        f'setupLog = "{_vbs_string(setup_log)}"',
         "If Not AcquireLock() Then",
         "  WScript.Quit 0",
         "End If",
         "LogLine \"start\"",
-        "If fso.FileExists(marker) Then fso.DeleteFile marker, True",
         "For i = 1 To 120",
         "  If Not IsRunning(pid) Then Exit For",
         "  WScript.Sleep 250",
@@ -429,24 +378,17 @@ def _launch_replace_script(local_path: Path) -> None:
         "  WScript.Quit 1",
         "End If",
         "If Not fso.FileExists(staged) Then",
-        "  LogLine \"failed: staged package missing\"",
+        "  LogLine \"failed: setup package missing\"",
         "  ReleaseLock",
         "  WScript.Quit 1",
         "End If",
-        "LogLine \"launching staged package\"",
+        "LogLine \"launching setup\"",
         "shell.CurrentDirectory = installDir",
-        "shell.Run Chr(34) & staged & Chr(34), 1, False",
-        "For i = 1 To 60",
-        "  If fso.FileExists(marker) Then",
-        "    LogLine \"staged app ready\"",
-        "    ReleaseLock",
-        "    WScript.Quit 0",
-        "  End If",
-        "  WScript.Sleep 500",
-        "Next",
-        "LogLine \"failed: staged app did not become ready\"",
+        "cmd = Chr(34) & staged & Chr(34) & \" /VERYSILENT /NORESTART /SUPPRESSMSGBOXES /DIR=\" & Chr(34) & installDir & Chr(34) & \" /LOG=\" & Chr(34) & setupLog & Chr(34)",
+        "shell.Run cmd, 1, False",
+        "LogLine \"setup started\"",
         "ReleaseLock",
-        "WScript.Quit 1",
+        "WScript.Quit 0",
         "",
         "Function AcquireLock()",
         "  On Error Resume Next",
@@ -478,13 +420,9 @@ def _launch_replace_script(local_path: Path) -> None:
         "End Sub",
         "",
         "Function IsRunning(processId)",
-        "  Dim service, processes",
-        "  On Error Resume Next",
-        '  Set service = GetObject("winmgmts:\\\\.\\root\\cimv2")',
-        "  Set processes = service.ExecQuery(\"Select ProcessId from Win32_Process Where ProcessId = \" & processId)",
-        "  IsRunning = (Err.Number = 0 And processes.Count > 0)",
-        "  Err.Clear",
-        "  On Error GoTo 0",
+        "  Dim rc",
+        "  rc = shell.Run(\"cmd /c tasklist /FI \"\"PID eq \" & CStr(processId) & \"\"\" /NH | find /I \"\"SIXIANG.exe\"\"\", 0, True)",
+        "  IsRunning = (rc = 0)",
         "End Function",
         "",
         "Sub LogLine(message)",
