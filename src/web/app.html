@@ -569,7 +569,7 @@ function renderQuadrant(q, tasks) {
     // 标签筛选生效时，任务行只展示被勾选的标签
     let shownTags = tags;
     if (selectedTags.length > 0) shownTags = tags.filter(tg => selectedTags.includes(tg));
-    const tagHTML = shownTags.slice(0,2).map((tg,i) => tagSpan(tg, i)).join('')
+    const tagHTML = shownTags.slice(0,2).map(tg => tagSpan(tg)).join('')
       + (shownTags.length > 2 ? `<span class="tag" style="opacity:.7">+${shownTags.length-2}</span>` : '');
     return `<div class="task" draggable="true" data-id="${t.id}" data-quadrant="${q}"
       ondragstart="onDragStart(event)" ondragend="onDragEnd(event)" onclick="openDetail(${t.id})">
@@ -586,13 +586,24 @@ function parseTags(raw) {
   catch { return [raw]; }
 }
 
-/* 多标签配色：按索引循环分配颜色，浅底深字保证四主题下高对比可读 */
+/* 多标签配色：按下标循环；颜色跟标签库（allTags）走，不跟象限/任务内序号走 */
 const TAG_PALETTE = [
   ['#5b4bb5', '#e8e3ff'], ['#8a5a10', '#fff0d4'], ['#2e7d52', '#dcf5e8'],
   ['#2f6fc4', '#dcebff'], ['#b04a3c', '#fde3de'], ['#a83e80', '#fde3f2'],
 ];
-function tagSpan(tg, idx) {
-  const [fg, bg] = TAG_PALETTE[idx % TAG_PALETTE.length];
+function tagPaletteIndex(tg) {
+  const i = allTags.indexOf(String(tg));
+  if (i >= 0) return i;
+  let h = 0;
+  const s = String(tg);
+  for (let k = 0; k < s.length; k++) h = (h * 31 + s.charCodeAt(k)) >>> 0;
+  return h;
+}
+function tagPalette(tg) {
+  return TAG_PALETTE[tagPaletteIndex(tg) % TAG_PALETTE.length];
+}
+function tagSpan(tg) {
+  const [fg, bg] = tagPalette(tg);
   return `<span class="tag" style="background:${bg};color:${fg}">${esc(tg)}</span>`;
 }
 function esc(s) {
@@ -921,7 +932,7 @@ function renderTagChips() {
   // 按任务标签配色展示胶囊；已加入输入框的胶囊变淡，再次点击可取消选择
   box.innerHTML = tags.map((tag, i) => {
     const used = existing.includes(tag);
-    const [fg, bg] = TAG_PALETTE[i % TAG_PALETTE.length];
+    const [fg, bg] = tagPalette(tag);
     const style = used
       ? `background:${bg};color:${fg};opacity:.38`
       : `background:${bg};color:${fg}`;
@@ -1000,7 +1011,7 @@ async function openDetail(id) {
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <span style="width:8px;height:8px;border-radius:50%;background:${qColor};display:inline-block"></span>
       <span style="font-size:11px">${qName}</span>
-      ${tags.map((tg,i) => tagSpan(tg, i)).join('')}
+      ${tags.map(tg => tagSpan(tg)).join('')}
     </div>
     <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 16px;margin-bottom:14px">
       <div style="font-size:11px;margin-bottom:6px">任务描述</div>
@@ -1458,7 +1469,7 @@ function tagBarsHTML(byTag) {
   if (!entries.length) return '<div class="chart-empty">今日无标签记录</div>';
   const top = entries[0][1];
   return entries.map(([tag, count], i) => {
-    const [fg] = TAG_PALETTE[i % TAG_PALETTE.length];
+    const [fg] = tagPalette(tag);
     const pct = Math.round(count / top * 100);
     return `<div class="tbar-row"><span class="tbar-name" title="${esc(tag)}">${esc(tag)}</span>` +
       `<div class="tbar-track"><div class="tbar-fill" style="width:${pct}%;background:${fg}"></div></div>` +
@@ -1493,7 +1504,7 @@ async function loadReportDay(ds) {
     return;
   }
   const stats = computeReportStats(tasks);
-  const tagsCell = t => '<div class="report-tags">' + parseTags(t.tag).map((tg,i)=>tagSpan(tg,i)).join('') + '</div>';
+  const tagsCell = t => '<div class="report-tags">' + parseTags(t.tag).map(tg => tagSpan(tg)).join('') + '</div>';
   el.innerHTML = `
     <div class="report-tabs">
       <div class="report-tab active" data-tab="detail" onclick="switchReportTab('detail')">
