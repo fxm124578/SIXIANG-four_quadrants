@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.23"
+APP_VERSION = "1.3.24"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"

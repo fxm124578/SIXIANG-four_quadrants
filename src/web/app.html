@@ -235,7 +235,7 @@ button,a,.q-add,.cb,select,input,textarea,.radio-option,.calendar-grid .day,.nav
   -webkit-text-fill-color:transparent;color:transparent}
 #splash .splash-text .splash-brand{
   font-weight:700;letter-spacing:.06em}
-#splash .splash-text .splash-line-lg{font-size:1.3em}
+#splash .splash-text .splash-line-lg{font-size:1.1em}
 .tag-filter-btn{
   display: inline-flex;
   align-items: center;
@@ -452,7 +452,7 @@ const SPLASH_LINES = ['无极生太极','太极生两仪','两仪生四象'];
 const splashStart = Date.now();
 let splashTimer = null;
 function splashLineHtml(line) {
-  // 「四象」品牌字用四色渐变高亮；第三句「两仪生四象」整句放大 2 倍
+  // 「四象」品牌字用四色渐变高亮；第三句「两仪生四象」整句微调放大 1.1 倍
   const brand = line.replace('四象', '<span class="splash-brand">四象</span>');
   return line === '两仪生四象' ? `<span class="splash-line-lg">${brand}</span>` : brand;
 }
