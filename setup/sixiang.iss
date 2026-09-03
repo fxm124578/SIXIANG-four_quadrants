@@ -9,14 +9,14 @@
 #define MyAppExeName "SIXIANG.exe"
 
 [Setup]
-AppId={{8F3C2A91-6D4E-4B17-9C5A-1E7F8D2B4A60}
+AppId={{B7E91C4A-2F18-4D6B-9A33-E5C8F0A17D24}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppNameEn} {#MyAppVersion}
 AppPublisher={#MyAppNameEn}
 DefaultDirName={localappdata}\{#MyAppNameEn}
 DefaultGroupName={#MyAppName}
-DisableDirPage=no
+DisableDirPage=auto
 AlwaysShowDirOnReadyPage=yes
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
@@ -24,7 +24,7 @@ OutputDir=..\dist
 OutputBaseFilename=SIXIANG-Setup-v{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
-WizardStyle=modern
+WizardStyle=classic
 SetupIconFile=..\src\app_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 UninstallDisplayName={#MyAppName}
