@@ -698,9 +698,7 @@ function toggleTagPanel() {
   panel.style.right = 'auto';
   panel.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
   panel.classList.add('open');
-  // 加载标签数据（如果还没加载）
-  if (allTags.length > 0) renderTagPanel();
-  else loadAllTags();
+  loadAllTags();
 }
 
 // 点击外部关闭面板
@@ -858,7 +856,8 @@ async function openEdit(id) {
       }
       await api.update_task(id, title, desc, JSON.stringify([...new Set(tags)]), quad, completedVal);
       closeDrawer();
-      refreshAll();
+      await refreshAll();
+      await loadAllTags();
       // 若原任务已完成，同步刷新日报内容与日历标记
       if (t.completed_at) {
         completedDatesCache = await api.get_completed_dates();
@@ -875,10 +874,10 @@ async function openEdit(id) {
       if (submit) submit.click();
     }
   });
-  // 历史标签快速点选：打开时若未加载则等待拉取完成再渲染（避免空白）
+  // 每次打开都重新拉取标签，避免刚保存的新标签还停在内存缓存里
   const tagInput = document.getElementById('dlg-tags');
   if (tagInput) tagInput.addEventListener('input', renderTagChips);
-  if (allTags.length === 0) await loadAllTags();
+  await loadAllTags();
   renderTagChips();
 }
 
@@ -910,12 +909,17 @@ function renderTagChips() {
   if (!box) return;
   const input = document.getElementById('dlg-tags');
   const existing = input ? input.value.split(/[,，;；、\s]+/).filter(Boolean) : [];
-  if (!allTags.length) {
+  // 输入框里刚打的新标签也立刻进胶囊，避免「看起来没加上」
+  const tags = [];
+  for (const tag of allTags.concat(existing)) {
+    if (tag && !tags.includes(tag)) tags.push(tag);
+  }
+  if (!tags.length) {
     box.innerHTML = '<span class="dlg-tag-empty">暂无历史标签</span>';
     return;
   }
   // 按任务标签配色展示胶囊；已加入输入框的胶囊变淡，再次点击可取消选择
-  box.innerHTML = allTags.map((tag, i) => {
+  box.innerHTML = tags.map((tag, i) => {
     const used = existing.includes(tag);
     const [fg, bg] = TAG_PALETTE[i % TAG_PALETTE.length];
     const style = used
@@ -956,7 +960,9 @@ async function openAdd(quadrant = 0) {
       const quad = parseInt(document.querySelector('#dlg-quads .selected')?.dataset.v ?? '0');
       if (!api) { alert('系统未就绪，请稍后重试'); return; }
       await api.add_task(title, desc, JSON.stringify([...new Set(tags)]), quad);
-      closeDrawer(); refreshAll();
+      closeDrawer();
+      await refreshAll();
+      await loadAllTags();
     } catch(err) { alert('保存失败: ' + err.message); console.error(err); }
   };
   setTimeout(() => document.getElementById('dlg-title').focus(), 100);
@@ -968,10 +974,10 @@ async function openAdd(quadrant = 0) {
       if (submit) submit.click();
     }
   });
-  // 历史标签快速点选：打开时若未加载则等待拉取完成再渲染（避免空白）
+  // 每次打开都重新拉取标签，避免刚保存的新标签还停在内存缓存里
   const tagInput = document.getElementById('dlg-tags');
   if (tagInput) tagInput.addEventListener('input', renderTagChips);
-  if (allTags.length === 0) await loadAllTags();
+  await loadAllTags();
   renderTagChips();
 }
 
