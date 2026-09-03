@@ -595,7 +595,16 @@ function tagSpan(tg, idx) {
   const [fg, bg] = TAG_PALETTE[idx % TAG_PALETTE.length];
   return `<span class="tag" style="background:${bg};color:${fg}">${esc(tg)}</span>`;
 }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// 把用户文本安全地放进内联事件处理器的 JavaScript 参数中。
+// 不能只做 HTML 转义：浏览器会在执行 onclick 前还原实体，单引号会逃出字符串。
+function jsArg(s) {
+  return esc(JSON.stringify(String(s ?? ''))
+    .replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029'));
+}
 
 /* ================================================================
    标签筛选（上拉面板 · 多选）
@@ -626,7 +635,7 @@ function renderTagPanel() {
   }
   container.innerHTML = allTags.map(tag => {
     const sel = selectedTags.includes(tag);
-    return `<span class="tag-panel-item ${sel ? 'selected' : ''}" onclick="toggleTag('${esc(tag)}')">
+    return `<span class="tag-panel-item ${sel ? 'selected' : ''}" onclick="toggleTag(${jsArg(tag)})">
       <span class="ck">${sel
         ? '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor" stroke="currentColor" stroke-width="1.5"/><path d="M5 8.5l2 2 4-4.5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         : '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>'}
@@ -913,7 +922,7 @@ function renderTagChips() {
       ? `background:${bg};color:${fg};opacity:.38`
       : `background:${bg};color:${fg}`;
     const fn = used ? 'removeTagFromInput' : 'addTagToInput';
-    return `<span class="dlg-tag-chip${used ? ' used' : ''}" style="${style}" onclick="${fn}('${esc(tag).replace(/'/g,"\\'")}')">${esc(tag)}</span>`;
+    return `<span class="dlg-tag-chip${used ? ' used' : ''}" style="${style}" onclick="${fn}(${jsArg(tag)})">${esc(tag)}</span>`;
   }).join('');
 }
 
@@ -1522,11 +1531,11 @@ async function loadReportDay(ds) {
         <td>${esc(QUADRANT_NAMES[t.quadrant])}</td>
         <td style="white-space:pre-wrap;word-break:break-word">${esc(t.description)}</td>
         <td style="text-align:center;white-space:nowrap">
-          <span class="icon-btn-sm" onclick="uncompleteReportTask(${t.id},'${esc(t.title).replace(/'/g,"\\'")}')" title="取消完成" style="color:var(--q4,#3dd68c)">
+          <span class="icon-btn-sm" onclick="uncompleteReportTask(${t.id},${jsArg(t.title)})" title="取消完成" style="color:var(--q4,#3dd68c)">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="currentColor" stroke="currentColor" stroke-width="1.2"/><path d="M5 8.2l2 2 4-4.4" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>
           <span class="icon-btn-sm" onclick="openEdit(${t.id})" title="编辑">${ICON_SVGS.edit}</span>
-          <span class="icon-btn-sm danger" onclick="deleteReportTask(${t.id},'${esc(t.title).replace(/'/g,"\\'")}')" title="删除">
+          <span class="icon-btn-sm danger" onclick="deleteReportTask(${t.id},${jsArg(t.title)})" title="删除">
             ${ICON_SVGS.delete}
           </span>
         </td>
@@ -1590,18 +1599,26 @@ function reportNext() {
 }
 
 async function drawerExportDay() {
-  const ds = fmtDate(reportDate);
-  const files = await api.export_day(ds);
-  alert(files.length ? `已生成 ${files.length} 个文件：\n${files.slice(0,6).join('\n')}` : `${ds} 没有已完成任务`);
+  try {
+    const ds = fmtDate(reportDate);
+    const files = await api.export_day(ds);
+    alert(files.length ? `已生成 ${files.length} 个文件：\n${files.slice(0,6).join('\n')}` : `${ds} 没有已完成任务`);
+  } catch (err) {
+    alert('导出失败：' + (err.message || err));
+  }
 }
 
 async function drawerExportRange() {
-  const start = prompt('开始日期（YYYY-MM-DD）', fmtDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
-  if (!start) return;
-  const end = prompt('结束日期（YYYY-MM-DD）', fmtDate(new Date()));
-  if (!end) return;
-  const files = await api.export_range(start, end);
-  alert(files.length ? `已生成 ${files.length} 个文件` : '该范围内没有可导出的记录');
+  try {
+    const start = prompt('开始日期（YYYY-MM-DD）', fmtDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)));
+    if (!start) return;
+    const end = prompt('结束日期（YYYY-MM-DD）', fmtDate(new Date()));
+    if (!end) return;
+    const files = await api.export_range(start, end);
+    alert(files.length ? `已生成 ${files.length} 个文件` : '该范围内没有可导出的记录');
+  } catch (err) {
+    alert('导出失败：' + (err.message || err));
+  }
 }
 
 /* ================================================================

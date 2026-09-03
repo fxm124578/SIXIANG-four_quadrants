@@ -6,18 +6,17 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
-import subprocess
 import sys
 import threading
-import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.22"
+APP_VERSION = "1.3.23"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -80,6 +79,7 @@ def check_for_update() -> Dict[str, Any]:
         "file_name": None,
         "download_url": None,
         "size": 0,
+        "sha256": None,
         "error": None,
     }
     try:
@@ -95,15 +95,23 @@ def check_for_update() -> Dict[str, Any]:
     info["has_update"] = _parse_version(tag) > _parse_version(APP_VERSION)
 
     if info["has_update"]:
+        # 只接受发布规范约定的资产，不能因为 release 里多了调试工具或
+        # 其他架构的 exe 就误下载第一个 .exe。
+        expected_name = f"SIXIANG-v{info['latest_version']}.exe"
         for asset in data.get("assets", []) or []:
             name = str(asset.get("name") or "")
-            if name.lower().endswith(".exe"):
+            if name == expected_name and asset.get("state") == "uploaded":
                 info["file_name"] = name
                 info["download_url"] = asset.get("browser_download_url")
                 info["size"] = int(asset.get("size") or 0)
+                digest = str(asset.get("digest") or "")
+                if digest.startswith("sha256:"):
+                    info["sha256"] = digest.removeprefix("sha256:").lower()
                 break
         if not info["download_url"]:
-            info["error"] = "发现新版本，但 release 中没有可下载的 exe 文件"
+            info["error"] = (
+                f"发现新版本，但 release 中缺少 {expected_name} 更新包"
+            )
     return info
 
 
@@ -192,7 +200,11 @@ def start_download() -> Dict[str, Any]:
         _state["phase"] = "downloading"
         _state["progress"] = 0.0
         _state["error"] = None
-    threading.Thread(target=_download_worker, args=(url, name), daemon=True).start()
+    threading.Thread(
+        target=_download_worker,
+        args=(url, name, int(info.get("size") or 0), info.get("sha256")),
+        daemon=True,
+    ).start()
     return _snapshot()
 
 
@@ -212,13 +224,18 @@ def _snapshot_locked() -> Dict[str, Any]:
     }
 
 
-def _download_file(url: str, name: str):
+def _download_file(url: str, name: str, expected_size: int = 0,
+                   expected_sha256: str | None = None):
     """下载到程序目录 .__update__，返回 (ok, 本地路径或错误信息)。
 
     下载过程中更新 _state 进度；供 WebView（后台线程）与 tkinter（同步）复用。
     """
     tmp_path = None
     try:
+        if Path(name).name != name or not name.lower().endswith(".exe"):
+            raise ValueError("更新包文件名无效")
+        if expected_size < 1:
+            raise ValueError("更新包大小无效")
         update_dir = _update_dir()
         update_dir.mkdir(parents=True, exist_ok=True)
         # 校验目标 exe 所在目录可写（exe 同目录替换需要写权限）
@@ -228,6 +245,7 @@ def _download_file(url: str, name: str):
 
         total = 0
         written = 0
+        hasher = hashlib.sha256()
         with _github_request(url, timeout=DOWNLOAD_TIMEOUT) as resp:
             total = int(resp.headers.get("Content-Length") or 0)
             tmp_path = update_dir / f"{name}.part"
@@ -237,10 +255,25 @@ def _download_file(url: str, name: str):
                     if not chunk:
                         break
                     fh.write(chunk)
+                    hasher.update(chunk)
                     written += len(chunk)
                     if total:
                         with _state["lock"]:
                             _state["progress"] = written / total * 100
+        if total and written != total:
+            raise OSError(f"下载不完整：应为 {total} 字节，实际 {written} 字节")
+        if written != expected_size:
+            raise OSError(
+                f"下载大小校验失败：应为 {expected_size} 字节，实际 {written} 字节"
+            )
+        actual_sha256 = hasher.hexdigest()
+        if expected_sha256 and actual_sha256.lower() != expected_sha256.lower():
+            raise OSError("下载校验失败：SHA-256 不匹配")
+        # 防止代理返回 HTML 错误页却恰好满足其他异常条件。
+        with open(tmp_path, "rb") as fh:
+            if fh.read(2) != b"MZ":
+                raise OSError("下载校验失败：文件不是 Windows 可执行程序")
+
         local_path = update_dir / name
         tmp_path.replace(local_path)
         return True, str(local_path)
@@ -253,8 +286,9 @@ def _download_file(url: str, name: str):
         return False, str(exc)
 
 
-def _download_worker(url: str, name: str) -> None:
-    ok, result = _download_file(url, name)
+def _download_worker(url: str, name: str, expected_size: int,
+                     expected_sha256: str | None) -> None:
+    ok, result = _download_file(url, name, expected_size, expected_sha256)
     with _state["lock"]:
         if ok:
             _state["phase"] = "ready"
@@ -306,82 +340,139 @@ def apply_update() -> Dict[str, Any]:
     return {"ok": True, "restarting": True}
 
 
-def _launch_replace_script(local_path: Path) -> None:
-    """生成并启动 update.bat：等旧进程退出 → 替换 exe → 启动新版本。
+def _vbs_string(value: Path | str) -> str:
+    """返回可嵌入 VBScript 双引号字符串的文本。"""
+    return str(value).replace('"', '""')
 
-    重命名目标固定为 ASCII 的「SIXIANG.exe」（与当前 exe 名、release 资产名
-    无关），保证开机自启等依赖固定路径/名称的机制始终有效；bat 内容保持纯
-    ASCII，任何代码页下解析一致，彻底避免中文文件名乱码问题。
-    结束旧进程改用 PID，不依赖进程映像名。
+
+def _launch_replace_script(local_path: Path) -> None:
+    """启动独立的更新助手：等旧进程退出 → 备份 → 替换 → 重启。
+
+    更新助手必须脱离正在被替换的 exe；这里使用 Windows 自带的 WScript，
+    但不再通过 cmd/bat、进程名强杀或删除 ``%TEMP%\\_MEI*``。PyInstaller
+    的 onefile 运行目录是每个进程独有的，删除它会误伤其他进程，也会让
+    正在解压的新进程找不到 python3xx.dll。
     """
     update_dir = _update_dir()
     update_dir.mkdir(parents=True, exist_ok=True)
-    new_name = local_path.name  # release 资产名为 ASCII，如 SIXIANG-v1.3.6.exe
     pid = os.getpid()
+    target_path = _exe_dir() / "SIXIANG.exe"
+    backup_path = _exe_dir() / "SIXIANG.previous.exe"
+    log_path = update_dir / "update.log"
 
-    bat_lines = [
-        "@echo off",
-        'set LOG=%~dp0..\\update.log',
-        'echo [%date% %time%] start >> "%LOG%"',
-        'cd /d "%~dp0"',
-        "ping -n 3 127.0.0.1 >nul",
-        'echo kill-old >> "%LOG%"',
-        f"taskkill /f /pid {pid} >nul 2>&1",
-        "ping -n 2 127.0.0.1 >nul",
-        # 清理可能残留的 SIXIANG 实例，避免旧进程占用导致 move 失败
-        "taskkill /f /im SIXIANG.exe >nul 2>&1",
-        "ping -n 2 127.0.0.1 >nul",
-        'echo move >> "%LOG%"',
-        f'move /y "%~dp0{new_name}" "%~dp0..\\SIXIANG.exe" >nul',
-        "if errorlevel 1 goto :fail",
-        # 替换后等约 1 秒再启动：给杀软实时扫描/文件系统稳定时间
-        "ping -n 2 127.0.0.1 >nul",
-        # 清理 Temp 残留的 PyInstaller 解压目录：多次强杀/更新后残留 _MEI*，
-        # Windows PID 复用时新进程解压到同名残留目录导致 python DLL 加载失败
-        'for /d %%d in ("%TEMP%\\_MEI*") do rd /s /q "%%d" >nul 2>&1',
-        'echo start-1 >> "%LOG%"',
-        # /d 指定新进程起始目录为 exe 同目录，避免其 cwd 落在 __update__ 导致清理失败
-        'start "" /d "%~dp0.." "%~dp0..\\SIXIANG.exe"',
-        # 双段观察：6 秒后检查存活，若存活再过 4 秒二次确认，
-        # 避免“进程仍在解压/加载中但即将失败”被误判为成功；中途退出则重试
-        "ping -n 7 127.0.0.1 >nul",
-        'tasklist /fi "imagename eq SIXIANG.exe" | findstr /i "SIXIANG.exe" >nul',
-        "if errorlevel 1 goto :retry",
-        "ping -n 5 127.0.0.1 >nul",
-        'tasklist /fi "imagename eq SIXIANG.exe" | findstr /i "SIXIANG.exe" >nul',
-        "if errorlevel 1 goto :retry",
-        "goto :done",
-        ":retry",
-        'echo retry >> "%LOG%"',
-        "ping -n 3 127.0.0.1 >nul",
-        'for /d %%d in ("%TEMP%\\_MEI*") do rd /s /q "%%d" >nul 2>&1',
-        'start "" /d "%~dp0.." "%~dp0..\\SIXIANG.exe"',
-        ":done",
-        'echo ok >> "%LOG%"',
-        # bat 流式读取：自删须放最后一行。__update__ 空目录残留无害（下次更新复用）；
-        # 日志删除 + bat 自删保证更新目录只剩空壳
-        "cd ..",
-        'del "%LOG%" >nul 2>&1',
-        '(goto) 2>nul & del "%~f0"',
-        ":fail",
-        'echo fail >> "%LOG%"',
-        "ping -n 6 127.0.0.1 >nul",
-        "exit /b 1",
+    # 所有文本仅来自本地绝对路径和 PID；路径由 VBScript 字符串转义，支持中文目录。
+    vbs_lines = [
+        "Option Explicit",
+        "Dim fso, shell, pid, staged, target, backup, logPath, i",
+        "Set fso = CreateObject(\"Scripting.FileSystemObject\")",
+        "Set shell = CreateObject(\"WScript.Shell\")",
+        f"pid = {pid}",
+        f'staged = "{_vbs_string(local_path)}"',
+        f'target = "{_vbs_string(target_path)}"',
+        f'backup = "{_vbs_string(backup_path)}"',
+        f'logPath = "{_vbs_string(log_path)}"',
+        "LogLine \"start\"",
+        "For i = 1 To 120",
+        "  If Not IsRunning(pid) Then Exit For",
+        "  WScript.Sleep 250",
+        "Next",
+        "If IsRunning(pid) Then",
+        "  LogLine \"failed: old process did not exit\"",
+        "  WScript.Quit 1",
+        "End If",
+        "For i = 1 To 60",
+        "  If InstallUpdate() Then Exit For",
+        "  WScript.Sleep 500",
+        "Next",
+        "If Not fso.FileExists(target) Then",
+        "  LogLine \"failed: replacement did not produce target\"",
+        "  WScript.Quit 1",
+        "End If",
+        "LogLine \"launching updated app\"",
+        "shell.Run Chr(34) & target & Chr(34), 1, False",
+        "For i = 1 To 48",
+        "  If IsImageRunning(\"SIXIANG.exe\") Then",
+        "    LogLine \"updated app started\"",
+        "    WScript.Quit 0",
+        "  End If",
+        "  WScript.Sleep 250",
+        "Next",
+        "LogLine \"updated app did not stay running; attempting rollback\"",
+        "If fso.FileExists(backup) Then",
+        "  On Error Resume Next",
+        "  If fso.FileExists(target) Then fso.DeleteFile target, True",
+        "  fso.MoveFile backup, target",
+        "  If Err.Number = 0 Then",
+        "    LogLine \"rollback complete; launching previous version\"",
+        "    shell.Run Chr(34) & target & Chr(34), 1, False",
+        "  Else",
+        "    LogLine \"rollback failed: \" & Err.Description",
+        "  End If",
+        "  On Error GoTo 0",
+        "End If",
+        "WScript.Quit 1",
+        "",
+        "Function IsRunning(processId)",
+        "  Dim service, processes",
+        "  On Error Resume Next",
+        "  Set service = GetObject(\"winmgmts:\\\\.\\root\\cimv2\")",
+        "  Set processes = service.ExecQuery(\"Select ProcessId from Win32_Process Where ProcessId = \" & processId)",
+        "  IsRunning = (Err.Number = 0 And processes.Count > 0)",
+        "  Err.Clear",
+        "  On Error GoTo 0",
+        "End Function",
+        "",
+        "Function IsImageRunning(imageName)",
+        "  Dim service, processes",
+        "  On Error Resume Next",
+        "  Set service = GetObject(\"winmgmts:\\\\.\\root\\cimv2\")",
+        "  Set processes = service.ExecQuery(\"Select Name from Win32_Process Where Name = '\" & imageName & \"'\")",
+        "  IsImageRunning = (Err.Number = 0 And processes.Count > 0)",
+        "  Err.Clear",
+        "  On Error GoTo 0",
+        "End Function",
+        "",
+        "Function InstallUpdate()",
+        "  On Error Resume Next",
+        "  InstallUpdate = False",
+        "  If Not fso.FileExists(staged) Then",
+        "    LogLine \"failed: staged package missing\"",
+        "    Exit Function",
+        "  End If",
+        "  If fso.FileExists(target) Then",
+        "    If fso.FileExists(backup) Then fso.DeleteFile backup, True",
+        "    fso.MoveFile target, backup",
+        "    If Err.Number <> 0 Then",
+        "      LogLine \"replace retry: cannot back up current executable: \" & Err.Description",
+        "      Err.Clear",
+        "      Exit Function",
+        "    End If",
+        "  End If",
+        "  fso.MoveFile staged, target",
+        "  If Err.Number <> 0 Then",
+        "    LogLine \"replace retry: cannot install new executable: \" & Err.Description",
+        "    Err.Clear",
+        "    If Not fso.FileExists(target) And fso.FileExists(backup) Then fso.MoveFile backup, target",
+        "    Exit Function",
+        "  End If",
+        "  InstallUpdate = True",
+        "  LogLine \"replacement complete; previous version kept as SIXIANG.previous.exe\"",
+        "  On Error GoTo 0",
+        "End Function",
+        "",
+        "Sub LogLine(message)",
+        "  Dim logFile",
+        "  On Error Resume Next",
+        "  Set logFile = fso.OpenTextFile(logPath, 8, True, -1)",
+        "  logFile.WriteLine Now & \" \" & message",
+        "  logFile.Close",
+        "  On Error GoTo 0",
+        "End Sub",
     ]
-    bat_path = update_dir / "update.bat"
-    # 全 ASCII 内容，任何代码页下解析一致，无需 chcp / GBK
-    bat_path.write_text("\r\n".join(bat_lines), encoding="ascii")
-
-    # 关键：不能直接用 subprocess.Popen(cmd /c bat, CREATE_NO_WINDOW) 启动 bat——
-    # 实测 Popen 派生的 cmd 环境下 start 出的新 exe 会加载 python DLL 失败
-    # （Failed to load Python DLL，手动双击正常）；ShellExecute 正常环境才稳定。
-    # 方案：生成 vbs 隐藏运行 bat（窗口不可见），并用 os.startfile（ShellExecute）启动。
-    vbs_path = update_dir / "run_update.vbs"
-    vbs_path.write_text(
-        'Set sh = CreateObject("WScript.Shell")\r\n'
-        f'sh.Run "cmd /c ""{bat_path}""", 0, False\r\n',
-        encoding="ascii",
-    )
+    vbs_path = update_dir / "apply_update.vbs"
+    # WScript 对 UTF-8（无 BOM）的识别依赖系统代码页；UTF-16 自带 BOM，
+    # 可以稳定承载用户可能存在的中文安装路径。
+    vbs_path.write_text("\r\n".join(vbs_lines), encoding="utf-16")
     os.startfile(str(vbs_path))
 
 
@@ -415,12 +506,13 @@ def cleanup_legacy_exes() -> None:
 
 
 # ---------------------------------------------------------------- 便捷入口
-def download_now(url: str, name: str):
+def download_now(url: str, name: str, expected_size: int = 0,
+                 expected_sha256: str | None = None):
     """同步下载更新文件；返回 (ok, 路径或错误信息)。
 
     供 tkinter 回退版等简单场景使用（无进度回调）。
     """
-    ok, result = _download_file(url, name)
+    ok, result = _download_file(url, name, expected_size, expected_sha256)
     if ok:
         with _state["lock"]:
             _state["phase"] = "ready"

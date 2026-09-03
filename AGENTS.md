@@ -1,6 +1,6 @@
 # AGENTS.md — 四象（Four Quadrants）
 
-Windows 桌面四象限任务管理小组件。无边框悬浮窗 + 四套主题 + WebView/tkinter 双引擎，纯 Python 标准库实现，单文件 exe 分发，GitHub Releases 自动更新。
+Windows 桌面四象限任务管理小组件。无边框悬浮窗 + 九套主题 + WebView/tkinter 双引擎，纯 Python 标准库实现，单文件 exe 分发，GitHub Releases 自动更新。
 
 ## 目录结构
 
@@ -40,7 +40,7 @@ README.md / DESIGN.md / LICENSE / requirements.txt
 - 零第三方依赖（仅标准库）；pywebview 可选（WebView 版），缺失自动回退 tkinter
 - 数据库：源码模式 `src/data.db`；打包模式 exe 同目录 `data.db`。onefile 下 `__file__` 指向临时解压目录，禁止用于数据落盘（用 `sys.executable`）
 - 数据/产物不提交：`data.db`、`build/`、`dist/`、`*.spec`（见 .gitignore）
-- 自动更新：update.bat（纯 ASCII，由 `updater.py::_launch_replace_script` 生成）等旧进程退出后替换 exe 为 `SIXIANG.exe` 并重启
+- 自动更新：`apply_update.vbs`（由 `updater.py::_launch_replace_script` 生成）等待旧 PID 自行退出，再备份、替换并重启 `SIXIANG.exe`；不得按映像名强杀或删除 `%TEMP%\\_MEI*`。下载必须校验 GitHub Release 资产的大小和 SHA-256。
 - GitHub 资产名必须 ASCII：`SIXIANG-vX.Y.Z.exe`（中文名会被平台强制替换为 default.exe）
 - 远端：https://github.com/fxm124578/SIXIANG-four_quadrants（公开），tag 与 release 一一对应
 

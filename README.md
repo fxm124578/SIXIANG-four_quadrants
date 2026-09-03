@@ -2,13 +2,13 @@
 
 > Windows 桌面四象限任务管理小组件 —— 悬浮窗常驻桌面，让「紧急且重要」始终可见。
 
-四象限桌面任务管理小组件：无边框悬浮窗 + 四套设计主题 + WebView / tkinter 双引擎，零第三方依赖（纯 Python 标准库），单文件免安装。
+四象限桌面任务管理小组件：无边框悬浮窗 + 九套设计主题 + WebView / tkinter 双引擎，零必装第三方依赖，单文件免安装。
 
 ## ✨ 亮点
 
 - 🪟 桌面悬浮窗：无边框、置顶、可拖动、边缘拖拽调整大小，不打扰工作流
 - 🗂️ 四象限：紧急且重要 / 紧急不重要 / 不紧急重要 / 不紧急不重要
-- 🎨 四套主题：午夜玻璃 / 雾白冰川 / 霓虹网格 / 晨雾纸墨
+- 🎨 九套主题：午夜玻璃、雾白冰川、霓虹网格、晨雾纸墨等，可导入自定义 CSS 主题
 - 📋 日报中心：底部抽屉式日历，按日查看完成任务 / 象限统计 / 标签统计
 - 📤 导出：单日或日期范围批量导出 CSV + JSON
 - 🔄 自动更新：设置页一键检查 GitHub Releases 新版，确认后自动下载并替换重启
@@ -23,8 +23,8 @@
 - 日报中心：底部抽屉式日历，按日查看完成任务 / 象限统计 / 标签统计
 - 导出：单日或日期范围批量导出 CSV + JSON
 - 三种窗口模式：置顶最前 / 固定桌面 / 普通窗口（系统标题栏）
-- 四套主题：午夜玻璃 / 雾白冰川 / 霓虹网格 / 晨雾纸墨
-- 设置自动记忆：窗口位置、大小、锁定、主题、模式
+- 九套内置主题，支持导入自定义 CSS 主题
+- 设置自动记忆：窗口位置、锁定、主题、模式（窗口尺寸固定为 4:3）
 - 软件更新：设置页一键检查 GitHub Releases 新版，确认后自动下载并替换重启
 
 ## 快速开始
@@ -54,7 +54,7 @@ Windows 也可双击 `run.bat`（自动优先 `pythonw`，无控制台窗口）�
 │  ├─ dialogs.py       tkinter 回退版对话框
 │  ├─ styles.py        主题系统 + ICO 图标
 │  ├─ app_icon.ico/.svg  应用图标
-│  ├─ web/app.html     单页应用：四套主题 + 全部功能
+│  ├─ web/app.html     单页应用：主题 + 全部功能
 │  ├─ widgets/         tkinter 回退版（main_widget / quadrant_card / task_item）
 │  └─ data.db          SQLite 数据文件（源码运行）
 ├─ designs/            四套 HTML 设计方案（预览 / 参考）
@@ -73,7 +73,7 @@ Windows 也可双击 `run.bat`（自动优先 `pythonw`，无控制台窗口）�
 
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --windowed --name 四象 --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/app_icon.ico;." src/main.py
+pyinstaller --onefile --windowed --name SIXIANG --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/themes;themes" --add-data "src/app_icon.ico;." src/main.py
 ```
 
 ## 许可证

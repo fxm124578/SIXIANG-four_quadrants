@@ -845,7 +845,12 @@ class SettingsDialog(ModalDialog):
                 self.after(0, lambda: safe_messagebox(
                     self, "warning", "检查更新", "release 中没有可下载的 exe 文件"))
                 return
-            ok, msg = updater.download_now(url, info.get("file_name") or "update.exe")
+            ok, msg = updater.download_now(
+                url,
+                info.get("file_name") or "update.exe",
+                int(info.get("size") or 0),
+                info.get("sha256"),
+            )
             self.after(0, lambda: self._on_download_done(ok, msg))
 
         threading.Thread(target=_worker, daemon=True).start()

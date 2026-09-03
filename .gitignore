@@ -12,6 +12,8 @@ env/
 # 运行时生成
 data.db
 started.log
+.__update__/
+SIXIANG.previous.exe
 
 # PyInstaller 打包产物
 build/

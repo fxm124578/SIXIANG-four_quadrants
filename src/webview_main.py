@@ -7,13 +7,11 @@ from __future__ import annotations
 
 import sys
 import webview
-from datetime import date
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from db import Database
-from models import quadrant_name
-from report import build_report_stats, export_report, export_report_range
+from report import export_report, export_report_range
 import autostart
 import theme_loader
 import updater
@@ -76,17 +74,18 @@ class JsApi:
         self.db.delete_task(task_id)
         return True
 
-    def update_task(self, task_id: int, title: str = "",
-                    description: str = "", tag: str = "",
-                    quadrant: int = -1,
-                    completed_at: str = "") -> bool:
+    def update_task(self, task_id: int, title: Optional[str] = None,
+                    description: Optional[str] = None,
+                    tag: Optional[str] = None, quadrant: int = -1,
+                    completed_at: Optional[str] = None) -> bool:
+        """更新任务；None 表示不改，空字符串表示用户明确清空该字段。"""
         self.db.update_task(
             task_id,
-            title=title or None,
-            description=description if description != "" else None,
-            tag=tag if tag != "" else None,
+            title=title,
+            description=description,
+            tag=tag,
             quadrant=int(quadrant) if int(quadrant) >= 0 else None,
-            completed_at=completed_at or None,
+            completed_at=completed_at,
         )
         return True
 
@@ -116,8 +115,8 @@ class JsApi:
         try:
             files = export_report(self.db, date_str, directory)
             return [str(f) for f in files]
-        except OSError:
-            return []
+        except OSError as exc:
+            raise RuntimeError(f"无法写入导出目录：{exc}") from exc
 
     def export_range(self, start: str, end: str) -> List[str]:
         directory = self._choose_dir()
@@ -126,8 +125,8 @@ class JsApi:
         try:
             files = export_report_range(self.db, start, end, directory)
             return [str(f) for f in files]
-        except OSError:
-            return []
+        except OSError as exc:
+            raise RuntimeError(f"无法写入导出目录：{exc}") from exc
 
     @staticmethod
     def _choose_dir() -> str:
