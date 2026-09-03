@@ -1,6 +1,7 @@
 """应用版本与自动更新（GitHub Releases）。
 
-流程：检查最新 release → 用户确认后下载新 exe → 用户确认后替换并重启。
+流程：检查最新 release → 用户确认后下载新 exe → 先启动已下载的包 →
+Python 起来后再晋升为 SIXIANG.exe（安装器逻辑，不覆盖后再立刻启动）。
 仅在 PyInstaller onefile 打包环境（sys.frozen）下执行替换；
 源码运行时仍可检查更新，但自动替换会给出提示。
 """
@@ -16,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.27"
+APP_VERSION = "1.3.28"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -178,9 +179,10 @@ def get_state() -> Dict[str, Any]:
 
 
 def _exe_dir() -> Path:
-    """打包后 exe 所在目录；源码运行时用当前目录。"""
+    """安装目录：打包后为 SIXIANG.exe 所在目录（从 .__update__ 启动时取其父目录）。"""
     if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent
+        from theme_loader import app_dir
+        return app_dir()
     return Path.cwd()
 
 
@@ -307,7 +309,7 @@ def _download_worker(url: str, name: str, expected_size: int,
 
 # ---------------------------------------------------------------- 应用更新
 def apply_update() -> Dict[str, Any]:
-    """用户确认后：写替换脚本 → 启动脚本 → 退出当前程序。"""
+    """用户确认后：启动已下载的新包 → 本进程退出。晋升由新进程完成。"""
     with _state["lock"]:
         if _state["phase"] != "ready" or not _state["local_path"]:
             return {"ok": False, "error": "没有已下载的更新文件"}
@@ -328,14 +330,6 @@ def apply_update() -> Dict[str, Any]:
             _state["error"] = f"启动更新失败：{exc}"
         return {"ok": False, "error": str(exc)}
 
-    # 统一 SIXIANG 命名：若已开启自启动，把注册表指向新 exe 路径
-    try:
-        import autostart
-        autostart.set_exe_path(str(_exe_dir() / "SIXIANG.exe"))
-    except Exception:
-        pass
-
-    # 替换脚本会等旧进程退出后替换 exe；这里安排本进程尽快退出
     threading.Thread(target=_delayed_exit, daemon=True).start()
     return {"ok": True, "restarting": True}
 
@@ -345,118 +339,151 @@ def _vbs_string(value: Path | str) -> str:
     return str(value).replace('"', '""')
 
 
-def _launch_replace_script(local_path: Path) -> None:
-    """启动独立的更新助手：等旧进程退出 → 备份 → 替换 → 重启。
+def write_update_ready_marker() -> None:
+    """新包从 .__update__ 启动且 Python 已加载时写入标记，供更新助手确认。"""
+    if not getattr(sys, "frozen", False):
+        return
+    exe = Path(sys.executable).resolve()
+    if exe.parent.name != _UPDATE_DIR_NAME:
+        return
+    marker = _update_dir() / "started.ok"
+    marker.write_text(str(os.getpid()), encoding="ascii")
 
-    更新助手必须脱离正在被替换的 exe；这里使用 Windows 自带的 WScript，
-    但不再通过 cmd/bat、进程名强杀或删除 ``%TEMP%\\_MEI*``。PyInstaller
-    的 onefile 运行目录是每个进程独有的，删除它会误伤其他进程，也会让
-    正在解压的新进程找不到 python3xx.dll。
+
+def promote_staged_exe() -> None:
+    """把正在运行的更新缓存 exe 复制为安装目录的 SIXIANG.exe。
+
+    此时旧进程已退出，SIXIANG.exe 未被占用；当前进程仍从 staged 路径运行，
+    只能复制不能移动。失败不影响本次会话（数据目录已指向安装目录）。
+    """
+    if not getattr(sys, "frozen", False):
+        return
+    exe = Path(sys.executable).resolve()
+    if exe.parent.name != _UPDATE_DIR_NAME:
+        return
+    dest = _exe_dir() / "SIXIANG.exe"
+    backup = _exe_dir() / "SIXIANG.exe.bak"
+    if dest.resolve() == exe:
+        return
+    import shutil
+    import time
+    last_error = None
+    for _ in range(10):
+        try:
+            if dest.exists() and dest.resolve() != exe:
+                if backup.exists():
+                    backup.unlink()
+                dest.replace(backup)
+            shutil.copy2(exe, dest)
+            last_error = None
+            break
+        except OSError as exc:
+            last_error = exc
+            time.sleep(0.5)
+    if last_error is not None:
+        return
+    try:
+        import autostart
+        autostart.set_exe_path(str(dest))
+    except Exception:
+        pass
+
+
+def _launch_replace_script(local_path: Path) -> None:
+    """启动独立助手：等旧进程退出 → 启动已下载的新包（不先覆盖 SIXIANG.exe）。
+
+    新包已经在下载完成后躺在 .__update__ 里，相当于安装器去跑 setup。
+    Python 起来后由新进程自己晋升为 SIXIANG.exe。
     """
     update_dir = _update_dir()
     update_dir.mkdir(parents=True, exist_ok=True)
     pid = os.getpid()
-    target_path = _exe_dir() / "SIXIANG.exe"
-    backup_path = _exe_dir() / "SIXIANG.exe.bak"
+    install_dir = _exe_dir()
+    marker_path = update_dir / "started.ok"
+    lock_path = update_dir / "apply.lock"
     log_path = update_dir / "update.log"
 
-    # 所有文本仅来自本地绝对路径和 PID；路径由 VBScript 字符串转义，支持中文目录。
     vbs_lines = [
         "Option Explicit",
-        "Dim fso, shell, pid, staged, target, backup, logPath, i",
+        "Dim fso, shell, pid, staged, installDir, marker, lockPath, logPath, i",
         "Set fso = CreateObject(\"Scripting.FileSystemObject\")",
         "Set shell = CreateObject(\"WScript.Shell\")",
         f"pid = {pid}",
         f'staged = "{_vbs_string(local_path)}"',
-        f'target = "{_vbs_string(target_path)}"',
-        f'backup = "{_vbs_string(backup_path)}"',
+        f'installDir = "{_vbs_string(install_dir)}"',
+        f'marker = "{_vbs_string(marker_path)}"',
+        f'lockPath = "{_vbs_string(lock_path)}"',
         f'logPath = "{_vbs_string(log_path)}"',
+        "If Not AcquireLock() Then",
+        "  WScript.Quit 0",
+        "End If",
         "LogLine \"start\"",
+        "If fso.FileExists(marker) Then fso.DeleteFile marker, True",
         "For i = 1 To 120",
         "  If Not IsRunning(pid) Then Exit For",
         "  WScript.Sleep 250",
         "Next",
         "If IsRunning(pid) Then",
         "  LogLine \"failed: old process did not exit\"",
+        "  ReleaseLock",
         "  WScript.Quit 1",
         "End If",
+        "If Not fso.FileExists(staged) Then",
+        "  LogLine \"failed: staged package missing\"",
+        "  ReleaseLock",
+        "  WScript.Quit 1",
+        "End If",
+        "LogLine \"launching staged package\"",
+        "shell.CurrentDirectory = installDir",
+        "shell.Run Chr(34) & staged & Chr(34), 1, False",
         "For i = 1 To 60",
-        "  If InstallUpdate() Then Exit For",
-        "  WScript.Sleep 500",
-        "Next",
-        "If Not fso.FileExists(target) Then",
-        "  LogLine \"failed: replacement did not produce target\"",
-        "  WScript.Quit 1",
-        "End If",
-        "LogLine \"launching updated app\"",
-        "shell.Run Chr(34) & target & Chr(34), 1, False",
-        "For i = 1 To 48",
-        "  If IsImageRunning(\"SIXIANG.exe\") Then",
-        "    LogLine \"updated app started\"",
+        "  If fso.FileExists(marker) Then",
+        "    LogLine \"staged app ready\"",
+        "    ReleaseLock",
         "    WScript.Quit 0",
         "  End If",
-        "  WScript.Sleep 250",
+        "  WScript.Sleep 500",
         "Next",
-        "LogLine \"updated app did not stay running; attempting rollback\"",
-        "If fso.FileExists(backup) Then",
-        "  On Error Resume Next",
-        "  If fso.FileExists(target) Then fso.DeleteFile target, True",
-        "  fso.MoveFile backup, target",
-        "  If Err.Number = 0 Then",
-        "    LogLine \"rollback complete; launching backup\"",
-        "    shell.Run Chr(34) & target & Chr(34), 1, False",
-        "  Else",
-        "    LogLine \"rollback failed: \" & Err.Description",
-        "  End If",
-        "  On Error GoTo 0",
-        "End If",
+        "LogLine \"failed: staged app did not become ready\"",
+        "ReleaseLock",
         "WScript.Quit 1",
+        "",
+        "Function AcquireLock()",
+        "  On Error Resume Next",
+        "  If fso.FileExists(lockPath) Then",
+        "    If DateDiff(\"s\", fso.GetFile(lockPath).DateLastModified, Now) > 120 Then",
+        "      fso.DeleteFile lockPath, True",
+        "    End If",
+        "  End If",
+        "  Err.Clear",
+        "  Dim lockFile",
+        "  Set lockFile = fso.CreateTextFile(lockPath, False)",
+        "  If Err.Number <> 0 Then",
+        "    LogLine \"another updater running\"",
+        "    AcquireLock = False",
+        "    Err.Clear",
+        "    On Error GoTo 0",
+        "    Exit Function",
+        "  End If",
+        "  lockFile.WriteLine CStr(pid)",
+        "  lockFile.Close",
+        "  AcquireLock = True",
+        "  On Error GoTo 0",
+        "End Function",
+        "",
+        "Sub ReleaseLock()",
+        "  On Error Resume Next",
+        "  If fso.FileExists(lockPath) Then fso.DeleteFile lockPath, True",
+        "  On Error GoTo 0",
+        "End Sub",
         "",
         "Function IsRunning(processId)",
         "  Dim service, processes",
         "  On Error Resume Next",
-        "  Set service = GetObject(\"winmgmts:\\\\.\\root\\cimv2\")",
+        '  Set service = GetObject("winmgmts:\\\\.\\root\\cimv2")',
         "  Set processes = service.ExecQuery(\"Select ProcessId from Win32_Process Where ProcessId = \" & processId)",
         "  IsRunning = (Err.Number = 0 And processes.Count > 0)",
         "  Err.Clear",
-        "  On Error GoTo 0",
-        "End Function",
-        "",
-        "Function IsImageRunning(imageName)",
-        "  Dim service, processes",
-        "  On Error Resume Next",
-        "  Set service = GetObject(\"winmgmts:\\\\.\\root\\cimv2\")",
-        "  Set processes = service.ExecQuery(\"Select Name from Win32_Process Where Name = '\" & imageName & \"'\")",
-        "  IsImageRunning = (Err.Number = 0 And processes.Count > 0)",
-        "  Err.Clear",
-        "  On Error GoTo 0",
-        "End Function",
-        "",
-        "Function InstallUpdate()",
-        "  On Error Resume Next",
-        "  InstallUpdate = False",
-        "  If Not fso.FileExists(staged) Then",
-        "    LogLine \"failed: staged package missing\"",
-        "    Exit Function",
-        "  End If",
-        "  If fso.FileExists(target) Then",
-        "    If fso.FileExists(backup) Then fso.DeleteFile backup, True",
-        "    fso.MoveFile target, backup",
-        "    If Err.Number <> 0 Then",
-        "      LogLine \"replace retry: cannot back up current executable: \" & Err.Description",
-        "      Err.Clear",
-        "      Exit Function",
-        "    End If",
-        "  End If",
-        "  fso.MoveFile staged, target",
-        "  If Err.Number <> 0 Then",
-        "    LogLine \"replace retry: cannot install new executable: \" & Err.Description",
-        "    Err.Clear",
-        "    If Not fso.FileExists(target) And fso.FileExists(backup) Then fso.MoveFile backup, target",
-        "    Exit Function",
-        "  End If",
-        "  InstallUpdate = True",
-        "  LogLine \"replacement complete; backup kept as SIXIANG.exe.bak\"",
         "  On Error GoTo 0",
         "End Function",
         "",
@@ -470,9 +497,7 @@ def _launch_replace_script(local_path: Path) -> None:
         "End Sub",
     ]
     vbs_path = update_dir / "apply_update.vbs"
-    # WScript 对 UTF-8（无 BOM）的识别依赖系统代码页；UTF-16 自带 BOM，
-    # 可以稳定承载用户可能存在的中文安装路径。
-    vbs_path.write_text("\r\n".join(vbs_lines), encoding="utf-16")
+    vbs_path.write_text("\r\n".join(vbs_lines) + "\r\n", encoding="utf-16", newline="")
     os.startfile(str(vbs_path))
 
 
@@ -491,7 +516,7 @@ def cleanup_legacy_exes() -> None:
     """
     if not getattr(sys, "frozen", False):
         return
-    exe_dir = Path(sys.executable).resolve().parent
+    exe_dir = _exe_dir()
     current = Path(sys.executable).resolve()
     target = exe_dir / "SIXIANG.exe"
     if not target.is_file():

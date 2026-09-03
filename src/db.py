@@ -23,13 +23,14 @@ def _default_db_path() -> Path:
     """数据库默认位置：
 
     - 源码运行：程序目录（__file__ 所在目录）
-    - PyInstaller onefile 打包：exe 所在目录。
+    - PyInstaller onefile 打包：安装目录（从 .__update__ 启动时为其父目录）。
       注意不能用 __file__，onefile 下它指向临时解压目录（_MEIPASS），
       进程退出后目录被清理，数据会丢失。
     - 以上目录不可写时回退 ~/.quadrant_tasks/data.db
     """
     if getattr(sys, "frozen", False):
-        base = Path(sys.executable).resolve().parent
+        from theme_loader import app_dir
+        base = app_dir()
     else:
         base = Path(__file__).resolve().parent
     candidates = [

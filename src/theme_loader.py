@@ -46,9 +46,16 @@ _QB_RE = re.compile(r"^qb(\d+)$")
 
 
 def app_dir() -> Path:
-    """应用数据目录：打包 = exe 同目录；源码 = 项目根。"""
+    """应用数据目录：打包 = 安装目录；源码 = 项目根。
+
+    更新时会先启动 ``.__update__/SIXIANG-vX.exe``，数据/主题仍必须落在
+    安装目录（exe 的上一级），不能写进更新缓存文件夹。
+    """
     if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent
+        exe_dir = Path(sys.executable).resolve().parent
+        if exe_dir.name == ".__update__":
+            return exe_dir.parent
+        return exe_dir
     return Path(__file__).resolve().parent.parent
 
 
