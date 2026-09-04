@@ -63,7 +63,7 @@ body.frost .cb svg{width:10px;height:10px;opacity:0;transform:scale(.4);transiti
 body.frost .task.done .cb{background:var(--q4);border-color:var(--q4)}
 body.frost .task.done .cb svg{opacity:1;transform:none}
 body.frost .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-body.frost .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#ece4f6;color:#7a6aa8;flex:none}
+body.frost .tag{font-size:10px;padding:2px 8px;border-radius:99px;flex:none}
 body.frost .tag.amber{background:#faeeda;color:#a8763a}
 body.frost footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
 body.frost .btn{font-size:12px;padding:7px 13px;border-radius:10px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.9);

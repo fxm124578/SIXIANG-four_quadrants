@@ -74,7 +74,7 @@ body.graphite .cb svg{width:10px;height:10px;opacity:0;transform:scale(.4);trans
 body.graphite .task.done .cb{background:var(--q4);border-color:var(--q4)}
 body.graphite .task.done .cb svg{opacity:1;transform:none}
 body.graphite .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-body.graphite .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--tag_bg);color:var(--tag_fg);flex:none}
+body.graphite .tag{font-size:10px;padding:2px 8px;border-radius:99px;flex:none}
 body.graphite .tag.amber{background:#4a4133;color:#e0b26a}
 body.graphite footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
 body.graphite .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.14);

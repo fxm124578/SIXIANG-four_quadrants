@@ -74,7 +74,7 @@ body.cream .cb svg{width:10px;height:10px;opacity:0;transform:scale(.4);transiti
 body.cream .task.done .cb{background:var(--q4);border-color:var(--q4)}
 body.cream .task.done .cb svg{opacity:1;transform:none}
 body.cream .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-body.cream .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--tag_bg);color:var(--tag_fg);flex:none}
+body.cream .tag{font-size:10px;padding:2px 8px;border-radius:99px;flex:none}
 body.cream .tag.amber{background:#f6ecd9;color:#9c7a3d}
 body.cream footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
 body.cream .btn{font-size:12px;padding:7px 13px;border-radius:11px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.92);

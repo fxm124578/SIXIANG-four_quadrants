@@ -75,7 +75,7 @@ body.midnight .cb svg{width:11px;height:11px;opacity:0;transform:scale(.4);trans
 body.midnight .task.done .cb{background:var(--q4);border-color:var(--q4);box-shadow:0 0 12px rgba(61,214,140,.55)}
 body.midnight .task.done .cb svg{opacity:1;transform:none}
 body.midnight .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-body.midnight .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(139,122,255,.28);color:#cfc4ff;flex:none;letter-spacing:.04em}
+body.midnight .tag{font-size:10px;padding:2px 8px;border-radius:99px;flex:none;letter-spacing:.04em}
 body.midnight .tag.amber{background:rgba(255,171,61,.2);color:#ffd9a3}
 body.midnight footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
 body.midnight .btn{font-size:12px;padding:7px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;

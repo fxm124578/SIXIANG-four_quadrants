@@ -74,7 +74,7 @@ body.sage .cb svg{width:10px;height:10px;opacity:0;transform:scale(.4);transitio
 body.sage .task.done .cb{background:var(--q4);border-color:var(--q4)}
 body.sage .task.done .cb svg{opacity:1;transform:none}
 body.sage .t-title{font-size:12.5px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-body.sage .tag{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--tag_bg);color:var(--tag_fg);flex:none}
+body.sage .tag{font-size:10px;padding:2px 8px;border-radius:99px;flex:none}
 body.sage .tag.amber{background:#f3ecdc;color:#94793f}
 body.sage footer{display:flex;align-items:center;gap:8px;padding:14px 22px 16px;flex-shrink:0;position:relative}
 body.sage .btn{font-size:12px;padding:7px 13px;border-radius:10px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,.9);
