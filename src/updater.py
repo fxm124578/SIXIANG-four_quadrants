@@ -1,10 +1,12 @@
 """应用版本与自动更新（GitHub Releases）。
 
-流程：检查最新 release → 下载 Setup → 退出应用 → 安装器覆盖当前目录并启动。
+流程：检查最新 release → 下载 Setup → 打开安装包。应用保持运行，
+由安装器检测占用并提示关闭，装完可选择启动。
 仅在 PyInstaller onefile 打包环境（sys.frozen）下执行；源码运行可检查更新。
 """
 from __future__ import annotations
 
+import ctypes
 import hashlib
 import json
 import os
@@ -15,7 +17,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 # ---------------------------------------------------------------- 版本与仓库
-APP_VERSION = "1.3.32"
+APP_VERSION = "1.3.33"
 REPO = "fxm124578/SIXIANG-four_quadrants"
 RELEASE_API = f"https://api.github.com/repos/{REPO}/releases/latest"
 USER_AGENT = f"Sixiang/{APP_VERSION}"
@@ -307,145 +309,41 @@ def _download_worker(url: str, name: str, expected_size: int,
 
 # ---------------------------------------------------------------- 应用更新
 def apply_update() -> Dict[str, Any]:
-    """用户确认后：拉起已下载的 Setup，本进程退出，由安装器覆盖并启动。"""
+    """打开已下载的安装包。本进程不退出，由安装器提示关闭后再覆盖。"""
     with _state["lock"]:
         if _state["phase"] != "ready" or not _state["local_path"]:
             return {"ok": False, "error": "没有已下载的更新文件"}
-        phase_bak = _state["phase"]
         local_path = Path(_state["local_path"])
-        _state["phase"] = "applying"
 
     if not getattr(sys, "frozen", False):
-        with _state["lock"]:
-            _state["phase"] = phase_bak
         return {"ok": False, "error": "源码运行版不支持自动替换，请重新克隆仓库运行"}
 
-    if "Setup" not in local_path.name:
+    if "Setup" not in local_path.name or not local_path.is_file():
         with _state["lock"]:
             _state["phase"] = "error"
-            _state["error"] = "更新包不是安装器"
-        return {"ok": False, "error": "更新包不是安装器"}
+            _state["error"] = "找不到安装包"
+        return {"ok": False, "error": "找不到安装包"}
 
     try:
-        _launch_replace_script(local_path)
+        _launch_installer(local_path)
     except Exception as exc:
         with _state["lock"]:
             _state["phase"] = "error"
-            _state["error"] = f"启动更新失败：{exc}"
+            _state["error"] = f"打开安装包失败：{exc}"
         return {"ok": False, "error": str(exc)}
 
-    threading.Thread(target=_delayed_exit, daemon=True).start()
-    return {"ok": True, "restarting": True}
+    return {"ok": True, "launched": True}
 
 
-def _vbs_string(value: Path | str) -> str:
-    """返回可嵌入 VBScript 双引号字符串的文本。"""
-    return str(value).replace('"', '""')
+def _launch_installer(local_path: Path) -> None:
+    """用 ShellExecute 打开 Setup，/DIR 指向当前安装目录。"""
+    args = f'/DIR="{_exe_dir()}"'
+    rc = ctypes.windll.shell32.ShellExecuteW(
+        None, "open", str(local_path), args, None, 1,
+    )
+    if rc <= 32:
+        raise OSError(f"无法打开安装包（{rc}）")
 
-
-def _launch_replace_script(local_path: Path) -> None:
-    """等旧进程退出后，静默运行 Setup，安装目录为当前安装目录。"""
-    update_dir = _update_dir()
-    update_dir.mkdir(parents=True, exist_ok=True)
-    pid = os.getpid()
-    install_dir = _exe_dir()
-    lock_path = update_dir / "apply.lock"
-    log_path = update_dir / "update.log"
-    setup_log = update_dir / "setup.log"
-
-    vbs_lines = [
-        "Option Explicit",
-        "Dim fso, shell, pid, staged, installDir, lockPath, logPath, setupLog, cmd, i",
-        "Set fso = CreateObject(\"Scripting.FileSystemObject\")",
-        "Set shell = CreateObject(\"WScript.Shell\")",
-        f"pid = {pid}",
-        f'staged = "{_vbs_string(local_path)}"',
-        f'installDir = "{_vbs_string(install_dir)}"',
-        f'lockPath = "{_vbs_string(lock_path)}"',
-        f'logPath = "{_vbs_string(log_path)}"',
-        f'setupLog = "{_vbs_string(setup_log)}"',
-        "If Not AcquireLock() Then",
-        "  WScript.Quit 0",
-        "End If",
-        "LogLine \"start\"",
-        "For i = 1 To 120",
-        "  If Not IsRunning(pid) Then Exit For",
-        "  WScript.Sleep 250",
-        "Next",
-        "If IsRunning(pid) Then",
-        "  LogLine \"failed: old process did not exit\"",
-        "  ReleaseLock",
-        "  WScript.Quit 1",
-        "End If",
-        "If Not fso.FileExists(staged) Then",
-        "  LogLine \"failed: setup package missing\"",
-        "  ReleaseLock",
-        "  WScript.Quit 1",
-        "End If",
-        "LogLine \"launching setup\"",
-        "shell.CurrentDirectory = installDir",
-        "cmd = Chr(34) & staged & Chr(34) & \" /VERYSILENT /NORESTART /SUPPRESSMSGBOXES /DIR=\" & Chr(34) & installDir & Chr(34) & \" /LOG=\" & Chr(34) & setupLog & Chr(34)",
-        "shell.Run cmd, 1, False",
-        "LogLine \"setup started\"",
-        "ReleaseLock",
-        "WScript.Quit 0",
-        "",
-        "Function AcquireLock()",
-        "  On Error Resume Next",
-        "  If fso.FileExists(lockPath) Then",
-        "    If DateDiff(\"s\", fso.GetFile(lockPath).DateLastModified, Now) > 120 Then",
-        "      fso.DeleteFile lockPath, True",
-        "    End If",
-        "  End If",
-        "  Err.Clear",
-        "  Dim lockFile",
-        "  Set lockFile = fso.CreateTextFile(lockPath, False)",
-        "  If Err.Number <> 0 Then",
-        "    LogLine \"another updater running\"",
-        "    AcquireLock = False",
-        "    Err.Clear",
-        "    On Error GoTo 0",
-        "    Exit Function",
-        "  End If",
-        "  lockFile.WriteLine CStr(pid)",
-        "  lockFile.Close",
-        "  AcquireLock = True",
-        "  On Error GoTo 0",
-        "End Function",
-        "",
-        "Sub ReleaseLock()",
-        "  On Error Resume Next",
-        "  If fso.FileExists(lockPath) Then fso.DeleteFile lockPath, True",
-        "  On Error GoTo 0",
-        "End Sub",
-        "",
-        "Function IsRunning(processId)",
-        "  Dim rc",
-        "  rc = shell.Run(\"cmd /c tasklist /FI \"\"PID eq \" & CStr(processId) & \"\"\" /NH | find /I \"\"SIXIANG.exe\"\"\", 0, True)",
-        "  IsRunning = (rc = 0)",
-        "End Function",
-        "",
-        "Sub LogLine(message)",
-        "  Dim logFile",
-        "  On Error Resume Next",
-        "  Set logFile = fso.OpenTextFile(logPath, 8, True, -1)",
-        "  logFile.WriteLine Now & \" \" & message",
-        "  logFile.Close",
-        "  On Error GoTo 0",
-        "End Sub",
-    ]
-    vbs_path = update_dir / "apply_update.vbs"
-    vbs_path.write_text("\r\n".join(vbs_lines) + "\r\n", encoding="utf-16", newline="")
-    os.startfile(str(vbs_path))
-
-
-def _delayed_exit() -> None:
-    import time
-    time.sleep(0.8)
-    try:
-        os._exit(0)
-    except Exception:
-        pass
 
 
 def cleanup_legacy_exes() -> None:

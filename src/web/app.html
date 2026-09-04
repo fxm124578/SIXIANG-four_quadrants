@@ -1083,7 +1083,7 @@ async function openSettings() {
             <span class="update-links">
               <button class="update-link" id="btn-check-update" onclick="checkUpdate()">检查更新</button>
               <button class="update-link primary" id="btn-download-update" onclick="downloadUpdate()" style="display:none">下载并更新</button>
-              <button class="update-link primary" id="btn-apply-update" onclick="applyUpdateNow()" style="display:none">立即重启更新</button>
+              <button class="update-link primary" id="btn-apply-update" onclick="applyUpdateNow()" style="display:none">立即更新</button>
             </span>
           </div>
           <div id="update-status" class="update-status">尚未检查更新</div>
@@ -1199,10 +1199,10 @@ function renderUpdateState(st) {
     if (dlBtn) dlBtn.style.display = 'none';
     clearUpdatePoll();
     status.classList.add('ok');
-    status.textContent = '更新已下载完成，点击「立即重启更新」安装（将关闭当前窗口，自动以「SIXIANG.exe」重新打开）';
+    status.textContent = '更新已下载完成，点击「立即更新」打开安装包';
     if (applyBtn) { applyBtn.style.display = ''; applyBtn.disabled = false; }
   } else if (st.phase === 'applying') {
-    status.textContent = '正在应用更新，程序即将重启…';
+    status.textContent = '正在打开安装包…';
   } else {
     status.textContent = '尚未检查更新，点击上方按钮开始';
   }
@@ -1231,11 +1231,15 @@ async function downloadUpdate() {
 
 async function applyUpdateNow() {
   const status = document.getElementById('update-status');
-  if (status) status.innerHTML = '<div style="color:#3dd68c">正在应用更新，程序即将重启…</div>';
+  if (status) status.innerHTML = '<div style="color:#3dd68c">正在打开安装包…</div>';
   clearUpdatePoll();
   try {
     const r = await api.apply_update();
-    if (r && r.ok === false) { if (status) status.textContent = (r.error || '更新失败') + '（请稍后重试）'; }
+    if (r && r.ok === false) {
+      if (status) status.textContent = (r.error || '更新失败') + '（请稍后重试）';
+    } else if (status) {
+      status.textContent = '已打开安装包。若四象仍在运行，请在安装器提示时关闭后再继续。';
+    }
   } catch(e) { if (status) status.textContent = '应用更新失败：' + e.message; }
 }
 
@@ -1267,7 +1271,7 @@ function showUpdateReadyModal() {
   showModal('更新已就绪', `
     <div style="font-size:13px;line-height:1.8">
       新版本已下载完成，是否现在更新？<br>
-      <span style="font-size:11px;color:var(--muted)">现在更新会关闭当前窗口，自动以「SIXIANG.exe」重新打开；选择稍后，可随时在设置中点击「立即重启更新」。</span>
+      <span style="font-size:11px;color:var(--muted)">会打开安装包。若四象正在运行，安装器会提示关闭后再继续；装完可选择启动。稍后可在设置中点击「立即更新」。</span>
     </div>`,
     [
       {text:'稍后再说', action:'close'},

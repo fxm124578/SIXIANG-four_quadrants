@@ -861,16 +861,16 @@ class SettingsDialog(ModalDialog):
             self._restore_update_btn()
             return
         if not safe_messagebox(self, "askyesno", "下载完成",
-                               f"更新文件已下载：\n{msg}\n\n是否立即重启并完成更新？"):
+                               f"更新文件已下载：\n{msg}\n\n是否现在打开安装包？"):
             self._restore_update_btn()
             return
         result = updater.apply_update()
         if not result.get("ok"):
-            safe_messagebox(self, "error", "应用更新", result.get("error") or "未知错误")
+            safe_messagebox(self, "error", "打开安装包", result.get("error") or "未知错误")
             self._restore_update_btn()
             return
-        safe_messagebox(self, "info", "正在更新", "程序即将重启以完成更新…")
-        self.master.after(300, self.master.destroy)
+        safe_messagebox(self, "info", "正在更新",
+                        "已打开安装包。若四象仍在运行，请在安装器提示时关闭后再继续。")
 
     def _restore_update_btn(self) -> None:
         if self._update_btn is not None:
