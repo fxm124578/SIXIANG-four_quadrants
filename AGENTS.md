@@ -50,3 +50,4 @@ README.md / DESIGN.md / LICENSE / requirements.txt
 - `DESIGN.md`：WebView 版改造方案文档
 - `designs/`：四套主题 HTML 设计参考
 - `RELEASE.md`：版本发布流程（@RELEASE.md 引用）
+- `MSIX_ROADMAP.md`：长期暂缓的 MSIX 迁移与 Store 发布计划；未重新批准前不执行
