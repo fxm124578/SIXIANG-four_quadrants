@@ -3,6 +3,9 @@
 优先使用 pywebview（WebView 版，四套设计 100% 还原）；
 若 pywebview 不可用则回退 tkinter 版（零依赖近似实现）。
 
+v2.0：进入引擎前先做进程单实例判定——重复启动只唤醒已有实例，
+本进程（二次实例）完成唤醒后立即退出；主实例继续创建窗口。
+
 运行：python main.py 或 pythonw main.py
 """
 from __future__ import annotations
@@ -70,13 +73,23 @@ def _run_tkinter() -> int:
 
 
 def main() -> int:
-    if _try_webview():
-        try:
-            return _run_webview()
-        except Exception:
-            traceback.print_exc()
-            # webview 失败则回退 tkinter
-    return _run_tkinter()
+    # 单实例判定必须在任何窗口创建之前（非 win32 降级为主实例，不阻塞）
+    from single_instance import acquire, release
+    if not acquire():
+        # 已有主实例在运行：本进程已尽力唤醒它（激活窗口 / 事件兜底），
+        # 立即退出（exit code 0），不再进入引擎初始化
+        return 0
+    try:
+        if _try_webview():
+            try:
+                return _run_webview()
+            except Exception:
+                traceback.print_exc()
+                # webview 失败则回退 tkinter
+        return _run_tkinter()
+    finally:
+        # 释放 Mutex：进程仍持有期间防止窗口期重复启动误判
+        release()
 
 
 if __name__ == "__main__":
