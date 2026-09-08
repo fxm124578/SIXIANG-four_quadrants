@@ -2,7 +2,7 @@
 
 > Windows 桌面四象限任务管理小组件 —— 悬浮窗常驻桌面，让「紧急且重要」始终可见。
 
-四象限桌面任务管理小组件：无边框悬浮窗 + 九套设计主题 + WebView / tkinter 双引擎，零必装第三方依赖，安装器分发 + onedir 多文件应用（v2.0 起）。
+四象限桌面任务管理小组件：无边框悬浮窗 + 九套设计主题 + WebView / tkinter 双引擎，零必装第三方依赖，安装器分发 + onedir 多文件应用（1.8 起）。
 
 ## ✨ 亮点
 
@@ -64,7 +64,7 @@ Windows 也可双击 `run.bat`（自动优先 `pythonw`，无控制台窗口）�
 │  ├─ dialogs.py       tkinter 回退版对话框
 │  ├─ styles.py        主题系统 + ICO 图标
 │  ├─ app_icon.ico/.svg  应用图标
-│  ├─ web/             UI 资源（v2.0 起拆分；打包后外置安装目录，改文件即生效）
+│  ├─ web/             UI 资源（1.8 起拆分；打包后外置安装目录，改文件即生效）
 │  │  ├─ index.html    页面骨架（主题清单注入占位）
 │  │  ├─ app.css       布局与主题样式（/*__THEMES_CSS__*/ 注入占位）
 │  │  └─ app.js        全部业务脚本
@@ -86,7 +86,7 @@ Windows 也可双击 `run.bat`（自动优先 `pythonw`，无控制台窗口）�
 
 ## 打包
 
-v2.0 起为 onedir 多文件应用：先打 onedir 目录（`dist/SIXIANG/` = 安装内容），再打安装器（发布资产为 `SIXIANG-Setup-vX.Y.Z.exe`）：
+1.8 起为 onedir 多文件应用：先打 onedir 目录（`dist/SIXIANG/` = 安装内容），再打安装器（发布资产为 `SIXIANG-Setup-vX.Y.Z.exe`）：
 
 ```bash
 pip install pyinstaller

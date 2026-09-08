@@ -21,7 +21,7 @@
 
 ## 2. 布局骨架（程序层，主题不要重复）
 
-四象限等高、防挤压等**布局结构**由公共 CSS（v2.0 起位于 `src/web/app.css`，1.x 时代为 `app.html` 内联 `<style>`）统一负责：
+四象限等高、防挤压等**布局结构**由公共 CSS（1.8 起位于 `src/web/app.css`，更早为 `app.html` 内联 `<style>`）统一负责：
 
 ```css
 .grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;padding:0 14px;flex:1;min-height:0}
