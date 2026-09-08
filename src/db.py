@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from migration import run_migrations
 from models import Task, parse_tags
 
 TIME_FMT = "%Y-%m-%d %H:%M:%S"
@@ -87,6 +88,9 @@ class Database:
             self.conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_tasks_quadrant ON tasks (quadrant)"
             )
+        # v2.0：schema 版本迁移——上方 CREATE TABLE IF NOT EXISTS 即 v0 基线；
+        # 此处把老库按 MIGRATIONS 顺序升级（自管事务，幂等，失败回滚）
+        run_migrations(self.conn)
 
     # ------------------------------------------------------------------- task
     @staticmethod

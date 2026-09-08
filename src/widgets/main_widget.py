@@ -8,10 +8,14 @@
 """
 from __future__ import annotations
 
+import sys
 import tkinter as tk
 from datetime import date, datetime
 
 import dialogs
+import hotkey
+import single_instance
+import tray
 from db import Database
 from styles import (
     T,
@@ -28,6 +32,24 @@ WEEKDAY_NAMES = ["周一", "周二", "周三", "周四", "周五", "周六", "�
 MIN_WIDTH, MIN_HEIGHT = 400, 500
 
 
+# ------------------------------------------------------------ 系统层（v2.0）
+def _show_main_window() -> None:
+    """唤起主窗口：恢复显示并置前（win32 user32，跨线程安全）。
+
+    托盘菜单/热键/单实例激活回调共用；非 win32 no-op。
+    """
+    if sys.platform != "win32":
+        return
+    single_instance.activate_window_by_title()
+
+
+def _main_hwnd() -> int:
+    """按标题现查主窗口句柄（托盘线程调用；非 win32 返回 0）。"""
+    if sys.platform != "win32":
+        return 0
+    return single_instance.find_window_by_title()
+
+
 class MainWindow(tk.Tk):
     def __init__(self, db: Database):
         super().__init__()
@@ -42,6 +64,7 @@ class MainWindow(tk.Tk):
         self._ghost = None
         self._report_dialog = None
         self._window_mode = "topmost"
+        self._tray_active = False  # v2.0：托盘是否就绪（关闭到托盘的前提）
 
         # 先隐藏，设置全部就绪后再显示，避免闪烁
         self.withdraw()
@@ -64,10 +87,13 @@ class MainWindow(tk.Tk):
         self._refresh_all()
         self._schedule_clock()
 
-        self.protocol("WM_DELETE_WINDOW", self.quit_app)
+        # v2.0 常驻：关闭窗口 = 隐藏到托盘（托盘可用时）；退出走 quit_app
+        self.protocol("WM_DELETE_WINDOW", self._on_window_close)
         self.bind_all("<MouseWheel>", self._on_global_wheel)
         self.deiconify()
         self.lift()
+        # v2.0 系统层：单实例激活回调 / 托盘 / 全局热键（非 win32 自动降级）
+        self._setup_system_layer()
 
     # ------------------------------------------------------------------- UI
     def _build_ui(self) -> None:
@@ -585,8 +611,57 @@ class MainWindow(tk.Tk):
         self._persist_settings()
 
     # ------------------------------------------------------------ 生命周期
+    def _setup_system_layer(self) -> None:
+        """v2.0：注册单实例激活回调、启动托盘与全局热键（win32 生效）。
+
+        托盘启动失败 → 关闭窗口直接退出（同 v1 行为），避免隐藏后无法找回；
+        热键注册失败只打 stderr，不阻断启动。
+        """
+        if sys.platform != "win32":
+            return
+        # 单实例激活回调：二次启动唤醒本窗口（user32 调用跨线程安全）
+        single_instance.set_activate_callback(_show_main_window)
+        # 热键默认值入库（settings key: hotkey；设置 UI 后续版本读写同一存储）
+        if not (self.db.get_setting("hotkey") or ""):
+            self.db.set_setting("hotkey", hotkey.DEFAULT_HOTKEY)
+        ok, err = hotkey.register(
+            self.db.get_setting("hotkey") or hotkey.DEFAULT_HOTKEY,
+            _show_main_window)
+        if not ok:
+            print(f"[hotkey] {err}", file=sys.stderr)
+
+        def _on_tray_quit():
+            # 托盘线程不可直接操作 tkinter，排队回主线程真正退出
+            try:
+                self.after(0, self.quit_app)
+            except RuntimeError:
+                pass
+
+        from styles import ensure_app_icon
+        self._tray_active = tray.start(_main_hwnd, _on_tray_quit,
+                                       icon_path=ensure_app_icon())
+
+    def _on_window_close(self) -> None:
+        """WM_DELETE_WINDOW（normal 模式系统 X / Alt+F4 / 任务栏关闭）。
+
+        托盘可用时隐藏到托盘继续常驻；否则按 v1 语义直接退出。
+        """
+        if sys.platform == "win32" and self._tray_active:
+            self.withdraw()
+        else:
+            self.quit_app()
+
     def quit_app(self) -> None:
+        """真正退出：移除托盘/热键后销毁窗口。
+
+        底部「退出」按钮、托盘菜单「退出」（经 after 回主线程）与
+        WM_DELETE_WINDOW（托盘不可用时）共用。
+        """
         self._persist_settings()
+        if sys.platform == "win32":
+            # 幂等收尾：移除托盘图标并退出热键线程（join 至多 2 秒）
+            tray.stop()
+            hotkey.stop()
         try:
             self.destroy()
         except tk.TclError:
