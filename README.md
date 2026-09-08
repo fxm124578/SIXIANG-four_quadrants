@@ -4,6 +4,8 @@
 
 **本仓库是发行通道。** 请从 [Releases](https://github.com/fxm124578/SIXIANG-four_quadrants/releases) 下载安装包 `SIXIANG-Setup-vX.Y.Z.exe`（当前发行 **v1.8.0**）。日常开发不在此仓进行。
 
+**v1.8.0 及此前**为开源稳定版本（MIT），本仓库保留对应源码快照。**v2.0.0 起闭源**：先完善核心功能，再考虑收费；后续源码不再推送到本仓库。
+
 四象限桌面任务管理小组件：无边框悬浮窗 + 九套设计主题 + WebView / tkinter 双引擎，零必装第三方依赖，安装器分发 + onedir 多文件应用（1.8 起）。
 
 ## ✨ 亮点
@@ -100,4 +102,4 @@ python -m PyInstaller --noconfirm --clean --onedir --windowed --name SIXIANG --i
 
 ## 许可证
 
-[MIT](LICENSE)
+[MIT](LICENSE)。此许可适用于 **v1.8.0 及此前** 的开源稳定版本。v2.0.0 起不再开源。
