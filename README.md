@@ -2,6 +2,8 @@
 
 > Windows 桌面四象限任务管理小组件 —— 悬浮窗常驻桌面，让「紧急且重要」始终可见。
 
+**本仓库是发行通道。** 请从 [Releases](https://github.com/fxm124578/SIXIANG-four_quadrants/releases) 下载安装包 `SIXIANG-Setup-vX.Y.Z.exe`（当前发行 **v1.8.0**）。日常开发不在此仓进行。
+
 四象限桌面任务管理小组件：无边框悬浮窗 + 九套设计主题 + WebView / tkinter 双引擎，零必装第三方依赖，安装器分发 + onedir 多文件应用（1.8 起）。
 
 ## ✨ 亮点
