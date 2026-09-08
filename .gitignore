@@ -44,6 +44,8 @@ themes/
 AGENTS.md
 MSIX_ROADMAP.md
 RELEASE.md
+DEV.md
+memory/
 
 # 内部交接/会话资料（.context），仅本地保存
 .context/
