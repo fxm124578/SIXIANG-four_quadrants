@@ -160,11 +160,15 @@ class MainWindow(tk.Tk):
                                             command=self.quit_app)
         self.quit_btn.pack(side="right", padx=(0, 6))
 
+        self.min_btn = dialogs.flat_button(footer, "最小化",
+                                           command=self.hide_to_tray)
+        self.min_btn.pack(side="right", padx=(0, 6))
+
         self.lock_btn = dialogs.flat_button(footer, "锁定",
                                             command=self.toggle_lock)
         self.lock_btn.pack(side="right", padx=(0, 8))
 
-        # 设置按钮按 HTML 布局放底部工具栏（右侧组：设置 锁定 退出）
+        # 设置按钮按 HTML 布局放底部工具栏（右侧组：设置 锁定 最小化 退出）
         self.settings_btn = dialogs.flat_button(
             footer, "设置", command=self.open_settings_dialog)
         self.settings_btn.pack(side="right", padx=(0, 8))
@@ -641,13 +645,18 @@ class MainWindow(tk.Tk):
         self._tray_active = tray.start(_main_hwnd, _on_tray_quit,
                                        icon_path=ensure_app_icon())
 
+    def hide_to_tray(self) -> None:
+        """前台最小化：托盘可用时隐藏，不退出。"""
+        if sys.platform == "win32" and self._tray_active:
+            self.withdraw()
+
     def _on_window_close(self) -> None:
         """WM_DELETE_WINDOW（normal 模式系统 X / Alt+F4 / 任务栏关闭）。
 
         托盘可用时隐藏到托盘继续常驻；否则按 v1 语义直接退出。
         """
         if sys.platform == "win32" and self._tray_active:
-            self.withdraw()
+            self.hide_to_tray()
         else:
             self.quit_app()
 

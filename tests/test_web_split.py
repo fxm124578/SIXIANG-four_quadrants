@@ -25,7 +25,7 @@ WEB_DIR = pathlib.Path(__file__).resolve().parents[1] / "src" / "web"
 # app.js 原函数锚点（拆分零重构，函数名/ID 原样保留）
 _JS_FUNCTION_ANCHORS = (
     "renderQuadrant", "openAdd", "openSettings", "applyTheme",
-    "importThemeFile", "onDrop", "refreshAll", "quitApp",
+    "importThemeFile", "onDrop", "refreshAll", "hideToTray", "quitApp",
 )
 # JS 模板字符串中动态生成的关键 DOM id
 _JS_DOM_ANCHORS = ("dlg-title", "dlg-tags", "dlg-quads", "set-theme-select")
@@ -76,6 +76,8 @@ class TestSplitIntegrity(unittest.TestCase):
             self.assertIn(f'id="{dom_id}"', html, f"静态 DOM {dom_id} 缺失")
         self.assertIn("pywebview-drag-region", html)
         self.assertIn('data-quadrant="3"', html)
+        self.assertIn('data-action="minimize"', html)
+        self.assertIn('data-action="quit"', html)
         # 模块化引用与注入占位
         self.assertIn('<link rel="stylesheet" href="app.css">', html)
         self.assertIn('<script src="app.js"></script>', html)
@@ -217,6 +219,31 @@ class TestLocalServer(_ThemeTmpMixin, unittest.TestCase):
             self.assertEqual(resp.headers.get("Cache-Control"), "no-store")
         finally:
             resp.close()
+
+
+class TestHideToTray(unittest.TestCase):
+    """前台最小化：隐藏窗口且不置退出标志。"""
+
+    def test_hide_does_not_quit(self):
+        api = webview_main.JsApi(db=None, settings={})
+
+        class _Win:
+            def __init__(self):
+                self.hidden = False
+                self.native = None
+
+            def hide(self):
+                self.hidden = True
+
+        win = _Win()
+        api.set_window(win)
+        self.assertTrue(api.hide_to_tray())
+        self.assertTrue(win.hidden)
+        self.assertFalse(api.quit_requested)
+        win.hidden = False
+        self.assertTrue(api.minimize())
+        self.assertTrue(win.hidden)
+        self.assertFalse(api.quit_requested)
 
 
 class TestPlatformGuard(unittest.TestCase):

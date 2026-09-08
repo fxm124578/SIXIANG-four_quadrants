@@ -174,6 +174,14 @@ def web_base_url() -> str:
     return _server.base_url
 
 
+_js_api: Optional["JsApi"] = None
+_CLEAR_HOVER_JS = (
+    "(function(){var b=document.body;if(!b)return;"
+    "if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();"
+    "b.style.pointerEvents='none';void b.offsetHeight;b.style.pointerEvents='';})()"
+)
+
+
 class JsApi:
     """Python→JS 桥，供 window.pywebview.api.* 调用。"""
 
@@ -182,6 +190,7 @@ class JsApi:
         self.settings = settings
         self.restart_requested = False  # 模式切换：窗口销毁后由 run() 重建
         self.quit_requested = False     # 托盘退出 / 更新退出 / 显式退出
+        self.tray_ready = False         # 托盘就绪后才允许隐藏，避免窗口消失无法找回
         self._window: Optional[webview.Window] = None
         self._apply_hotkey = None       # run() 注入：热键配置变更时重注册
 
@@ -314,6 +323,29 @@ class JsApi:
                 self._window.destroy()
             except Exception:
                 pass
+
+    def minimize(self) -> bool:
+        """JS 前台最小化入口（与 hide_to_tray 相同）。"""
+        return self.hide_to_tray()
+
+    def hide_to_tray(self) -> bool:
+        """前台最小化：隐藏窗口，不退出。不依赖托盘是否就绪。"""
+        if self._window is None:
+            return False
+        try:
+            native = getattr(self._window, "native", None)
+            handle = getattr(native, "Handle", None) if native is not None else None
+            if handle:
+                import ctypes
+                ctypes.windll.user32.ShowWindow(int(handle), 0)  # SW_HIDE
+                return True
+        except Exception:
+            pass
+        try:
+            self._window.hide()
+        except Exception:
+            return False
+        return True
 
     # --------------------------------------------------------------- 主题
     def get_theme_list(self) -> List[Dict]:
@@ -464,10 +496,19 @@ def _show_main_window() -> None:
     """唤起主窗口：恢复显示并置前（win32 user32，跨线程安全）。
 
     托盘菜单/热键/单实例激活回调共用；非 win32 no-op。
+    藏窗时按钮 :hover 不会自动清除，唤起后补一次。
     """
     if sys.platform != "win32":
         return
     single_instance.activate_window_by_title()
+    api = _js_api
+    window = api._window if api is not None else None
+    if window is None:
+        return
+    try:
+        window.evaluate_js(_CLEAR_HOVER_JS)
+    except Exception:
+        pass
 
 
 def _close_main_window() -> None:
@@ -595,12 +636,15 @@ def run() -> int:
 
         settings = _read_settings(db)
         api = JsApi(db, settings)
+        global _js_api
+        _js_api = api
         # 主题目录初始化（首次复制内置）
         theme_loader.ensure_themes_dir()
         # 启动内置页面服务（失败即抛明确错误，由 main.py 回退 tkinter 版）
         web_base_url()
         # v2.0 系统层：全局热键 + 托盘常驻（非 win32 / 失败自动降级）
         tray_ready = _start_system_layer(api, db, settings)
+        api.tray_ready = tray_ready
 
         while True:
             settings = _read_settings(db)

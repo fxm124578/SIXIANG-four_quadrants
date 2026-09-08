@@ -231,5 +231,29 @@ class HotkeyDegradeTests(unittest.TestCase):
         hotkey.stop()  # 幂等
 
 
+@unittest.skipUnless(sys.platform == "win32", "需要真实托盘")
+class TrayWin32StartTests(unittest.TestCase):
+    """Python 3.13+ 无 wintypes.WNDCLASSW 时，托盘曾静默失败。"""
+
+    def tearDown(self):
+        tray.stop()
+
+    def test_start_returns_true(self):
+        import styles
+        ok = tray.start(lambda: 0, lambda: None,
+                        icon_path=styles.ensure_app_icon())
+        self.assertTrue(ok)
+
+
+@unittest.skipUnless(sys.platform == "win32", "需要真实热键")
+class HotkeyWin32StartTests(unittest.TestCase):
+    def tearDown(self):
+        hotkey.stop()
+
+    def test_register_returns_true(self):
+        ok, err = hotkey.register("Ctrl+Alt+Shift+F9", lambda: None)
+        self.assertTrue(ok, err)
+
+
 if __name__ == "__main__":
     unittest.main()

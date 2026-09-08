@@ -1247,6 +1247,24 @@ async function toggleLock() {
   await api.save_settings({locked: isLocked ? '1' : '0'});
 }
 
+function clearStickyHover() {
+  const b = document.body;
+  if (!b) return;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  b.style.pointerEvents = 'none';
+  void b.offsetHeight;
+  b.style.pointerEvents = '';
+}
+window.addEventListener('focus', clearStickyHover);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') clearStickyHover();
+});
+async function hideToTray() {
+  clearStickyHover();
+  if (!api) return;
+  if (typeof api.minimize === 'function') await api.minimize();
+  else if (typeof api.hide_to_tray === 'function') await api.hide_to_tray();
+}
 async function quitApp() { await api.quit(); }
 
 /* ================================================================
@@ -1363,6 +1381,7 @@ document.addEventListener('click', e => {
   else if (action === 'report') openReport();
   else if (action === 'settings') openSettings();
   else if (action === 'lock') toggleLock();
+  else if (action === 'minimize') hideToTray();
   else if (action === 'quit') quitApp();
 });
 

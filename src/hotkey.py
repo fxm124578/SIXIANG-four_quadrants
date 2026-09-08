@@ -22,6 +22,8 @@ import threading
 from ctypes import wintypes
 from typing import Callable, Optional, Tuple
 
+from win32_wnd import WNDPROC, create_message_window, def_window_proc
+
 # 热键默认值与 id（win32 常量，定义与平台无关，便于单测）
 DEFAULT_HOTKEY = "Ctrl+Alt+S"
 HOTKEY_ID = 0xB007
@@ -128,8 +130,6 @@ _wnd_proc_refs: list = []  # 持有历次 ctypes 回调引用防 GC（窗口类�
 if sys.platform == "win32":
     _user32 = ctypes.windll.user32
     _kernel32 = ctypes.windll.kernel32
-    _user32.DefWindowProcW.restype = ctypes.c_void_p
-    _kernel32.GetModuleHandleW.restype = ctypes.c_void_p
 
 
 def _hotkey_wnd_proc(hwnd, msg, wparam, lparam):
@@ -154,8 +154,8 @@ def _hotkey_wnd_proc(hwnd, msg, wparam, lparam):
     # 默认处理：DefWindowProcW 返回 0 时 ctypes 给 None，转 0 保证回调
     # 返回值可被 WNDPROC（LRESULT）正常转换
     try:
-        return _user32.DefWindowProcW(hwnd, msg, wparam, lparam) or 0
-    except (AttributeError, OSError):
+        return def_window_proc(hwnd, msg, wparam, lparam)
+    except (AttributeError, OSError, OverflowError):
         return 0
 
 
@@ -174,25 +174,10 @@ def _worker_main(spec: str) -> None:
         return
 
     try:
-        wnd_proc = wintypes.WNDPROC(_hotkey_wnd_proc)
+        wnd_proc = WNDPROC(_hotkey_wnd_proc)
         _wnd_proc_refs.append(wnd_proc)  # 防回调对象被 GC
-
-        class_name = "SIXIANG_Hotkey_Window"
-        wc = wintypes.WNDCLASSW()
-        wc.lpfnWndProc = wnd_proc
-        wc.hInstance = _kernel32.GetModuleHandleW(None)
-        wc.lpszClassName = class_name
-        if not _user32.RegisterClassW(ctypes.byref(wc)):
-            err = _kernel32.GetLastError()
-            if err != 1410:  # ERROR_CLASS_ALREADY_EXISTS → 已注册，继续
-                raise OSError(f"注册热键窗口类失败（{err}）")
-
-        _user32.CreateWindowExW.restype = ctypes.c_void_p
-        hwnd = _user32.CreateWindowExW(
-            0, class_name, "SIXIANG.Hotkey", 0, 0, 0, 0, 0,
-            None, None, wc.hInstance, None)
-        if not hwnd:
-            raise OSError("创建热键消息窗口失败")
+        hwnd = create_message_window(
+            "SIXIANG_Hotkey_Window", "SIXIANG.Hotkey", wnd_proc)
 
         if not _user32.RegisterHotKey(hwnd, HOTKEY_ID,
                                       parsed["mods"], parsed["vk"]):

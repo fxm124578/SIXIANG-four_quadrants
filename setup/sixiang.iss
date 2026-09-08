@@ -53,6 +53,8 @@ Source: "..\dist\SIXIANG\*"; DestDir: "{app}"; Flags: recursesubdirs createallsu
 ; 外置页面层：把 _internal\web 再复制一份到 {app}\web（改文件即刷新）；
 ; 用户误删/覆盖时由程序回退 _internal\web，不会白屏
 Source: "..\dist\SIXIANG\_internal\web\*"; DestDir: "{app}\web"; Flags: recursesubdirs createallsubdirs ignoreversion
+; 用户可见卸载入口。Inno 仍生成 unins000.exe（系统卸载用）；本文件只转调它。
+Source: "uninstall.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 ; Win11 开始菜单「所有应用」不展示子文件夹里的快捷方式，必须直接放在 Programs 根下
@@ -61,6 +63,9 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDi
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall
+
+[UninstallDelete]
+Type: files; Name: "{app}\uninstall.exe"
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);
