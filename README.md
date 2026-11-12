@@ -1,105 +1,61 @@
-# 四象
+# 四象 · 把「紧急且重要」放在眼前
 
-> Windows 桌面四象限任务管理小组件 —— 悬浮窗常驻桌面，让「紧急且重要」始终可见。
+> 极简的四象限任务看板，常驻桌面一角。随手记、按轻重缓急排、按天回看，全程不打断你手上的事。
 
-**本仓库是发行通道。** 请从 [Releases](https://github.com/fxm124578/SIXIANG-four_quadrants/releases) 下载安装包 `SIXIANG-Setup-vX.Y.Z.exe`（当前发行 **v1.8.5**）。日常开发不在此仓进行。
+**[下载 Windows 版](https://github.com/fxm124578/SIXIANG-four_quadrants/releases/latest)** · [全部版本与更新说明](https://github.com/fxm124578/SIXIANG-four_quadrants/releases)
 
-**v1.8.x 及此前**为开源稳定版本（MIT），本仓库保留对应源码快照。**v2.0.0 起闭源**：先完善核心功能，再考虑收费；后续源码不再推送到本仓库。
+---
 
-四象限桌面任务管理小组件：无边框悬浮窗 + 九套设计主题 + WebView / tkinter 双引擎，零必装第三方依赖，安装器分发 + onedir 多文件应用（1.8 起）。
+## 为什么用四象限
 
-## ✨ 亮点
+事情一多，难的往往不是「记下来」，而是**一眼看清哪件该先做**。
 
-- 🪟 桌面悬浮窗：无边框、置顶、可拖动、边缘拖拽调整大小，不打扰工作流
-- 🎯 单实例常驻：重复启动只唤醒已有窗口；前台最小化藏到托盘，右下角电源仍退出；全局热键唤起（默认 Ctrl+Alt+S）
-- 🗂️ 四象限：紧急且重要 / 紧急不重要 / 不紧急重要 / 不紧急不重要
-- 🎨 九套主题：午夜玻璃、雾白冰川、霓虹网格、晨雾纸墨等，可导入自定义 CSS 主题
-- 📋 日报中心：底部抽屉式日历，按日查看完成任务 / 象限统计 / 标签统计
-- 📤 导出：单日或日期范围批量导出 CSV + JSON
-- 🔄 自动更新：设置页一键检查 GitHub Releases 新版，下载安装包后静默覆盖升级（data.db 与主题保留）
-- ⚡ 零依赖：仅 Python 标准库实现，WebView 渲染 / tkinter 回退双引擎
+四象把艾森豪威尔矩阵做成一个安静的小窗口：
 
-## 功能
+- 紧急且重要 —— 现在就得处理
+- 紧急不重要 —— 能交出去就别自己扛
+- 不紧急重要 —— 值得排进日程的事
+- 不紧急不重要 —— 有空再说
 
-- 桌面悬浮窗：无边框、置顶、可拖动、边缘拖拽调整大小
-- 单实例：重复启动 / 双击 exe 只唤醒已有窗口（不重复开进程）
-- 托盘常驻：关闭窗口最小化到托盘继续运行；托盘菜单「显示主窗口 / 退出」
-- 全局热键：默认 Ctrl+Alt+S 随时唤起窗口（设置页可改，冲突时自动降级不崩溃）
-- 四象限：紧急且重要 / 紧急不重要 / 不紧急重要 / 不紧急不重要
-- 任务管理：新建、编辑、删除、多标签、跨象限拖拽、勾选归档
-- 标签筛选：底部「筛选」按钮，上拉面板多选标签，实时筛选四象限任务
-- 日报中心：底部抽屉式日历，按日查看完成任务 / 象限统计 / 标签统计
-- 导出：单日或日期范围批量导出 CSV + JSON
-- 三种窗口模式：置顶最前 / 固定桌面 / 普通窗口（系统标题栏）
-- 九套内置主题，支持导入自定义 CSS 主题
-- 设置自动记忆：窗口位置、锁定、主题、模式（窗口尺寸固定为 4:3）
-- 软件更新：设置页一键检查 GitHub Releases 新版，确认后自动下载并替换重启
+拖进对应象限，优先级就定了。不用填表单，不用开会，不用维护复杂的项目结构。
 
-## 快速开始
+## 适合谁
 
-```bash
-# 安装依赖（仅 pywebview，系统需 Win10/11 自带 WebView2 Runtime）
-pip install pywebview
+- 手上同时挂着七八件事，需要一个地方把轻重缓急摆平
+- 不想为记一条待办去打开一个重型工具
+- 喜欢把待办常驻在桌面边缘，做完随手勾掉
+- 习惯按天回看：今天到底做成了什么
 
-# 启动
-python src\main.py
-```
+## 亮点
 
-Windows 也可双击 `run.bat`（自动优先 `pythonw`，无控制台窗口）。
+- **常驻不打扰**：无边框悬浮窗，可置顶、可拖动、可缩放；重复启动只唤醒已有窗口，关掉窗口收进托盘继续运行，全局热键随时唤出。
+- **四个象限即优先级**：新建、编辑、跨象限拖拽、勾选归档；多标签与标签筛选，一眼筛出同一个方向的事。
+- **先收集，再整理**：想不清归到哪一格？先丢进底部收纳筐，回头看清楚了再拖回象限。
+- **周期任务**：每天 / 每周 / 每月 / 完成后 N 天重复；到应做日才上板，过期仍留在原位并标记，不会悄悄消失。
+- **任务链**：把一件事拆成有先后的步骤，画板上主线与支线一目了然，点哪步跳到哪步。
+- **日报**：按天查看完成了什么、象限与标签分布、完成时段；支持导出 CSV / JSON / 自包含 HTML 报告。
+- **九套主题**：晨雾纸墨、午夜玻璃、霓虹网格、玄墨……也可以导入自己的 CSS 主题。
+- **可选的账号同步**：登录后任务随账号走，多台设备共用同一份看板；最近三天的快照随时找回误删的内容。
+- **本机优先**：不登录也能完整使用，数据留在自己的电脑；数据库是单文件，方便备份与迁移。
 
-若未安装 pywebview，`src/main.py` 会自动回退到 tkinter 版（零依赖，视觉近似）。
+## 下载与安装
 
-## 目录结构
+Windows 10 / 11。
 
-```
-├─ src/                应用源码
-│  ├─ main.py          入口（单实例判定 → webview 优先，tkinter 回退）
-│  ├─ migration.py     SQLite schema 版本迁移框架（settings.schema_version）
-│  ├─ single_instance.py  单实例 Mutex + 重复启动窗口唤醒
-│  ├─ tray.py          托盘常驻（纯 ctypes，Win32）
-│  ├─ hotkey.py        全局唤醒热键（默认 Ctrl+Alt+S，Win32）
-│  ├─ webview_main.py  WebView 版：JsApi 桥 + 窗口管理 + 内置本地页面服务
-│  ├─ db.py            SQLite 数据层
-│  ├─ models.py        数据模型 + 四象限常量
-│  ├─ report.py        日报统计与 CSV/JSON 导出
-│  ├─ updater.py       GitHub Releases 检查 / 下载 / 更新
-│  ├─ theme_loader.py  主题目录扫描 / 元数据 / CSS 注入
-│  ├─ autostart.py     开机自启动（HKCU Run）
-│  ├─ dialogs.py       tkinter 回退版对话框
-│  ├─ styles.py        主题系统 + ICO 图标
-│  ├─ app_icon.ico/.svg  应用图标
-│  ├─ web/             UI 资源（1.8 起拆分；打包后外置安装目录，改文件即生效）
-│  │  ├─ index.html    页面骨架（主题清单注入占位）
-│  │  ├─ app.css       布局与主题样式（/*__THEMES_CSS__*/ 注入占位）
-│  │  └─ app.js        全部业务脚本
-│  ├─ widgets/         tkinter 回退版（main_widget / quadrant_card / task_item）
-│  └─ data.db          SQLite 数据文件（源码运行）
-├─ tests/              unittest 测试（迁移 / 系统层 / web 拆分）
-├─ designs/            四套 HTML 设计方案（预览 / 参考）
-├─ setup/sixiang.iss   Inno Setup 安装脚本（onedir 递归安装 + web 外置复制）
-├─ run.bat             Windows 启动脚本
-├─ requirements.txt    依赖说明
-├─ LICENSE             MIT
-└─ DESIGN.md           WebView 版改造方案文档
-```
+1. 打开 [Releases](https://github.com/fxm124578/SIXIANG-four_quadrants/releases/latest) 下载最新的 `SIXIANG-Setup-vX.Y.Z.exe`。
+2. 双击安装，首次可选安装目录，之后升级沿用同一目录。
+3. 升级不会覆盖你的任务数据与自定义主题；发布新版本后，应用内「设置 → 检查更新」可以一键升级。
 
-## 数据
+## 关于这个仓库
 
-- SQLite 单文件 `data.db`：源码运行在 `src/`，打包版在 exe 同目录；不可写时回退 `~/.quadrant_tasks/data.db`
-- 导出文件默认到桌面 `~/Desktop/四象日报导出/`
+本仓库是**发行页**：安装包与每个版本的更新说明都在 [Releases](https://github.com/fxm124578/SIXIANG-four_quadrants/releases)。
 
-## 打包
+仓库里保留的源码是**早期开源版本的最后一版快照**（对应 `windows-v0.3.0`），采用 MIT 许可，仅供历史参考，**已停止更新**，与当前安装包的代码不再一致。
 
-1.8 起为 onedir 多文件应用：先打 onedir 目录（`dist/SIXIANG/` = 安装内容），再打安装器（发布资产为 `SIXIANG-Setup-vX.Y.Z.exe`）：
+## 反馈
 
-```bash
-pip install pyinstaller
-python -m PyInstaller --noconfirm --clean --onedir --windowed --name SIXIANG --icon=src/app_icon.ico --add-data "src/web;web" --add-data "src/themes;themes" --add-data "src/app_icon.ico;." src/main.py
-"%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" /DMyAppVersion=X.Y.Z setup\sixiang.iss
-```
-
-安装目录布局：`SIXIANG.exe` + `_internal/`（Python 运行时与内置资源兜底）+ `web/`（外置 UI 资源，可直接改文件）+ `themes/` + `data.db`。发布流程详见本地文档 `RELEASE.md`。
+使用中遇到问题，欢迎在 [Issues](https://github.com/fxm124578/SIXIANG-four_quadrants/issues) 说明现象与发生时间。如果你愿意，可以附上本机的 `sixiang-diagnostics.log`——它只记录在本机、不会自动上传，能帮助定位问题。
 
 ## 许可证
 
-[MIT](LICENSE)。此许可适用于 **v1.8.x 及此前** 的开源稳定版本。v2.0.0 起不再开源。
+本仓库保留的历史源码采用 [MIT](LICENSE) 许可；该许可仅适用于这批早期快照。
